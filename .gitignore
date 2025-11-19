@@ -49,6 +49,10 @@ scripts/
 docs/
 .trae/
 
+# NLP4ECR specific folders to exclude
+data/NLP4ECR/prob_3_p2p/
+data/NLP4ECR/prob_4_c2s/
+
 # Jupyter Notebook
 .ipynb_checkpoints
 
