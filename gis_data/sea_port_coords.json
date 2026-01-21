@@ -1,0 +1,26 @@
+[
+    {
+        "name": "大连港",
+        "en_name": "Dalian Port",
+        "location": {
+            "lng": 121.6338,
+            "lat": 38.9156
+        }
+    },
+    {
+        "name": "营口港",
+        "en_name": "Yingkou Port",
+        "location": {
+            "lng": 122.2327,
+            "lat": 40.6628
+        }
+    },
+    {
+        "name": "丹东港",
+        "en_name": "Dandong Port",
+        "location": {
+            "lng": 123.7345,
+            "lat": 39.9703
+        }
+    }
+]
