@@ -48,6 +48,7 @@ baseline/
 scripts/
 docs/
 .trae/
+paper/
 
 # NLP4ECR specific folders to exclude
 data/NLP4ECR/prob_3_p2p/
