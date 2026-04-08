@@ -1,0 +1,50 @@
+This is BibTeX, Version 0.99d (TeX Live 2025)
+Capacity: max_strings=200000, hash_size=200000, hash_prime=170003
+The top-level auxiliary file: elsarticle-template-num.aux
+The style file: elsarticle-num.bst
+Database file #1: ref_sop_mac.bib
+Warning--I didn't find a database entry for "lamport94"
+Warning--empty journal in jiangDROCELEVATINGLARGE2025a
+Warning--empty journal in xiaoChainofExpertsWhenLLMs2024
+You've used 28 entries,
+            2952 wiz_defined-function locations,
+            880 strings with 14341 characters,
+and the built_in function-call counts, 9590 in all, are:
+= -- 834
+> -- 551
+< -- 1
++ -- 202
+- -- 174
+* -- 871
+:= -- 1406
+add.period$ -- 53
+call.type$ -- 28
+change.case$ -- 28
+chr.to.int$ -- 0
+cite$ -- 30
+duplicate$ -- 232
+empty$ -- 907
+format.name$ -- 203
+if$ -- 2331
+int.to.chr$ -- 0
+int.to.str$ -- 28
+missing$ -- 18
+newline$ -- 117
+num.names$ -- 30
+pop$ -- 171
+preamble$ -- 1
+purify$ -- 0
+quote$ -- 0
+skip$ -- 570
+stack$ -- 0
+substring$ -- 328
+swap$ -- 110
+text.length$ -- 1
+text.prefix$ -- 0
+top$ -- 0
+type$ -- 0
+warning$ -- 2
+while$ -- 54
+width$ -- 30
+write$ -- 279
+(There were 3 warnings)

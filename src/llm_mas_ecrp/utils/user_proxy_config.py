@@ -56,6 +56,11 @@ __deepseek = OpenAI(
     api_key=os.getenv("DEEPSEEK_API_KEY"),
 )
 
+__openrouter = OpenAI(
+    base_url=os.getenv("OPENROUTER_BASE_URL", "https://openrouter.ai/api/v1"),
+    api_key=os.getenv("OPENROUTER_API_KEY"),
+)
+
 
 def get_llm_client(client: str) -> OpenAI:
     match client:
@@ -69,6 +74,8 @@ def get_llm_client(client: str) -> OpenAI:
             return __gemini
         case "Qwen":
             return __qwen
+        case "OpenRouter":
+            return __openrouter
         case _:
             raise ValueError("Invalid model name")
 

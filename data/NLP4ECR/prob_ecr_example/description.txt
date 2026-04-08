@@ -1,0 +1,16 @@
+The supply vector is $S = [100, 50, 0]$ (TEU) and the demand vector is $D = [0, 0, 150]$ (TEU), where port A and port B are surplus nodes and port C is the sole deficit node. The unit transportation cost matrix $c_{ij}$ is given in Table~\ref{tab:example_cost}.
+
+\begin{table}[pos=H]
+\centering
+\caption{Unit transportation cost matrix $c_{ij}$ (\textyen/TEU)}
+\label{tab:example_cost}
+\begin{tabular}{l|ccc}
+ & A & B & C \\
+\hline
+A & -- & 2 & 10 \\
+B & 2 & -- & 3 \\
+C & 10 & 3 & -- \\
+\end{tabular}
+\end{table}
+
+Setting $T=1$, $h_i = 0$, and $I_{i0} = 0$, the objective becomes $\min \sum_{i,j} c_{ij} x_{ij}$ subject to flow balance constraints: $\sum_j x_{ij} - \sum_j x_{ji} = S_i - D_i$ for each port $i$, and non-negativity $x_{ij} \geq 0$. Each port can both send and receive containers (transshipment is allowed).

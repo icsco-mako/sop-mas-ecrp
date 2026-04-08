@@ -122,11 +122,13 @@ class ProblemSolver:
         self.logger = config_logger(self.filepath)
 
     def _setup_filepath(self) -> str:
+        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
         filepath = Path(
             "results",
             self.cfg.algorithm,
             f"{self.cfg.dataset}_k{self.cfg.max_collaborate_nums}",
             str(self.cfg.prob_name),
+            timestamp,
         )
         filepath.mkdir(parents=True, exist_ok=True)
         return str(filepath)
@@ -169,12 +171,12 @@ class ProblemSolver:
                 [
                     {
                         "class": DataEngineer,
-                        "args": ["DeepSeek", "deepseek-v3-250324", 0],  # agent_id=0
+                        "args": ["OpenRouter", "deepseek/deepseek-chat-v3-0324", 0],
                     },
-                    {"class": ModelEngineer, "args": ["DeepSeek", "deepseek-v3-250324", 1]},  # agent_id=1
-                    {"class": PythonDeveloper, "args": ["DeepSeek", "deepseek-v3-250324", 2]},  # agent_id=2
-                    {"class": TestingEngineer, "args": ["DeepSeek", "deepseek-v3-250324", 3]},  # agent_id=3
-                    {"class": BusinessExpert, "args": ["DeepSeek", "deepseek-v3-250324", 4]},  # agent_id=4
+                    {"class": ModelEngineer, "args": ["OpenRouter", "deepseek/deepseek-chat-v3-0324", 1]},
+                    {"class": PythonDeveloper, "args": ["OpenRouter", "deepseek/deepseek-chat-v3-0324", 2]},
+                    {"class": TestingEngineer, "args": ["OpenRouter", "deepseek/deepseek-chat-v3-0324", 3]},
+                    {"class": BusinessExpert, "args": ["OpenRouter", "deepseek/deepseek-chat-v3-0324", 4]},
                 ],
             ),
             # "spm": lambda: SPM(problem),

@@ -1,0 +1,18 @@
+{
+    "sets": {
+        "ports": ["A", "B", "C"],
+        "periods": [1]
+    },
+    "supply": {"A": 100, "B": 50, "C": 0},
+    "demand": {"A": 0, "B": 0, "C": 150},
+    "transport_cost": [
+        {"from": "A", "to": "B", "cost": 2},
+        {"from": "A", "to": "C", "cost": 10},
+        {"from": "B", "to": "A", "cost": 2},
+        {"from": "B", "to": "C", "cost": 3},
+        {"from": "C", "to": "A", "cost": 10},
+        {"from": "C", "to": "B", "cost": 3}
+    ],
+    "holding_cost": {"A": 0, "B": 0, "C": 0},
+    "initial_inventory": {"A": 0, "B": 0, "C": 0}
+}

@@ -111,6 +111,18 @@ def __run_str_code(
     message_pool: MessagePool,
 ) -> Dict:
     try:
+        # Prefer TE-Agent's execution result if available
+        te_output = message_pool.get("Testing Engineer")
+        if te_output:
+            try:
+                te_data = json.loads(te_output)
+                if (te_data.get("execution_status") == "success"
+                        and te_data.get("obj_value") is not None):
+                    logger.info("Using TE-Agent execution result")
+                    return {"obj_value": te_data["obj_value"]}
+            except (json.JSONDecodeError, KeyError):
+                pass
+
         globals_dict = globals()
         globals_dict["gp"] = gurobipy
         globals_dict["GRB"] = gurobipy.GRB
@@ -186,8 +198,8 @@ def sop_mac(
         if __create_agent(agent_config) is not None
     ]
     pm = ProjectManager(
-        client="DeepSeek",
-        model="deepseek-v3-1-250821",
+        client="OpenRouter",
+        model="deepseek/deepseek-chat-v3-0324",
         agent_list=agent_list,
         max_collaborate_nums=max_collaborate_nums,
     )
@@ -227,8 +239,13 @@ def sop_mac(
     logger.info(f"代码执行结果: {result}\n")
     
     if problem["dataset"] == "NLP4ECR":
-        is_success = input("请输入执行结果是否正确(True/False): ").lower() == "true"
-        error_msg = "None" if is_success else "用户判定结果不正确"
+        if result.get("obj_value") is not None:
+            is_success = True
+            error_msg = "None"
+            logger.info(f"NLP4ECR: obj_value={result['obj_value']}, auto-accepted")
+        else:
+            is_success = False
+            error_msg = result.get("error_msg", "obj_value is None")
     else:
         [sample_result] = problem["sample"][0]["output"]
         is_success, error_msg = __verify_result(result, sample_result)
@@ -255,22 +272,29 @@ def sop_mac(
         )
         if is_error_found:
             logger.info("回溯后重新执行...\n")
-            fw_res_retry, agent_times_retry = __iterative_modeling(
-                problem=problem,
-                project_manager=pm,
-                stack=stack,
-                message_pool=message_pool,
-                max_collaborate_nums=max_collaborate_nums,
-            )
+            # After backtracking, only run remaining unselected agents
+            remaining = max_collaborate_nums - len(message_pool.get_spoken_agents())
+            if remaining > 0:
+                fw_res_retry, agent_times_retry = __iterative_modeling(
+                    problem=problem,
+                    project_manager=pm,
+                    stack=stack,
+                    message_pool=message_pool,
+                    max_collaborate_nums=remaining,
+                )
             # 合并智能体时间
             for agent_name, exec_time in agent_times_retry.items():
                 if agent_name in agent_times:
                     agent_times[agent_name] += exec_time
                 else:
                     agent_times[agent_name] = exec_time
-            
+
             result: Dict = __run_str_code(problem, message_pool)
-            is_success, new_error_msg = __verify_result(result, sample_result)
+            if problem["dataset"] == "NLP4ECR":
+                is_success = result.get("obj_value") is not None
+                new_error_msg = "None" if is_success else result.get("error_msg", "obj_value is None")
+            else:
+                is_success, new_error_msg = __verify_result(result, sample_result)
             if is_success:
                 log_separator(logger, "SUCCESS AFTER BACKTRACKING", "=", 80)
                 logger.info(

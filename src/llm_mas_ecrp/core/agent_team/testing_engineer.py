@@ -1,5 +1,4 @@
 import json
-import subprocess
 import logging
 import sys
 import io
@@ -9,59 +8,44 @@ from .base_agent import BaseAgent
 from llm_mas_ecrp.utils.user_proxy_config import get_llm_client
 from ..message_pool import MessagePool
 
-logger = logging.getLogger(__name__)  # 使用模块名作为日志记录器名称
-
-
-def run_py_file(file_path, func_name=None, args=None):
-    cmd = ["python", file_path]
-    if func_name:
-        cmd.extend(["--func", func_name])
-    if args is not None:
-        cmd.extend(["--args", json.dumps(args)])
-
-    result = subprocess.run(
-        cmd,
-        capture_output=True,
-        text=True,
-        encoding="gbk",  # 修改编码为系统默认
-    )
-    return {
-        "exit_code": result.returncode,
-        "stdout": result.stdout,
-        "stderr": result.stderr,
-    }
+logger = logging.getLogger(__name__)
 
 
 class TestingEngineer(BaseAgent):
     NAME = "Testing Engineer"
     ROLE_DESCRIPTION = """
-    需要为解决空箱调运问题的Python-Gurobi求解代码设计测试用例，检查代码是否运行成功。
+    Performs supplementary testing and fine-grained error diagnosis on Python-Gurobi solver code. Generates structured diagnostic artifacts (execution summaries, solver logs) based on controller-level execution outcomes to support failure localization during exception backtracking.
     """
     FORWARD_TASK = """
-# Role: Python Test Engineer
+# Role: Testing Engineer — Supplementary Testing & Fine-Grained Error Diagnosis
+
 ## Background
-Need to design test cases for Python-Gurobi solver code addressing empty container repositioning problems, ensuring algorithm robustness and accuracy across different scenarios.
+You are the Testing Engineer in a multi-agent system for Operations Research optimization. Your role is to analyze code execution results and generate a structured diagnostic report that supports failure localization during exception backtracking.
 
 ## Input
 1. Original problem description: {problem_description}
-2. Cross-department feedback: {message_pool} (Includes parameters, decision variables, constraints, optimization objectives, and other key elements)
-3. For the naming of parameters, please refer to the Parameter Naming Convention Document {parameter_naming_convention_document}.
+2. Execution outcome: {execution_outcome}
+3. Solver log: {solver_log}
+4. Upstream agent outputs: {message_pool}
 
-## Core Tasks
-**Parameter Generation**
-   - Generate complete input parameter sets based on problem description
-   - The parameters you generate should be same as the Parameter Naming Convention Document. Note the parameter dimensions, and do not generate new parameters.
-   - Parameters should comply with business rules (e.g.: N>=1, M>=1)
+## Tasks
+Based on the controller-level execution outcomes above:
+1. **Execution Analysis**: Evaluate whether the solver code executed correctly. If successful, assess the quality of the solution (objective value reasonableness, constraint satisfaction). If failed, identify the likely root cause.
+2. **Error Diagnosis**: If execution failed, classify the error:
+   - Code-level error (syntax, import, function definition)
+   - Model-level error (incorrect formulation, infeasible model)
+   - Data-level error (parameter mismatch, invalid input format)
+3. **Recommendations**: Provide actionable suggestions for the responsible agent.
 
 ## Output Requirements
-- Only generate one test case.
-- Output MUST be a valid JSON without any comments or explanations.
-- Example format:
+Output MUST be a valid JSON without any comments or explanations:
 {{
-    "param1": [1, 2, 3],
-    "param2": [[1, 2], [3, 4]],
-    "param3": 5
-}}.
+    "execution_status": "success or failure",
+    "diagnostic_summary": "Brief analysis of the execution result",
+    "error_analysis": "Detailed error classification and root cause (empty string if success)",
+    "solver_log_summary": "Key observations from the solver log",
+    "recommendations": "Suggestions for improvement"
+}}
     """
     BACKWARD_TASK = """When you are solving a problem, you get a feedback from the external environment. You need to judge whether this is a problem caused by you or by other agents (other agents have given some results before you). If it is your problem, you need to give Come up with solutions and refined testing case.
 
@@ -90,71 +74,79 @@ The output format is a JSON structure like this:
 
     # @override
     def forward_step(self, problem: Dict, message_pool: MessagePool):
+        # Step 1: Execute code with actual data (controller-level execution)
+        code = message_pool.get("Python Developer")
+        data = problem["sample"][0]["input"]
+
+        execution_outcome = {}
+        solver_log_content = ""
+
+        old_stdout, old_stderr = sys.stdout, sys.stderr
+        solver_log = io.StringIO()
+
+        try:
+            sys.stdout = solver_log
+            sys.stderr = solver_log
+
+            import gurobipy as gp
+            from gurobipy import GRB
+
+            local_vars = {}
+            exec(code, {"gp": gp, "GRB": GRB, "__builtins__": __builtins__}, local_vars)
+
+            if "optimize" not in local_vars:
+                raise NameError("optimize function not found in the generated code")
+
+            result = local_vars["optimize"](data)
+
+            execution_outcome = {
+                "status": "success",
+                "obj_value": result.get("obj_value") if isinstance(result, dict) else None,
+                "result": str(result),
+            }
+        except Exception as e:
+            execution_outcome = {
+                "status": "failure",
+                "error_type": type(e).__name__,
+                "error_msg": str(e),
+            }
+        finally:
+            sys.stdout = old_stdout
+            sys.stderr = old_stderr
+            solver_log_content = solver_log.getvalue()
+
+        logger.info(f"TE execution: {execution_outcome.get('status')}")
+        if execution_outcome.get("status") == "success":
+            logger.info(f"TE obj_value: {execution_outcome.get('obj_value')}")
+
+        # Step 2: LLM diagnostic analysis
         prompt = self.FORWARD_TASK.format(
             problem_description=problem["description"],
-            parameter_naming_convention_document=problem["sample"][0]["input"],
-            message_pool=message_pool,
+            execution_outcome=json.dumps(execution_outcome, ensure_ascii=False),
+            solver_log=solver_log_content[:3000],
+            message_pool=message_pool.get_content(),
         )
         response: str = self.llm_call(prompt=prompt)
         response = self.strip_str("```json", response)
 
         try:
-            data: dict = json.loads(response)
+            diagnosis = json.loads(response)
         except JSONDecodeError as e:
-            logging.error(f"JSON解析失败: {e}")
-            logging.error(f"原始响应内容: {response}")
-            return json.dumps(
-                {
-                    "error_type": "json_decode_error",
-                    "error_msg": f"JSON解析失败: {str(e)}",
-                }
-            )
+            logger.error(f"TE diagnostic JSON parse failed: {e}")
+            logger.error(f"Raw response: {response}")
+            diagnosis = {"diagnostic_summary": response}
 
-        code = message_pool.get("Python Developer")
-        
-        # 捕获求解器日志输出
-        old_stdout = sys.stdout
-        old_stderr = sys.stderr
-        solver_log = io.StringIO()
-        
-        try:
-            # 重定向标准输出和错误输出
-            sys.stdout = solver_log
-            sys.stderr = solver_log
-            
-            # 使用局部作用域执行代码，以便捕获 optimize 函数
-            import gurobipy as gp
-            from gurobipy import GRB
-            local_vars = {}
-            exec(code, {"gp": gp, "GRB": GRB, "__builtins__": __builtins__}, local_vars)
-            
-            # 检查 optimize 函数是否存在
-            if "optimize" not in local_vars:
-                raise NameError("optimize function not found in the generated code")
-            
-            # 调用 optimize 函数
-            result = local_vars["optimize"](data)
-            
-        finally:
-            # 恢复标准输出
-            sys.stdout = old_stdout
-            sys.stderr = old_stderr
-        
-        # 获取求解器日志
-        solver_log_content = solver_log.getvalue()
-        
-        # 打印测试用例和结果（恢复输出后）
-        print(f"测试用例: {data}")
-        print(f"求解结果: {result}")
-        if solver_log_content:
-            logger.info(f"求解器日志:\n{solver_log_content}")
-        
+        # Step 3: Return structured diagnostic report
         return json.dumps(
             {
-                "testing_case_generated": data,
-                "testing_result": str(result),
-                "solver_log": solver_log_content,  # 添加求解器日志
-            }
+                "execution_status": execution_outcome.get("status", "unknown"),
+                "obj_value": execution_outcome.get("obj_value"),
+                "diagnostic_summary": diagnosis.get("diagnostic_summary", ""),
+                "error_analysis": diagnosis.get("error_analysis", ""),
+                "solver_log": solver_log_content,
+                "recommendations": diagnosis.get("recommendations", ""),
+            },
+            ensure_ascii=False,
         )
 
     # @override
@@ -175,26 +167,3 @@ The output format is a JSON structure like this:
                 f"Error: {e}.\n testing engineer Response content is:\n{response}"
             )
             raise e
-
-
-if __name__ == "__main__":
-    with open("./src/workflow/problem_description.md", "r", encoding="utf-8") as f:
-        problem = f.read()
-    with open("./src/workflow/nlp_term_tags.json", "r", encoding="utf-8") as file:
-        nlp_term_tags = json.load(file)
-    with open(
-        "./src/workflow/structure_model_info.json", "r", encoding="utf-8"
-    ) as file:
-        semantic_parsing_dict = json.load(file)
-    with open("./src/workflow/model.md", "r", encoding="utf-8") as file:
-        model = file.read()
-    with open("./src/workflow/generate_code.py", "r", encoding="utf-8") as file:
-        code = file.read()
-    message_pool = {
-        "business_expert": nlp_term_tags,
-        "product_manager": semantic_parsing_dict,
-        "or_specialist": model,
-        "python_developer": code,
-    }
-    testing_engineer = TestingEngineer("DeepSeek", "ep-20250210181347-9n2pl")
-    testing_engineer.step(problem, message_pool)
