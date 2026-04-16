@@ -52,6 +52,62 @@ def save_workflow_result(result: Dict[str, str], filepath: str):
     print(f"共保存 {len(result)} 个智能体的输出")
 
 
+def generate_data_schema(sample_data: list) -> dict:
+    """从完整 sample 数据中生成精简版 schema，供 DE/ME/PY Agent 理解数据结构。
+
+    策略：
+    - 集合/列表：保留完整（如节点名）
+    - 标量 dict（如 holding_cost: {H1: v}）：保留所有 key 和值
+    - 矩阵 dict（如 reposition_cost: {i: {j: v}}）：只保留 2x2 子矩阵 + 维度说明
+    """
+    if isinstance(sample_data, dict):
+        sample_data = [sample_data]
+
+    schema_list = []
+    for item in sample_data:
+        if not isinstance(item, dict):
+            schema_list.append(item)
+            continue
+        schema = {}
+        for key, value in item.items():
+            if isinstance(value, list):
+                schema[key] = value
+            elif isinstance(value, dict):
+                schema[key] = _compress_matrix(value, key)
+            else:
+                schema[key] = value
+        schema_list.append(schema)
+    return schema_list
+
+
+def _compress_matrix(d: dict, field_name: str = "") -> dict:
+    """压缩矩阵 dict。
+
+    对于二维矩阵（如 reposition_cost: {H1: {H2: v, ...}, ...}）：
+      只保留前 2 个外层 key × 前 2 个内层 key 的子矩阵，其余用维度说明替代。
+    对于一维 dict（如 holding_cost: {H1: v, H2: v, ...}）：
+      保留所有 key，值用 0 替代。
+    """
+    # 检查是否为二维矩阵
+    first_val = next(iter(d.values()), None)
+    if isinstance(first_val, dict):
+        # 二维矩阵：只保留 2×2 子矩阵
+        outer_keys = list(d.keys())
+        result = {}
+        for ok in outer_keys[:2]:
+            inner = d[ok]
+            if isinstance(inner, dict):
+                inner_keys = list(inner.keys())
+                result[ok] = {ik: inner[ik] for ik in inner_keys[:2]}
+            else:
+                result[ok] = inner
+        result[f"... ({len(outer_keys)} keys total: {', '.join(outer_keys)})"] = {}
+        return result
+    else:
+        # 一维 dict：保留所有 key，值不变（值本身就是标量）
+        return {k: v for k, v in d.items()}
+
+
 def save_backtrack_result(result: List[Tuple[str, str, str]], filepath: str):
     for agent, status, msg in result:
         filename = os.path.join(filepath, f"{agent}_{status}.txt")
@@ -111,10 +167,16 @@ def dataset_loader(dataset, prob_name):
         case "NLP4ECR":
             dirpath = rf"./data/{dataset}/{prob_name}"  # ./data/NLP4ECR/prob_0
             description: str = read_file(dirpath, "description.txt")
-            sample: list = json.loads(read_file(dirpath, "sample.json"))
+            sample_raw = json.loads(read_file(dirpath, "sample.json"))
+            # sample.json 可能是 dict 或 list，统一为 list
+            if isinstance(sample_raw, dict):
+                sample_raw = [sample_raw]
+            sample_schema: list = generate_data_schema(sample_raw)
+            full_data = sample_raw[0] if len(sample_raw) == 1 else sample_raw
             sample = [
                 {
-                    "input": sample,
+                    "input": sample_schema,   # 精简 schema，供 DE/ME/PY Agent
+                    "data": full_data,         # 完整数据，供 TE Agent 执行
                     "output": "None",
                 }
             ]

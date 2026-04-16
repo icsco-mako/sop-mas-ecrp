@@ -9,6 +9,37 @@ from ..message_pool import MessagePool
 logger = logging.getLogger(__name__)
 
 
+def _truncate_text(text: str, limit: int = 5000) -> str:
+    if not text:
+        return ""
+    if len(text) <= limit:
+        return text
+    return text[:limit] + f"\n...[truncated {len(text) - limit} chars]"
+
+
+def _compact_testing_output(testing_output_raw: str) -> str:
+    """Keep only BA-relevant TE fields and drop full solver logs."""
+    if not testing_output_raw:
+        return ""
+
+    try:
+        parsed = json.loads(testing_output_raw)
+    except JSONDecodeError:
+        return _truncate_text(testing_output_raw, 3000)
+
+    compact = {
+        "execution_status": parsed.get("execution_status"),
+        "obj_value": parsed.get("obj_value"),
+        "result_summary": parsed.get("result_summary", {}),
+        "business_summary": parsed.get("business_summary", {}),
+        "diagnostic_summary": parsed.get("diagnostic_summary", ""),
+        "solver_log_summary": parsed.get("solver_log_summary", ""),
+        "recommendations": parsed.get("recommendations", ""),
+        "error_analysis": parsed.get("error_analysis", ""),
+    }
+    return json.dumps(compact, ensure_ascii=False, indent=2)
+
+
 class BusinessExpert(BaseAgent):
     """业务专家代理
 
@@ -38,7 +69,7 @@ class BusinessExpert(BaseAgent):
 
 你将接收：
 - **model_blueprint**: ModelExpert定义的变量含义和目标函数
-- **optimization_results**: PyDeveloper的Gurobi求解结果
+- **optimization_results**: TestingEngineer压缩后的Gurobi求解结果摘要，其中可能包含 business_summary；若 business_summary 中已有精确 cost_breakdown，必须优先使用其中的数值，不要写“估算”
 - **business_context**: 原始问题的业务背景信息
 
 ---
@@ -139,24 +170,15 @@ class BusinessExpert(BaseAgent):
         - Testing Engineer 的执行结果（优化输出）
         - 原始问题描述作为业务上下文
         """
-        # 获取模型蓝图（OR Specialist 的输出）
-        model_blueprint = message_pool.get("OR Specialist") or ""
+        # 获取模型蓝图（OR Specialist 的输出），避免过长模型文本挤占结果解释上下文
+        model_blueprint = _truncate_text(message_pool.get("OR Specialist") or "", 5000)
         
-        # 获取优化结果（Testing Engineer 的输出）
+        # 获取优化结果（Testing Engineer 的输出），仅保留压缩摘要，显式排除完整 solver_log
         testing_output_raw = message_pool.get("Testing Engineer") or ""
-        optimization_results = testing_output_raw
-        
-        # 尝试解析 TestingEngineer 的 JSON 输出
-        try:
-            parsed = json.loads(testing_output_raw)
-            # TestingEngineer 返回格式：{"testing_case_generated": {...}, "testing_result": "..."}
-            optimization_results = parsed.get("testing_result", testing_output_raw)
-        except JSONDecodeError:
-            # 如果解析失败，直接使用原始字符串
-            optimization_results = testing_output_raw
+        optimization_results = _compact_testing_output(testing_output_raw)
         
         # 业务上下文来自原始问题描述
-        business_context = problem.get("description", "")
+        business_context = _truncate_text(problem.get("description", ""), 2500)
         
         # 构建提示词
         prompt = (

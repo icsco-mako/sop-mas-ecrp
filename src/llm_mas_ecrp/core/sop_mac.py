@@ -13,6 +13,13 @@ from llm_mas_ecrp.utils.logger import log_separator
 logger = logging.getLogger(__name__)
 
 
+def _is_failed_result(result: Dict) -> bool:
+    status = str(result.get("status", "")).lower()
+    if status in {"error", "failure", "failed", "infeasible", "unbounded", "inf_or_unbd", "infeasible_or_unbounded"}:
+        return True
+    return result.get("obj_value") is None
+
+
 def __create_agent(agent_config: List):
     try:
         agent_class = agent_config["class"]
@@ -91,7 +98,7 @@ def __exception_traceback(
             problem, hist_msg["content"], str(error_info)
         )
         backtrack_hist_log.append((agent, response))
-        logger.info("回溯日志：\n", agent, response)
+        logger.info(f"回溯日志：\n{agent}\n{response}")
         if response["is_caused_by_you"]:
             logger.info(f"Error source found: {agent.name}")
             logger.info(f"error reason: {response['reason']}")
@@ -123,14 +130,14 @@ def __run_str_code(
             except (json.JSONDecodeError, KeyError):
                 pass
 
-        globals_dict = globals()
+        globals_dict = dict(globals())
         globals_dict["gp"] = gurobipy
         globals_dict["GRB"] = gurobipy.GRB
+        globals_dict["__builtins__"] = __builtins__
 
         code = message_pool.get("Python Developer")
-        local_vars = {}
-        exec(code, globals_dict, local_vars)
-        if "optimize" not in local_vars:
+        exec(code, globals_dict)
+        if "optimize" not in globals_dict:
             logger.error("optimize function not found in generated code")
             return {
                 "obj_value": None,
@@ -138,8 +145,8 @@ def __run_str_code(
                 "error_msg": "optimize function not found",
             }
 
-        data = problem["sample"][0]["input"]
-        result: Dict = local_vars["optimize"](data)
+        data = problem["sample"][0].get("data", problem["sample"][0]["input"])
+        result: Dict = globals_dict["optimize"](data)
 
         if not isinstance(result, dict):
             logger.error("Invalid result type: expected dict")
@@ -147,6 +154,15 @@ def __run_str_code(
                 "obj_value": None,
                 "error_type": "result dict, invalid__type",
                 "error_msg": f"Expected dict, got {type(result)}",
+            }
+
+        if _is_failed_result(result):
+            error_msg = result.get("message") or result.get("error_msg") or f"invalid solve result: {result}"
+            logger.error(error_msg)
+            return {
+                "obj_value": None,
+                "error_type": "solver_or_model_failure",
+                "error_msg": error_msg,
             }
 
         if "obj_value" not in result:
@@ -198,8 +214,8 @@ def sop_mac(
         if __create_agent(agent_config) is not None
     ]
     pm = ProjectManager(
-        client="OpenRouter",
-        model="deepseek/deepseek-chat-v3-0324",
+        client="DeepSeek",
+        model="deepseek-chat",
         agent_list=agent_list,
         max_collaborate_nums=max_collaborate_nums,
     )
@@ -265,15 +281,22 @@ def sop_mac(
     if is_backtrack:
         log_separator(logger, "Backward Tracking Process", "=", 80)
         logger.info("====================异常回溯开始====================\n")
-        
+
         error_info: str = json.dumps(result)
-        is_error_found, bw_res = __exception_traceback(
-            problem, pm, error_info, stack, message_pool
-        )
+        try:
+            is_error_found, bw_res = __exception_traceback(
+                problem, pm, error_info, stack, message_pool
+            )
+        except Exception as e:
+            logger.error(f"Backward tracking failed: {e}")
+            is_error_found = False
+            bw_res = []
         if is_error_found:
             logger.info("回溯后重新执行...\n")
             # After backtracking, only run remaining unselected agents
             remaining = max_collaborate_nums - len(message_pool.get_spoken_agents())
+            fw_res_retry = {}
+            agent_times_retry = {}
             if remaining > 0:
                 fw_res_retry, agent_times_retry = __iterative_modeling(
                     problem=problem,

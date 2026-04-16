@@ -8,6 +8,7 @@ load_dotenv()
 
 client = {
     "DeepSeek": ["deepseek-v3", "deepseek-r1"],
+    "Ark": ["ep-20250217190713-6lfs8", "ep-20250210181347-9n2pl"],
     "OpenAI": ["gpt-4o", "o1", "o3-mini"],
     "Anthropic": ["claude-3.5-sonnet-20241022"],
     "Gemini": ["gemini-2.0-flash-exp", "gemini-2.0-flash-thinking-exp"],
@@ -67,6 +68,8 @@ def get_llm_client(client: str) -> OpenAI:
         case "OpenAI":
             return __openai
         case "DeepSeek":
+            return __deepseek
+        case "Ark":
             return __ark_client
         case "Anthropic":
             return __anthropic

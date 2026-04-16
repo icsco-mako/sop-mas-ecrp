@@ -1,15 +1,15 @@
-空箱调运海陆协同优化问题。从集装箱船公司的视角出发，考虑海港-陆港两级节点的空箱调运问题，建立多周期网络流优化模型，旨在最小化船公司的总运营成本，包括调运成本、存储成本和租箱成本。
+Sea-land coordinated empty container repositioning problem. From the perspective of a container shipping company, consider the repositioning of empty containers in a two-tier network consisting of seaports and dry ports. Formulate a multi-period network flow optimization model to minimize the company's total operating cost, including repositioning cost, holding cost, and container leasing cost.
 
-网络拓扑：3个海港（H1=大连港，H2=营口港，H3=丹东港），10个干港（L1=沈阳，L2=鞍山，L3=哈尔滨，L4=长春，L5=通化，L6=吉林，L7=通辽，L8=赤峰，L9=大庆，L10=齐齐哈尔）。共13个节点，5个规划周期。
+Network topology: 3 seaports (Dalian Port, Yingkou Port, Dandong Port) and 10 dry ports (Shenyang, Anshan, Harbin, Changchun, Tonghua, Jilin, Tongliao, Chifeng, Daqing, Qiqihar), for a total of 13 nodes over 5 planning periods.
 
-空箱供给来源于重箱转化：上一周期到达某节点的重箱在本周期转化为该节点的空箱供给。各节点运出的重箱量构成其空箱需求。
+Empty container supply is generated from laden-container conversion: laden containers arriving at a node in the previous period become the empty container supply of that node in the current period. Laden-container departures from each node constitute its empty container demand.
 
-每个节点具有最大堆存容量，并承担单位周期的库存持有成本。当节点空箱不足时，可从其他节点调运空箱或向第三方租箱满足需求。
+Each node has a maximum storage capacity and incurs a per-period inventory holding cost. When a node faces an empty-container shortage, demand can be satisfied either by repositioning containers from other nodes or by leasing containers from a third party.
 
-空箱调运遵循特定的时间规则：海港间调运需经历tau_ij个周期的运输时间（如Dalian→Dandong需2个周期）；海港与腹地干港之间的调运、同属一海港腹地的干港之间调运可实现即时完成。
+Empty-container repositioning follows specific time rules: repositioning between seaports requires a transit time of $\tau_{ij}$ periods (for example, Dalian Port to Dandong Port takes 2 periods); repositioning between a seaport and its hinterland dry ports, as well as repositioning between dry ports within the same hinterland, is completed within the current period.
 
-周期内事件的执行顺序为：继承上周期库存→处理在途调运到达→重箱转化空箱→调运和租箱决策。
+Within each period, events occur in the following order: inherit inventory from the previous period, process the arrival of in-transit repositioning flows, convert laden-container arrivals into empty-container supply, and then make repositioning and leasing decisions.
 
-优化目标：最小化总运营成本 = 调运成本 + 库存持有成本 + 租箱成本。
+Objective: minimize total operating cost = repositioning cost + holding cost + leasing cost.
 
-约束条件包括：库存流量平衡、库存容量限制、调运量非负。
+Constraints include inventory flow balance, inventory capacity limits, and non-negativity of repositioning decisions.

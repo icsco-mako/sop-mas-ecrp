@@ -171,12 +171,12 @@ class ProblemSolver:
                 [
                     {
                         "class": DataEngineer,
-                        "args": ["OpenRouter", "deepseek/deepseek-chat-v3-0324", 0],
+                        "args": ["DeepSeek", "deepseek-chat", 0],
                     },
-                    {"class": ModelEngineer, "args": ["OpenRouter", "deepseek/deepseek-chat-v3-0324", 1]},
-                    {"class": PythonDeveloper, "args": ["OpenRouter", "deepseek/deepseek-chat-v3-0324", 2]},
-                    {"class": TestingEngineer, "args": ["OpenRouter", "deepseek/deepseek-chat-v3-0324", 3]},
-                    {"class": BusinessExpert, "args": ["OpenRouter", "deepseek/deepseek-chat-v3-0324", 4]},
+                    {"class": ModelEngineer, "args": ["DeepSeek", "deepseek-chat", 1]},
+                    {"class": PythonDeveloper, "args": ["DeepSeek", "deepseek-chat", 2]},
+                    {"class": TestingEngineer, "args": ["DeepSeek", "deepseek-chat", 3]},
+                    {"class": BusinessExpert, "args": ["DeepSeek", "deepseek-chat", 4]},
                 ],
             ),
             # "spm": lambda: SPM(problem),
