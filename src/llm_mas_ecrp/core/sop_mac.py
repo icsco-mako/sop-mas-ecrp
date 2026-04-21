@@ -276,6 +276,7 @@ def sop_mac(
             "agent_times": agent_times,
             "status": True,
             "error_msg": "None",
+            "obj_value": result.get("obj_value"),
         }
 
     bw_res = []
@@ -330,6 +331,7 @@ def sop_mac(
                     "agent_times": agent_times,
                     "status": True,
                     "error_msg": "None",
+                    "obj_value": result.get("obj_value"),
                 }
             error_msg = new_error_msg
 
@@ -341,4 +343,5 @@ def sop_mac(
         "agent_times": agent_times,
         "status": False,
         "error_msg": error_msg,
+        "obj_value": result.get("obj_value") if isinstance(result, dict) else None,
     }
