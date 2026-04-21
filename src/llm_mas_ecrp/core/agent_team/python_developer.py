@@ -64,11 +64,18 @@ The output format is a JSON structure like this:
 }}
 """
 
-    def __init__(self, client, model, agent_id: int) -> None:
+    def __init__(
+        self,
+        client,
+        model,
+        agent_id: int,
+        temperature: float = 0.0,
+        top_p: float = 1.0,
+    ) -> None:
         self.client = get_llm_client(client)
         self.model = model
         self.name = self.NAME
-        super().__init__(self.client, model, agent_id)
+        super().__init__(self.client, model, agent_id, temperature, top_p)
 
     # @override
     def forward_step(self, problem: Dict, message_pool: MessagePool):

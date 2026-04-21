@@ -68,13 +68,15 @@ Next agent to consult: <?>
         model: str,
         agent_list: List[BaseAgent],
         max_collaborate_nums: int,
+        temperature: float = 0.0,
+        top_p: float = 1.0,
     ):
         self.client = get_llm_client(client)
         self.model = model
         self.name = self.NAME
         self.agent_list = agent_list
         self.max_collaborate_nums = max_collaborate_nums
-        super().__init__(self.client, model, 0)
+        super().__init__(self.client, model, 0, temperature, top_p)
 
     def forward_step(
         self,

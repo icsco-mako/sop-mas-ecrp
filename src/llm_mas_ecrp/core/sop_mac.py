@@ -24,7 +24,8 @@ def __create_agent(agent_config: List):
     try:
         agent_class = agent_config["class"]
         args = agent_config["args"]
-        return agent_class(*args)
+        kwargs = agent_config.get("kwargs", {})
+        return agent_class(*args, **kwargs)
     except (TypeError, ValueError) as e:
         logging.error(f"Failed to create instance of {agent_class.__name__}: {e}")
         return None

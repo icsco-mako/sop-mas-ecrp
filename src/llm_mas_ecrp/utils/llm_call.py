@@ -15,6 +15,8 @@ def llm_call(
     prompt: Optional[str] = None,
     messages: Optional[List] = None,
     seed: int = 10,
+    temperature: float = 0.0,
+    top_p: float = 1.0,
 ) -> str:
     """调用openai接口，带重试机制"""
     assert (prompt is None) != (
@@ -44,7 +46,8 @@ def llm_call(
             completion = client.chat.completions.create(
                 model=model,
                 messages=messages,
-                temperature=0.0,
+                temperature=temperature,
+                top_p=top_p,
                 stream=True,
             )
             chunks = []
