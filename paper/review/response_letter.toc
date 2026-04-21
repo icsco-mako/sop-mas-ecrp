@@ -1,0 +1,103 @@
+\contentsline {section}{\numberline {1}Response to Reviewer \#1}{2}{section.1}%
+\contentsline {subsection}{\numberline {1.1}Comment 1.1 and 1.6--- Anomaly Backtracking Logic}{2}{subsection.1.1}%
+\contentsline {subsubsection}{\numberline {1.1.1}Comment}{2}{subsubsection.1.1.1}%
+\contentsline {subsubsection}{\numberline {1.1.2}Response}{2}{subsubsection.1.1.2}%
+\contentsline {subsubsection}{\numberline {1.1.3}Modifications}{3}{subsubsection.1.1.3}%
+\contentsline {subsection}{\numberline {1.2}Comment 1.2 and 1.7 --- Temperature Settings}{4}{subsection.1.2}%
+\contentsline {subsubsection}{\numberline {1.2.1}Comment}{4}{subsubsection.1.2.1}%
+\contentsline {subsubsection}{\numberline {1.2.2}Response}{4}{subsubsection.1.2.2}%
+\contentsline {subsubsection}{\numberline {1.2.3}Modifications}{6}{subsubsection.1.2.3}%
+\contentsline {subsection}{\numberline {1.3}Comment 1.3 --- Multi-Agent Interaction Latency vs.\ Manual Modeling}{6}{subsection.1.3}%
+\contentsline {subsubsection}{\numberline {1.3.1}Comment}{6}{subsubsection.1.3.1}%
+\contentsline {subsubsection}{\numberline {1.3.2}Response}{7}{subsubsection.1.3.2}%
+\contentsline {subsubsection}{\numberline {1.3.3}Modifications}{7}{subsubsection.1.3.3}%
+\contentsline {subsection}{\numberline {1.4}Comment 1.4 --- BA-Agent User Study Data}{7}{subsection.1.4}%
+\contentsline {subsubsection}{\numberline {1.4.1}Comment}{7}{subsubsection.1.4.1}%
+\contentsline {subsubsection}{\numberline {1.4.2}Response}{8}{subsubsection.1.4.2}%
+\contentsline {subsubsection}{\numberline {1.4.3}Modifications}{9}{subsubsection.1.4.3}%
+\contentsline {subsection}{\numberline {1.5}Comment 1.5 --- ECR paper Citation}{10}{subsection.1.5}%
+\contentsline {subsubsection}{\numberline {1.5.1}Comment}{10}{subsubsection.1.5.1}%
+\contentsline {subsubsection}{\numberline {1.5.2}Response}{10}{subsubsection.1.5.2}%
+\contentsline {subsubsection}{\numberline {1.5.3}Modifications}{10}{subsubsection.1.5.3}%
+\contentsline {subsection}{\numberline {1.6}Comment 1.8 --- Terminology Consistency}{10}{subsection.1.6}%
+\contentsline {subsubsection}{\numberline {1.6.1}Comment}{10}{subsubsection.1.6.1}%
+\contentsline {subsubsection}{\numberline {1.6.2}Response}{10}{subsubsection.1.6.2}%
+\contentsline {subsubsection}{\numberline {1.6.3}Modifications}{11}{subsubsection.1.6.3}%
+\contentsline {section}{\numberline {2}Response to Reviewer \#2}{12}{section.2}%
+\contentsline {subsection}{\numberline {2.1}Comment 2.A --- Precise Definition of ``Accuracy''}{12}{subsection.2.1}%
+\contentsline {subsubsection}{\numberline {2.1.1}Comment}{12}{subsubsection.2.1.1}%
+\contentsline {subsubsection}{\numberline {2.1.2}Response}{12}{subsubsection.2.1.2}%
+\contentsline {subsubsection}{\numberline {2.1.3}Modifications}{12}{subsubsection.2.1.3}%
+\contentsline {subsection}{\numberline {2.2}Comment 2.B --- Same LLM Backbone for All Baselines}{12}{subsection.2.2}%
+\contentsline {subsubsection}{\numberline {2.2.1}Comment}{12}{subsubsection.2.2.1}%
+\contentsline {subsubsection}{\numberline {2.2.2}Response}{13}{subsubsection.2.2.2}%
+\contentsline {subsubsection}{\numberline {2.2.3}Modifications}{13}{subsubsection.2.2.3}%
+\contentsline {subsection}{\numberline {2.3}Comment 2.C --- Equation (1) Probability Notation}{13}{subsection.2.3}%
+\contentsline {subsubsection}{\numberline {2.3.1}Comment}{13}{subsubsection.2.3.1}%
+\contentsline {subsubsection}{\numberline {2.3.2}Response}{13}{subsubsection.2.3.2}%
+\contentsline {subsubsection}{\numberline {2.3.3}Modifications}{14}{subsubsection.2.3.3}%
+\contentsline {subsection}{\numberline {2.4}Comment 2.D --- Efficiency Metrics by Problem Size}{14}{subsection.2.4}%
+\contentsline {subsubsection}{\numberline {2.4.1}Comment}{14}{subsubsection.2.4.1}%
+\contentsline {subsubsection}{\numberline {2.4.2}Response}{14}{subsubsection.2.4.2}%
+\contentsline {subsubsection}{\numberline {2.4.3}Modifications}{16}{subsubsection.2.4.3}%
+\contentsline {subsection}{\numberline {2.5}Comment 2.E --- Human Baseline for Modeling Time \textbf {[MERGE with 1.3]}}{16}{subsection.2.5}%
+\contentsline {subsubsection}{\numberline {2.5.1}Comment}{16}{subsubsection.2.5.1}%
+\contentsline {subsubsection}{\numberline {2.5.2}Response}{16}{subsubsection.2.5.2}%
+\contentsline {subsubsection}{\numberline {2.5.3}Modifications}{16}{subsubsection.2.5.3}%
+\contentsline {subsection}{\numberline {2.6}Comment 2.F --- Clarify Hardware and Network Latency}{17}{subsection.2.6}%
+\contentsline {subsubsection}{\numberline {2.6.1}Comment}{17}{subsubsection.2.6.1}%
+\contentsline {subsubsection}{\numberline {2.6.2}Response}{17}{subsubsection.2.6.2}%
+\contentsline {subsubsection}{\numberline {2.6.3}Modifications}{17}{subsubsection.2.6.3}%
+\contentsline {subsection}{\numberline {2.7}Comment 2.G --- Qualitative Metric for BA-Agent}{17}{subsection.2.7}%
+\contentsline {subsubsection}{\numberline {2.7.1}Comment}{17}{subsubsection.2.7.1}%
+\contentsline {subsubsection}{\numberline {2.7.2}Response}{17}{subsubsection.2.7.2}%
+\contentsline {subsubsection}{\numberline {2.7.3}Modifications}{18}{subsubsection.2.7.3}%
+\contentsline {section}{\numberline {3}Response to Reviewer \#3}{19}{section.3}%
+\contentsline {subsection}{\numberline {3.1}Comment 3.1 --- \texttt {top\_p} and \texttt {max\_tokens} Undefined}{19}{subsection.3.1}%
+\contentsline {subsubsection}{\numberline {3.1.1}Comment}{19}{subsubsection.3.1.1}%
+\contentsline {subsubsection}{\numberline {3.1.2}Response}{19}{subsubsection.3.1.2}%
+\contentsline {subsubsection}{\numberline {3.1.3}Modifications}{19}{subsubsection.3.1.3}%
+\contentsline {subsection}{\numberline {3.2}Comment 3.2 and 3.7 --- Dual Use of Variable $i$}{19}{subsection.3.2}%
+\contentsline {subsubsection}{\numberline {3.2.1}Comment}{19}{subsubsection.3.2.1}%
+\contentsline {subsubsection}{\numberline {3.2.2}Response}{20}{subsubsection.3.2.2}%
+\contentsline {subsubsection}{\numberline {3.2.3}Modifications}{20}{subsubsection.3.2.3}%
+\contentsline {subsection}{\numberline {3.3}Comment 3.3 --- Equation (1) Symbols Undefined \textbf {[COMPLETED]}}{21}{subsection.3.3}%
+\contentsline {subsubsection}{\numberline {3.3.1}Comment}{21}{subsubsection.3.3.1}%
+\contentsline {subsubsection}{\numberline {3.3.2}Response}{21}{subsubsection.3.3.2}%
+\contentsline {subsubsection}{\numberline {3.3.3}Modifications}{22}{subsubsection.3.3.3}%
+\contentsline {subsection}{\numberline {3.4}Comment 3.4, 3.5 and 3.6 --- Variable Inconsistencies in Figure 1}{22}{subsection.3.4}%
+\contentsline {subsubsection}{\numberline {3.4.1}Comment}{22}{subsubsection.3.4.1}%
+\contentsline {subsubsection}{\numberline {3.4.2}Response}{23}{subsubsection.3.4.2}%
+\contentsline {subsubsection}{\numberline {3.4.3}Modifications}{23}{subsubsection.3.4.3}%
+\contentsline {subsection}{\numberline {3.5}Comment 3.8 and 3.9 --- Figure 2 Shows Wrong Problem (Airplane Landing, not ECR)}{23}{subsection.3.5}%
+\contentsline {subsubsection}{\numberline {3.5.1}Comment}{23}{subsubsection.3.5.1}%
+\contentsline {subsubsection}{\numberline {3.5.2}Response}{23}{subsubsection.3.5.2}%
+\contentsline {subsubsection}{\numberline {3.5.3}Modifications}{24}{subsubsection.3.5.3}%
+\contentsline {subsection}{\numberline {3.6}Comment 3.10 --- Accuracy Increase Value Inconsistency}{26}{subsection.3.6}%
+\contentsline {subsubsection}{\numberline {3.6.1}Comment}{26}{subsubsection.3.6.1}%
+\contentsline {subsubsection}{\numberline {3.6.2}Response}{26}{subsubsection.3.6.2}%
+\contentsline {subsubsection}{\numberline {3.6.3}Modifications}{26}{subsubsection.3.6.3}%
+\contentsline {subsection}{\numberline {3.7}Comment 3.11 --- \texttt {is\_backward} Formatting Inconsistency}{26}{subsection.3.7}%
+\contentsline {subsubsection}{\numberline {3.7.1}Comment}{26}{subsubsection.3.7.1}%
+\contentsline {subsubsection}{\numberline {3.7.2}Response}{27}{subsubsection.3.7.2}%
+\contentsline {subsubsection}{\numberline {3.7.3}Modifications}{27}{subsubsection.3.7.3}%
+\contentsline {subsection}{\numberline {3.8}Comment 3.12 --- Symbols ``+'' and ``-'' Defined but Unused}{27}{subsection.3.8}%
+\contentsline {subsubsection}{\numberline {3.8.1}Comment}{27}{subsubsection.3.8.1}%
+\contentsline {subsubsection}{\numberline {3.8.2}Response}{27}{subsubsection.3.8.2}%
+\contentsline {subsubsection}{\numberline {3.8.3}Modifications}{27}{subsubsection.3.8.3}%
+\contentsline {subsection}{\numberline {3.9}Comment 3.13 --- $S_i^t$ Variable $t$ Undefined}{27}{subsection.3.9}%
+\contentsline {subsubsection}{\numberline {3.9.1}Comment}{27}{subsubsection.3.9.1}%
+\contentsline {subsubsection}{\numberline {3.9.2}Response}{27}{subsubsection.3.9.2}%
+\contentsline {subsubsection}{\numberline {3.9.3}Modifications}{28}{subsubsection.3.9.3}%
+\contentsline {subsection}{\numberline {3.10}Comment 3.14 --- ECR Case Solution Lacks Numerical Evidence}{28}{subsection.3.10}%
+\contentsline {subsubsection}{\numberline {3.10.1}Comment}{28}{subsubsection.3.10.1}%
+\contentsline {subsubsection}{\numberline {3.10.2}Response}{28}{subsubsection.3.10.2}%
+\contentsline {subsubsection}{\numberline {3.10.3}Modifications}{28}{subsubsection.3.10.3}%
+\contentsline {subsection}{\numberline {3.11}Comment 3.16 --- Future Research Directions in Conclusion}{29}{subsection.3.11}%
+\contentsline {subsubsection}{\numberline {3.11.1}Comment}{29}{subsubsection.3.11.1}%
+\contentsline {subsubsection}{\numberline {3.11.2}Response}{29}{subsubsection.3.11.2}%
+\contentsline {subsubsection}{\numberline {3.11.3}Modifications}{30}{subsubsection.3.11.3}%
+\contentsline {subsection}{\numberline {3.12}Comment 3.17 --- Move Math Model from Appendix to Main Text}{30}{subsection.3.12}%
+\contentsline {subsubsection}{\numberline {3.12.1}Comment}{30}{subsubsection.3.12.1}%
+\contentsline {subsubsection}{\numberline {3.12.2}Response}{30}{subsubsection.3.12.2}%
+\contentsline {subsubsection}{\numberline {3.12.3}Modifications}{31}{subsubsection.3.12.3}%

@@ -1,0 +1,89 @@
+\begin{thebibliography}{10}
+\expandafter\ifx\csname url\endcsname\relax
+  \def\url#1{\texttt{#1}}\fi
+\expandafter\ifx\csname urlprefix\endcsname\relax\def\urlprefix{URL }\fi
+\expandafter\ifx\csname href\endcsname\relax
+  \def\href#1#2{#2} \def\path#1{#1}\fi
+
+\bibitem{liLargeLanguageModels2023}
+B.~Li, K.~Mellou, B.~Zhang, J.~Pathuri, I.~Menache, Large {{Language Models}} for {{Supply Chain Optimization}} (Jul. 2023).
+\newblock \href {http://arxiv.org/abs/2307.03875} {\path{arXiv:2307.03875}}, \href {https://doi.org/10.48550/arXiv.2307.03875} {\path{doi:10.48550/arXiv.2307.03875}}.
+
+\bibitem{liAdaptiveTODLLMdrivenAdaptive2025a}
+P.~Li, Q.~Yang, S.~Xu, X.~Li, Z.~Li, C.~Wang, Y.~Liu, T.~Guo, J.~Tang, Y.~Wen, Adaptive-{{TOD}}: {{An LLM-driven}} and adaptive agent for diverse interaction modes, Neurocomputing 652 (2025) 130991.
+\newblock \href {https://doi.org/10.1016/j.neucom.2025.130991} {\path{doi:10.1016/j.neucom.2025.130991}}.
+
+\bibitem{jiangDROCELEVATINGLARGE2025a}
+X.~Jiang, Y.~Wu, C.~Zhang, Y.~Zhang, {{DROC}}: {{ELEVATING LARGE LANGUAGE MODELS FOR COMPLEX VEHICLE ROUTING VIA DECOMPOSED RE- TRIEVAL OF CONSTRAINTS}} (2025).
+
+\bibitem{liuSTLLMGraphEnhanced2025}
+C.~Liu, K.~H. Hettige, Q.~Xu, C.~Long, S.~Xiang, G.~Cong, Z.~Li, R.~Zhao, {{ST-LLM}}+: {{Graph Enhanced Spatio-Temporal Large Language Models}} for {{Traffic Prediction}}, IEEE Transactions on Knowledge and Data Engineering 37~(8) (2025) 4846--4859.
+\newblock \href {https://doi.org/10.1109/TKDE.2025.3570705} {\path{doi:10.1109/TKDE.2025.3570705}}.
+
+\bibitem{ishibashiSelfOrganizedAgentsLLM2024}
+Y.~Ishibashi, Y.~Nishimura, Self-{{Organized Agents}}: {{A LLM Multi-Agent Framework}} toward {{Ultra Large-Scale Code Generation}} and {{Optimization}} (Apr. 2024).
+\newblock \href {http://arxiv.org/abs/2404.02183} {\path{arXiv:2404.02183}}, \href {https://doi.org/10.48550/arXiv.2404.02183} {\path{doi:10.48550/arXiv.2404.02183}}.
+
+\bibitem{huangSurveyHallucinationLarge2025}
+L.~Huang, W.~Yu, W.~Ma, W.~Zhong, Z.~Feng, H.~Wang, Q.~Chen, W.~Peng, X.~Feng, B.~Qin, T.~Liu, A {{Survey}} on {{Hallucination}} in {{Large Language Models}}: {{Principles}}, {{Taxonomy}}, {{Challenges}}, and {{Open Questions}}, ACM Transactions on Information Systems 43~(2) (2025) 1--55.
+\newblock \href {https://doi.org/10.1145/3703155} {\path{doi:10.1145/3703155}}.
+
+\bibitem{labanLLMsGetLost2025a}
+P.~Laban, H.~Hayashi, Y.~Zhou, J.~Neville, {{LLMs Get Lost In Multi-Turn Conversation}} (May 2025).
+\newblock \href {http://arxiv.org/abs/2505.06120} {\path{arXiv:2505.06120}}, \href {https://doi.org/10.48550/arXiv.2505.06120} {\path{doi:10.48550/arXiv.2505.06120}}.
+
+\bibitem{zhangNeuralTSPSolver2023}
+D.~Zhang, Z.~Xiao, Y.~Wang, M.~Song, G.~Chen, Neural {{TSP Solver}} with {{Progressive Distillation}}, in: B.~Williams, Y.~Chen, J.~Neville (Eds.), Thirty-{{Seventh AAAI Conference}} on {{Artificial Intelligence}}, {{AAAI}} 2023, {{Thirty-Fifth Conference}} on {{Innovative Applications}} of {{Artificial Intelligence}}, {{IAAI}} 2023, {{Thirteenth Symposium}} on {{Educational Advances}} in {{Artificial Intelligence}}, {{EAAI}} 2023, {{Washington}}, {{DC}}, {{USA}}, {{February}} 7-14, 2023, AAAI Press, 2023, pp. 12147--12154.
+\newblock \href {https://doi.org/10.1609/AAAI.V37I10.26432} {\path{doi:10.1609/AAAI.V37I10.26432}}.
+
+\bibitem{ramamonjisonNL4OptCompetitionFormulating2023}
+R.~Ramamonjison, T.~Yu, R.~Li, H.~Li, G.~Carenini, B.~Ghaddar, S.~He, M.~Mostajabdaveh, A.~{Banitalebi-Dehkordi}, Z.~Zhou, Y.~Zhang, {{NL4Opt Competition}}: {{Formulating Optimization Problems Based}} on {{Their Natural Language Descriptions}}, in: Proceedings of the {{NeurIPS}} 2022 {{Competitions Track}}, PMLR, 2023, pp. 189--203.
+
+\bibitem{xiangLinerFleetDeployment2024}
+X.~Xiang, X.~Xu, C.~Liu, S.~Jia, Liner fleet deployment and empty container repositioning under demand uncertainty: {{A}} robust optimization approach, Transportation Research Part B: Methodological 190 (2024) 103088.
+\newblock \href {https://doi.org/10.1016/j.trb.2024.103088} {\path{doi:10.1016/j.trb.2024.103088}}.
+
+\bibitem{xiangTacticalVesselDeployment2024}
+X.~Xiang, C.~Liu, S.~Jia, Tactical vessel deployment and empty container repositioning considering container turnover times, Computers \& Industrial Engineering 190 (2024) 110032.
+\newblock \href {https://doi.org/10.1016/j.cie.2024.110032} {\path{doi:10.1016/j.cie.2024.110032}}.
+
+\bibitem{xuEmptyContainerRepositioning2024}
+X.~Xu, X.~Huang, L.~Wang, Empty container repositioning problem using a reinforcement learning framework with multi-weight adaptive reward function, Maritime Policy \& Management (2024) 1--22\href {https://doi.org/10.1080/03088839.2024.2326635} {\path{doi:10.1080/03088839.2024.2326635}}.
+
+\bibitem{kuzmiczContainerDepotLocation2020}
+K.~A. Ku{\'z}micz, E.~Pesch, Container depot location problem in the frame of the {{Polish}} part of the {{New Silk Road}}, MATEC Web of Conferences 312 (2020) 02004.
+\newblock \href {https://doi.org/10.1051/matecconf/202031202004} {\path{doi:10.1051/matecconf/202031202004}}.
+
+\bibitem{shanExactAlgorithmInland2020}
+W.~Shan, Z.~Peng, J.~Liu, B.~Yao, B.~Yu, An exact algorithm for inland container transportation network design, Transportation Research Part B: Methodological 135 (2020) 41--82.
+\newblock \href {https://doi.org/10.1016/j.trb.2020.02.011} {\path{doi:10.1016/j.trb.2020.02.011}}.
+
+\bibitem{zhangTacticalOperationalCooperative2019}
+H.~Zhang, L.~Lu, X.~Wang, Tactical and {{Operational Cooperative Empty Container Repositioning Optimization Model Based}} on {{Business Flow}} and {{Initial Solutions Generation Rules}}, Symmetry 11~(3) (2019) 300.
+\newblock \href {https://doi.org/10.3390/sym11030300} {\path{doi:10.3390/sym11030300}}.
+
+\bibitem{liangDynamicContainerSlot2024}
+J.~Liang, Z.~Ma, S.~Wang, H.~Liu, Z.~Tan, Dynamic container slot allocation with empty container repositioning under stochastic demand, Transportation Research Part E: Logistics and Transportation Review 187 (2024) 103603.
+\newblock \href {https://doi.org/10.1016/j.tre.2024.103603} {\path{doi:10.1016/j.tre.2024.103603}}.
+
+\bibitem{yuPricingCompetitionMaritime2024}
+M.~Yu, X.~Tan, J.~Chen, Pricing competition in maritime transportation with blockchain technology and empty container repositioning, Advanced Engineering Informatics 59 (2024) 102318.
+\newblock \href {https://doi.org/10.1016/j.aei.2023.102318} {\path{doi:10.1016/j.aei.2023.102318}}.
+
+\bibitem{faziMultitripContainerDrayage2023}
+S.~Fazi, S.~K. Choudhary, J.-X. Dong, The multi-trip container drayage problem with synchronization for efficient empty containers re-usage, European Journal of Operational Research 310~(1) (2023) 343--359.
+\newblock \href {https://doi.org/10.1016/j.ejor.2023.02.041} {\path{doi:10.1016/j.ejor.2023.02.041}}.
+
+\bibitem{caiJointOptimizationEmpty2024}
+J.~Cai, Y.~Huang, C.~Diao, Z.~Jin, Joint optimization of empty container repositioning and inventory control applying dynamic programming and simulated annealing, Applied Soft Computing 167 (2024) 112452.
+\newblock \href {https://doi.org/10.1016/j.asoc.2024.112452} {\path{doi:10.1016/j.asoc.2024.112452}}.
+
+\bibitem{luoEmptyContainerRepositioning2019}
+T.~Luo, D.~Chang, Empty container repositioning strategy in intermodal transport with demand switching, Advanced Engineering Informatics 40 (2019) 1--13.
+\newblock \href {https://doi.org/10.1016/j.aei.2019.02.008} {\path{doi:10.1016/j.aei.2019.02.008}}.
+
+\bibitem{xieEmptyContainerManagement2017}
+Y.~Xie, X.~Liang, L.~Ma, H.~Yan, Empty container management and coordination in intermodal transport, European Journal of Operational Research 257~(1) (2017) 223--232.
+\newblock \href {https://doi.org/10.1016/j.ejor.2016.07.053} {\path{doi:10.1016/j.ejor.2016.07.053}}.
+
+\end{thebibliography}
