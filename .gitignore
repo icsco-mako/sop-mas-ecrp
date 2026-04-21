@@ -60,3 +60,13 @@ venv/
 env/
 ENV/
 .venv/
+
+# AI coding assistant artifacts
+AGENTS.md
+CLAUDE.md
+COPILOT.md
+GEMINI.md
+.agents/
+.claude/
+.cursor/
+.cursorrules
