@@ -1,0 +1,49 @@
+# Top-p sensitivity study for SOP-MAS (response to Reviewer 1, Comment 1.7)
+#
+# Design: factorial sweep over (top_p, temperature_creative) applied to the
+# two "creative" agents only (ModelEngineer, PythonDeveloper). The other
+# agents (DataEngineer, TestingEngineer, BusinessExpert, ProjectManager)
+# stay deterministic at temperature=0.0, top_p=1.0 to isolate the effect.
+#
+# Each (config, instance) cell is repeated R times to estimate stability.
+# Backward tracking is disabled so we measure raw forward-pass behaviour.
+
+llm:
+  client: DeepSeek
+  model: deepseek-chat
+
+pipeline:
+  algorithm: sop_mac
+  max_collaborate_nums: 5
+  is_backtrack: false
+
+repeats: 3
+
+# Agents whose (temperature, top_p) we sweep. Other agents stay deterministic.
+creative_agents: [ModelEngineer, PythonDeveloper]
+
+# Factorial design — 4 top_p x 2 temperatures = 8 configs.
+configs:
+  - {id: c1, top_p: 0.5, temperature: 0.2}
+  - {id: c2, top_p: 0.7, temperature: 0.2}
+  - {id: c3, top_p: 0.9, temperature: 0.2}
+  - {id: c4, top_p: 1.0, temperature: 0.2}
+  - {id: c5, top_p: 0.5, temperature: 0.8}
+  - {id: c6, top_p: 0.7, temperature: 0.8}
+  - {id: c7, top_p: 0.9, temperature: 0.8}
+  - {id: c8, top_p: 1.0, temperature: 0.8}
+
+# Test instances — kept small initially. Add more by appending to the lists.
+instances:
+  - {dataset: ComplexOR, prob_name: aircraft_landing}
+  - {dataset: ComplexOR, prob_name: diet_problem}
+  - {dataset: ComplexOR, prob_name: knapsack_optimization}
+  - {dataset: NLP4LP, prob_name: "74"}
+  - {dataset: NLP4LP, prob_name: "187"}
+
+# Output root (relative to project root).
+output_root: results/topp_ablation
+
+# Concurrency: number of parallel workers (each issues independent API calls).
+# Set to 1 for sequential debug; raise carefully to respect API rate limits.
+concurrency: 4

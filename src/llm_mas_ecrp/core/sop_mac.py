@@ -24,7 +24,8 @@ def __create_agent(agent_config: List):
     try:
         agent_class = agent_config["class"]
         args = agent_config["args"]
-        return agent_class(*args)
+        kwargs = agent_config.get("kwargs", {})
+        return agent_class(*args, **kwargs)
     except (TypeError, ValueError) as e:
         logging.error(f"Failed to create instance of {agent_class.__name__}: {e}")
         return None
@@ -275,6 +276,7 @@ def sop_mac(
             "agent_times": agent_times,
             "status": True,
             "error_msg": "None",
+            "obj_value": result.get("obj_value"),
         }
 
     bw_res = []
@@ -329,6 +331,7 @@ def sop_mac(
                     "agent_times": agent_times,
                     "status": True,
                     "error_msg": "None",
+                    "obj_value": result.get("obj_value"),
                 }
             error_msg = new_error_msg
 
@@ -340,4 +343,5 @@ def sop_mac(
         "agent_times": agent_times,
         "status": False,
         "error_msg": error_msg,
+        "obj_value": result.get("obj_value") if isinstance(result, dict) else None,
     }

@@ -9,11 +9,20 @@ class BaseAgent:
     NAME: str = ""
     ROLE_DESCRIPTION: str = "You're a helpful assistant."
 
-    def __init__(self, client: OpenAI, model: str, agent_id: int) -> None:
+    def __init__(
+        self,
+        client: OpenAI,
+        model: str,
+        agent_id: int,
+        temperature: float = 0.0,
+        top_p: float = 1.0,
+    ) -> None:
         self.model = model
         self.name = self.NAME
         self.client = client
         self.agent_id = agent_id
+        self.temperature = temperature
+        self.top_p = top_p
 
     def llm_call(
         self,
@@ -28,6 +37,8 @@ class BaseAgent:
             prompt=prompt,
             messages=messages,
             seed=seed,
+            temperature=self.temperature,
+            top_p=self.top_p,
         )
 
     def forward_step(self, problem: Dict, message_pool) -> str:
