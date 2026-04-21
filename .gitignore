@@ -47,7 +47,6 @@ results/
 baseline/
 scripts/
 docs/
-.trae/
 paper/
 
 # NLP4ECR specific folders to exclude
