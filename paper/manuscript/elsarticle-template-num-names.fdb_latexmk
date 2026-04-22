@@ -1,14 +1,14 @@
 # Fdb version 4
-["bibtex elsarticle-template-num-names"] 1776778127.05255 "elsarticle-template-num-names.aux" "elsarticle-template-num-names.bbl" "elsarticle-template-num-names" 1776778297.47082 0
+["bibtex elsarticle-template-num-names"] 1776842899.32881 "elsarticle-template-num-names.aux" "elsarticle-template-num-names.bbl" "elsarticle-template-num-names" 1776842900.6712 0
   "./elsarticle-num-names.bst" 1769745281.721 28896 b24eb82d1afd0a3fa7d82c6efbe1f559 ""
   "./ref_sop_mac.bib" 1775542861.05 65173 5d5580a6e0ccc21139634bc7eee771ef ""
-  "elsarticle-template-num-names.aux" 1776778297.16598 13530 b727168ff1c5a771b16e7f8c1e5c0e63 "pdflatex"
+  "elsarticle-template-num-names.aux" 1776842900.3945 13530 b727168ff1c5a771b16e7f8c1e5c0e63 "pdflatex"
   (generated)
   "elsarticle-template-num-names.bbl"
   "elsarticle-template-num-names.blg"
   (rewritten before read)
-["pdflatex"] 1776778296.04977 "/Users/pengkangzhen/Documents/code/llm_mas_ecrp/paper/manuscript/elsarticle-template-num-names.tex" "elsarticle-template-num-names.pdf" "elsarticle-template-num-names" 1776778297.47098 0
-  "/Users/pengkangzhen/Documents/code/llm_mas_ecrp/paper/manuscript/elsarticle-template-num-names.tex" 1776778295.85365 103278 c10da9ece4a61d2fb9f0d453888d3f7b ""
+["pdflatex"] 1776842899.40588 "/Users/pengkangzhen/Documents/code/llm_mas_ecrp/paper/manuscript/elsarticle-template-num-names.tex" "elsarticle-template-num-names.pdf" "elsarticle-template-num-names" 1776842900.67132 0
+  "/Users/pengkangzhen/Documents/code/llm_mas_ecrp/paper/manuscript/elsarticle-template-num-names.tex" 1776842896.41582 103359 d09bed7d614047b01f7a3865e52f1e8d ""
   "/usr/local/texlive/2025/texmf-dist/fonts/enc/dvips/cm-super/cm-super-t1.enc" 1136849721 2971 def0b6c1f0b107b3b936def894055589 ""
   "/usr/local/texlive/2025/texmf-dist/fonts/enc/dvips/cm-super/cm-super-ts1.enc" 1136849721 2900 1537cc8184ad1792082cd229ecc269f4 ""
   "/usr/local/texlive/2025/texmf-dist/fonts/map/fontname/texfonts.map" 1577235249 3524 cb3e574dea2d1052e39280babc910dc8 ""
@@ -174,11 +174,11 @@
   "/usr/local/texlive/2025/texmf-var/fonts/map/pdftex/updmap/pdftex.map" 1763276278 5467155 19efa205003f9ecad95fbbaa6ff24da1 ""
   "/usr/local/texlive/2025/texmf-var/web2c/pdftex/pdflatex.fmt" 1763276269 3345744 8b29ef73e25569b0d0b0e5d0d366964a ""
   "/usr/local/texlive/2025/texmf.cnf" 1741450484 577 418a7058ec8e006d8704f60ecd22c938 ""
-  "elsarticle-template-num-names.aux" 1776778297.16598 13530 b727168ff1c5a771b16e7f8c1e5c0e63 "pdflatex"
-  "elsarticle-template-num-names.bbl" 1776778127.13698 18411 54b2aa3e3c2dd4e4cd8795e888b9ac0d "bibtex elsarticle-template-num-names"
-  "elsarticle-template-num-names.out" 1776778297.17239 4960 c285247efff7510896aa54f55e9771f1 "pdflatex"
-  "elsarticle-template-num-names.spl" 1776778296.23764 0 d41d8cd98f00b204e9800998ecf8427e "pdflatex"
-  "elsarticle-template-num-names.tex" 1776778295.85365 103278 c10da9ece4a61d2fb9f0d453888d3f7b ""
+  "elsarticle-template-num-names.aux" 1776842900.3945 13530 b727168ff1c5a771b16e7f8c1e5c0e63 "pdflatex"
+  "elsarticle-template-num-names.bbl" 1776842899.4037 18055 3c3ff89f2c7779b505244d55b2cbe843 "bibtex elsarticle-template-num-names"
+  "elsarticle-template-num-names.out" 1776842900.3957 4960 c285247efff7510896aa54f55e9771f1 "pdflatex"
+  "elsarticle-template-num-names.spl" 1776842899.53105 0 d41d8cd98f00b204e9800998ecf8427e "pdflatex"
+  "elsarticle-template-num-names.tex" 1776842896.41582 103359 d09bed7d614047b01f7a3865e52f1e8d ""
   "figure/agent_runtime_combined.pdf" 1769747086.189 39455 69b050577289c1d602999541ddfdfd89 ""
   "figure/cost_style4_sunburst.pdf" 1775626286.74171 32828 ed8d6b9f13f57760ba8bf0264c4ab2de ""
   "figure/figure_sensitivity_analysis.pdf" 1769747086.215 132728 20ce752e95a3d505107b5cd90ff163a8 ""

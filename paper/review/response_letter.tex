@@ -1,5 +1,6 @@
 \documentclass[11pt,a4paper]{article}
 
+\usepackage{amsmath}
 \usepackage{booktabs}
 \usepackage{graphicx}
 \usepackage{longtable}
@@ -12,6 +13,24 @@
   rulecolor=\color{gray!40},
   breaklines=true,
   columns=fullflexible,
+}
+\lstdefinestyle{prompttemplate}{
+  backgroundcolor=\color{gray!6},
+  frame=single,
+  frameround=tttt,
+  framesep=6pt,
+  framerule=0.35pt,
+  rulecolor=\color{black!35},
+  xleftmargin=0.5em,
+  xrightmargin=0.5em,
+  basicstyle=\scriptsize\ttfamily,
+  numbers=none,
+  breaklines=true,
+  breakatwhitespace=true,
+  columns=flexible,
+  keepspaces=true,
+  showstringspaces=false,
+  captionpos=b
 }
 \usepackage[colorlinks=true,linkcolor=blue,urlcolor=blue,citecolor=blue]{hyperref}
 \usepackage{geometry}
@@ -57,7 +76,9 @@ Both examples share the same setting: the DE-Agent extracts $S{=}[100,50,0]$, $D
 \item \textbf{Example 1 (with TE-Agent): DE-Agent $\rightarrow$ ME-Agent $\rightarrow$ PY-Agent $\rightarrow$ TE-Agent.}
 \begin{itemize}
 \item \textbf{Step~5: Iterative modeling.} After the PY-Agent posts the defective code, the TE-Agent performs one supplementary execution within a sandbox environment and returns a structured diagnostic report. A representative excerpt is shown below.
-\begin{lstlisting}[basicstyle=\ttfamily\small,breaklines=true]
+\begin{lstlisting}[
+  style=prompttemplate
+]
 {
   "execution_status": "success",
   "diagnostic_summary": "The solver returns an optimal plan, but the shipment into port C falls short of the demand D[C]=150.",
@@ -213,7 +234,9 @@ Although a formal user study remains beyond the scope of the present revision, w
 
 \begin{quote}
 \textbf{Representative BA-Agent output (translated from the actual run).}
-\begin{lstlisting}
+\begin{lstlisting}[
+  style=prompttemplate
+]
 {
   "executive_summary": "The optimizer found the minimum-cost plan
   for the inter-port empty-container repositioning task, with a
@@ -325,27 +348,29 @@ A comprehensive terminology audit was performed. ``LLM-agent system'' did not ap
 ``Define `accuracy' precisely. Distinguish between successful code execution and reaching the global optimum (optimality gap). High-impact journals require measuring the mathematical quality of the solution, not just syntax.''
 
 \subsubsection{Response}
-We revised the metric definitions into explicit indicator-based formulas. In direct response to the reviewer, we formalized AR to distinguish executable correctness from mathematical correctness. In addition, for completeness and notational consistency across the evaluation metrics, we also expressed CER and RER mathematically. Specifically, an instance is counted as accurate only if the generated code compiles, executes without runtime errors, the solver reports an Optimal status, and the returned objective value matches the ground-truth optimum within a numerical tolerance. This is consistent with the verification criteria already described in Step~6 (Section~3.2).
+We sincerely appreciate this insightful remark. The reviewer's distinction between syntactic correctness and mathematical optimality is well taken and substantially strengthens the rigor of our evaluation framework. In response, we revised the metric definitions into explicit indicator-based formulas. We formalized AR to distinguish executable correctness from mathematical correctness. In addition, for completeness and notational consistency across the evaluation metrics, we also expressed CER and RER mathematically. Specifically, an instance is counted as accurate only if the generated code compiles, executes without runtime errors, the solver reports an Optimal status, and the returned objective value matches the ground-truth optimum within a numerical tolerance. This is consistent with the verification criteria already described in Step~6 (Section~3.2).
 
 \subsubsection{Modifications}
 \begin{enumerate}
 \item \textbf{Section 4.1 (L394) --- MODIFY}
 \begin{quote}
 \textbf{Before:} ``\textit{AR represents the proportion of codes that successfully satisfy all test cases.}''\\[4pt]
-\textbf{After:} ``\textit{\textcolor{red}{For each test instance $i \in \{1,\dots,N\}$, let $c_i \in \{0,1\}$ indicate successful compilation, $r_i \in \{0,1\}$ indicate execution without runtime errors, $s_i$ denote the solver status, $z_i$ denote the objective value returned by the generated code, and $\hat z_i$ denote the ground-truth optimal objective value. CER and RER are defined as}
-\[
-\textcolor{red}{\mathrm{CER}=\frac{1}{N}\sum_{i=1}^{N}\mathbf{1}(c_i=0), \qquad
-\mathrm{RER}=\frac{\sum_{i=1}^{N}\mathbf{1}(c_i=1,\; r_i=0)}{\sum_{i=1}^{N}\mathbf{1}(c_i=1)}.}
-\]
+\textbf{After:} ``\textcolor{red}{For each test instance $i \in \{1,\dots,N\}$, let $c_i \in \{0,1\}$ indicate successful compilation, $r_i \in \{0,1\}$ indicate execution without runtime errors, $s_i$ denote the solver status, $z_i$ denote the objective value returned by the generated code, and $\hat z_i$ denote the ground-truth optimal objective value. CER and RER are defined as}
+\begin{equation}
+\textcolor{red}{\mathrm{CER}=\frac{1}{N}\sum_{i=1}^{N}\mathbf{1}(c_i=0).} \tag{2}
+\end{equation}
+\begin{equation}
+\textcolor{red}{\mathrm{RER}=\frac{\sum_{i=1}^{N}\mathbf{1}(c_i=1,\; r_i=0)}{\sum_{i=1}^{N}\mathbf{1}(c_i=1)}.} \tag{3}
+\end{equation}
 \textcolor{red}{An instance is considered correctly solved only when the generated code compiles, executes without error, attains an optimal solver status, and yields an objective value within tolerance of the ground truth, i.e.,}
-\[
-\textcolor{red}{a_i=\mathbf{1}\!\left(c_i=1,\; r_i=1,\; s_i=\mathrm{Optimal},\; \frac{|z_i-\hat z_i|}{\max(1,|\hat z_i|)}\le \varepsilon\right).}
-\]
+\begin{equation}
+\textcolor{red}{a_i=\mathbf{1}\!\left(c_i=1,\; r_i=1,\; s_i=\mathrm{Optimal},\; \frac{|z_i-\hat z_i|}{\max(1,|\hat z_i|)}\le \varepsilon\right).} \tag{4}
+\end{equation}
 \textcolor{red}{The accuracy rate is then defined as}
-\[
-\textcolor{red}{\mathrm{AR}=\frac{1}{N}\sum_{i=1}^{N} a_i.}
-\]
-\textcolor{red}{In this study, $\varepsilon = 10^{-6}$.}}'' 
+\begin{equation}
+\textcolor{red}{\mathrm{AR}=\frac{1}{N}\sum_{i=1}^{N} a_i.} \tag{5}
+\end{equation}
+\textcolor{red}{In this study, $\varepsilon = 10^{-6}$.}''
 \end{quote}
 \end{enumerate}
 
@@ -379,37 +404,44 @@ We thank the reviewer for raising this important point. We fully agree that a pa
 ``Re-evaluate Equation 1's probabilistic notation. If agent selection is governed by deterministic prompts rather than actual probability distributions, simplify the math to avoid unnecessary `math-washing.' ''
 
 \subsubsection{Response}
-We thank the reviewer for this careful observation. After re-checking the implementation, we agree that the original probabilistic notation overstated the role of randomness in PM-Agent selection. In the current implementation, the PM-Agent is invoked through an LLM call, but the candidate set is restricted by the sub-sequence rule, the prompt explicitly instructs the model to choose the smallest admissible \texttt{agent\_id}, and decoding is performed with temperature 0.0. The realized selection process is therefore better described as a deterministic, state-dependent mapping over an ordered admissible set rather than as a stochastic policy. The relevant PM-Agent prompt template is reproduced below:
+We thank the reviewer for this careful observation. After re-checking the implementation, we agree that the original probabilistic notation $\Pr\{A_k=e\mid S_k=s\}$ overstated the role of randomness in PM-Agent selection. \textcolor{red}{In the implementation, the PM-Agent operates under two structural constraints: (i) the candidate set $\mathcal{A}_k$ is restricted by the sub-sequence rule, which forbids re-selecting already-used agents and maintains relative ordering; and (ii) decoding is performed with temperature 0.0, so for a fixed contextual state $s_k$ the LLM produces a single, repeatable output. The selection within $\mathcal{A}_k$ is not reduced to a hard-coded rule; rather, the PM-Agent reasons over the current message-pool state to decide the next role, which in particular accommodates agent reuse, early termination, and backtracking decisions (Section~3.3).} \textcolor{red}{Empirically, across all $K=5$ independent runs on every benchmark instance, the realized PM-Agent selection sequence was identical, indicating that the realized policy behaves as a state-dependent decision function rather than a stochastic distribution.} Accordingly, the formalization should be a state-dependent selection function rather than a probability distribution. The relevant PM-Agent prompt template is reproduced below:
 
-\begin{lstlisting}
-# PROBLEM DESCRIPTION
-Current optimization problem to solve: {problem_description}
+\begin{lstlisting}[
+  style=prompttemplate,
+  caption={Complete ECR mathematical formulation generated by SOP-MAS},
+  label={lst:ecr-mathematical-model}
+]
+Now, you are presented with an operational optimization-related problem: {problem_description}. In this 
+multi-agent system, there are many agents, each of whom is responsible for solving part of the problem. 
+Your task is to CHOOSE THE NEXT AGENT TO CONSULT to solve the optimization problem. The names of the 
+agents and their capabilities are listed below: {agent_list}. Experts that have already been selected 
+include: {selected_agent_list}. Please select an agent to consult from the remaining agent names 
+{allowed_agent_list}. Please note that the maximum number of asked agents is {max_collaborate_nums}, and 
+you can ask {remaining_collaborate_nums} more times. You should output the name of agent directly.
 
-# SELECTION CRITERIA
-1. **STRICT ORDERING REQUIREMENT** (HIGHEST PRIORITY):
-   - You MUST select agents in the order they appear in {agent_list}
-   - The agent_id sequence MUST be monotonically increasing
-   - NEVER skip agents or select out of order unless already selected
-
-2. Available Options:
-   - Already selected: {selected_agent_list}
-   - Available pool: {allowed_agent_list}
-   - Remaining quota: {remaining_collaborate_nums} / {max_collaborate_nums}
-
-3. Selection Logic:
-   - From {allowed_agent_list}, select the agent with the
-     SMALLEST agent_id
+# Decision Logic
+Select agents based on these priorities:
+1. Capability Alignment Score (relevance to current problem module)
+2. Remaining Invocation Quota:
+   {remaining_collaborate_nums}/{max_collaborate_nums}
+3. Select agents sequentially from the {agent_list} sequence,
+   without requiring continuity, but the relative order of elements
+   in the {agent_list} must be maintained.
 \end{lstlisting}
 
-This prompt structure shows that the PM-Agent operates under an explicit ordering constraint over the current admissible set. Accordingly, we revised Equation~(1) and the surrounding text in the manuscript to remove the probabilistic formulation and restate the PM-Agent policy as a deterministic selection function conditioned on the current state and admissible agent set. We also updated the notation explanation in Comment~3.3 to match this revision.
+\textcolor{red}{The prompt requires maintaining the relative order of agents in the selectable set, which constrains $\mathcal{A}_k$ but does not reduce the selection to a fixed closed-form rule.} Accordingly, we revised Equation~(1) and the surrounding text in the manuscript to remove the probabilistic formulation and restate the PM-Agent policy as a state-dependent selection function conditioned on the current state and admissible agent set. We also updated the notation explanation in Comment~3.3 to match this revision.
 
 \subsubsection{Modifications}
 
 \begin{enumerate}
 \item \textbf{Section 3.2 Step 2 and Equation (1) (L330--334) --- MODIFY}
 \begin{quote}
-\textbf{Before:} ``\textit{The policy selection function is defined as: $\pi_{\mathrm{PM}}(e|s)=Pr\{A_k=e \mid S_k=s\}$. ... The probability arises from the stochastic nature of LLM generation, since the PM-Agent determines the next agent via an LLM call rather than a hard-coded rule.}''\\[4pt]
-\textbf{After:} ``\textit{\textcolor{red}{The PM-Agent selection function is defined as: $a_k=\pi_{\mathrm{PM}}(s_k)$, where $a_k\in\mathcal{A}_k$. The selectable set is restricted by the sub-sequence rule and the PM-Agent is decoded deterministically; accordingly, the realized selection process is described as a deterministic, state-dependent mapping over an ordered admissible set.}}''
+\textbf{Before:} ``\textit{The policy selection function is defined as: $\pi(e|s)=Pr\{A_k=e \mid S_k=s\}$. ... The probability arises from the stochastic nature of LLM generation, since the PM-Agent determines the next agent via an LLM call rather than a hard-coded rule.}''\\[4pt]
+\textbf{After:} ``\textit{\textcolor{red}{The PM-Agent selection function is defined as a state-dependent decision function:
+\begin{equation}\label{eq:pm-selection-revised}
+a_k=\pi_{\mathrm{PM}}\left(s_k\right), \quad a_k\in\mathcal{A}_k
+\end{equation}
+where $\mathcal{A}_k$ denotes the admissible agent set at step $k$ induced by the sub-sequence rule. Although $\pi_{\mathrm{PM}}$ is realized through an LLM call rather than a closed-form rule, temperature~0 decoding makes the realized selection repeatable for a given state $s_k$; this was empirically verified by identical selection trajectories across $K=5$ independent runs on all benchmark instances. We therefore formalize $\pi_{\mathrm{PM}}$ as a deterministic mapping over the admissible set rather than as a probability distribution, and defer its inner reasoning (which depends on the message-pool state) to the prompt specification.}}''
 \end{quote}
 \end{enumerate}
 
@@ -420,14 +452,16 @@ This prompt structure shows that the PM-Agent operates under an explicit orderin
 ``Provide efficiency metrics correlated to problem size. Show how runtime and accuracy scale as the number of ports and time periods increase to prove industrial-grade scalability.''
 
 \subsubsection{Response}
-We appreciate the reviewer's concern regarding industrial-grade scalability. After careful analysis of the SOP-MAS workflow, we clarify that the framework's modeling runtime does not scale with problem size. The key insight lies in a deliberate architectural design: \textbf{problem description and concrete data are strictly separated}.
+We thank the reviewer for this insightful comment, which highlights an important point that we failed to make sufficiently clear in the original manuscript. After careful analysis of the SOP-MAS workflow, we clarify that the framework's modeling runtime does not scale with problem size. The key insight lies in a deliberate architectural design: \textbf{problem description and concrete data are strictly separated}.
 
-In SOP-MAS, the problem description $P$ (e.g., \texttt{description.txt}) is expressed in abstract symbolic form, parameters, variables, and constraints defined using index notation (e.g., $i \in I$ for ports, $t \in T$ for time periods), while the concrete numerical data (e.g., port coordinates, demand matrices) resides in separate data files (e.g., \texttt{sample.json}). This separation is essential because embedding concrete data directly into the problem description would cause the text length to grow prohibitively with problem scale, overwhelming the LLM's context window and comprehension capacity. To illustrate this point, consider the following comparison:
+In SOP-MAS, the problem description $P$ (e.g., \texttt{description.txt}) is expressed in abstract symbolic form, parameters, variables, and constraints defined using index notation, while the concrete numerical data (e.g., port coordinates, demand matrices) resides in separate data files (e.g., \texttt{sample.json}). For small-scale problems, embedding concrete data directly into the problem description is perfectly feasible and does not pose any difficulty. However, as the problem scale grows (e.g., more ports, longer time horizons, larger demand matrices), the text length increases rapidly. Embedding all numerical data into the prompt would eventually overwhelm the LLM's context window and degrade its comprehension capacity. Therefore, we adopt a strict separation between the abstract problem description and the concrete data files. To illustrate this point, consider the following comparison:
 
 \medskip
 \noindent\textbf{Case A: Problem description with embedded data (not adopted).} If concrete data were embedded, even a simple 3-port ECR example would need to enumerate all values explicitly:
 
-\begin{lstlisting}
+\begin{lstlisting}[
+  style=prompttemplate
+]
 # ECR Problem: 3 ports (A, B, C), T=1
 
 The supply vector is S = [100, 50, 0] (TEU), where
@@ -444,7 +478,9 @@ Storage cost h_i = 0, initial inventory I_i0 = 0.
 
 \noindent\textbf{Case B: Problem description with separated data (adopted by SOP-MAS).} The description uses abstract symbolic notation, remaining concise regardless of scale:
 
-\begin{lstlisting}
+\begin{lstlisting}[
+  style=prompttemplate
+]
 # ECR Problem: Multi-period Network Flow Optimization
 
 Network: Directed graph G=(N,E), where N = H (seaports) union L (dry ports).
@@ -462,14 +498,14 @@ Parameters:
 (Data provided separately in sample.json)
 \end{lstlisting}
 
-\noindent As shown, Case B's description length is independent of the number of ports or time periods, whereas Case A's text length grows proportionally to $O(|N|^2 \times |T|)$ as problem scale increases. For the Liaoning case with 3 seaports, 5 dry ports, and 7 time periods, Case A would require enumerating hundreds of specific values, whereas Case B's abstract description remains unchanged.
+\noindent As shown, Case B's description length is independent of the number of ports or time periods, whereas Case A's text length grows proportionally to $O(|N|^2 \times |T|)$ as problem scale increases. For the empirical case study (in the manuscript section 5) with 3 seaports, 5 dry ports, and 7 time periods, Case A would require enumerating hundreds of specific values, whereas Case B's abstract description remains unchanged.
 
 This design has the following implications for each step of the SOP process:
 
 \begin{itemize}
-\item \textbf{Steps 1--5 (Modeling):} Since $P$ remains fixed in length regardless of how many ports or time periods are involved, the DE-Agent's parameter extraction, the ME-Agent's model formulation, and the PY-Agent's code generation all produce identical outputs in terms of model structure and code template. The LLM API call time for these steps is therefore constant.
+\item \textbf{Steps 1--5 (Iterative Modeling):} Since $P$ (problem descrition) remains fixed in length regardless of how many ports or time periods are involved, the DE-Agent's parameter extraction, the ME-Agent's model formulation, and the PY-Agent's code generation all produce identical outputs in terms of model structure and code template. The LLM API call time for these steps is therefore constant.
 
-\item \textbf{Step 6 (Execution):} After the forward pass, the framework enters a unified execution stage around the generated \texttt{optimize(data)} function, where concrete data is loaded from external files (\texttt{sample.json}). If the TE-Agent was selected earlier in the forward pass, its successful execution result can be reused directly; otherwise, or if reuse is not possible, the framework executes the latest solver code itself. Only at this stage does the actual problem scale manifest, affecting the optimization solver's (such as Gurobi or OR-Tools) runtime. Increasing the number of ports or time periods increases the number of decision variables and constraints fed to the solver, but the solver code template itself remains unchanged.
+\item \textbf{Step 6 (Execution):} After the forward pass, the framework enters a unified execution stage around the generated \texttt{optimize(data)} function, where concrete data is loaded from external files (\texttt{sample.json}). If the TE-Agent was selected earlier in the forward pass, its successful execution result can be reused directly; otherwise, or if reuse is not possible, the framework executes the latest solver code itself. Only at this stage does the actual problem scale manifest, affecting the optimization solver's (such as OR-Tools, Gurobi, CPLEX) runtime. Increasing the number of ports or time periods increases the number of decision variables and constraints fed to the solver, but the solver code template itself remains unchanged.
 
 \item \textbf{Scalability implication:} The modeling overhead of SOP-MAS (Steps 1--5) is bounded by the sub-minute LLM API call time and is independent of problem scale. The computational bottleneck shifts entirely to the solver execution phase, whose scalability depends on the choice of solver (e.g., OR-Tools, Gurobi, CPLEX) and has been extensively validated by the OR community. This separation of concerns allows SOP-MAS to serve as a scale-agnostic modeling layer on top of existing solver infrastructure.
 \end{itemize}
@@ -492,8 +528,8 @@ We have added a corresponding discussion to Section 4.4.
 ``Support `reduced modeling time' claims with a human baseline. Compare the 48-second SOP-MAS runtime against the actual hours an expert requires to manually model the Liaoning case.''
 
 \subsubsection{Response}
-Thank you for this important suggestion. We fully agree that a human baseline is important for interpreting reduced modeling-time claims.
-And we note that Comment 2.E and Comment 1.3 are closely related, as both concern the interpretation of modeling time reduction claims. To avoid fragmented discussion, we have merged this point into Comment 1.3 and revised the manuscript to explicitly clarify that the reported 48-second runtime reflects the end-to-end automated latency of SOP-MAS for generating an executable initial model, with multi-agent interaction already included in that measured latency, rather than the full human modeling cycle, which also involves requirement clarification, iterative formulation revision, debugging, and stakeholder validation. We further clarify that the comparison is intended as a workflow-level statement: for complex real-world cases such as the Liaoning ECR application, the expert-centered formulation process often spans hours or even weeks in practice, whereas SOP-MAS reduces the routine formulation stage to sub-minute automated generation and shifts the remaining work to expert review and refinement.
+We deeply appreciate the reviewer’s rigorous attention to detail. We fully agree that a human baseline is important for interpreting reduced modeling-time claims.
+And we note that Comment 1.3 and Comment 2.E are closely related, as both concern the interpretation of modeling time reduction claims. We have therefore merged this point into Comment 1.3 and revised the manuscript to explicitly clarify that the reported 48-second runtime reflects the end-to-end automated latency of SOP-MAS for generating an executable initial model, with multi-agent interaction already included in that measured latency, rather than the full human modeling cycle, which also involves requirement clarification, iterative formulation revision, debugging, and stakeholder validation. We further clarify that the comparison is intended as a workflow-level statement: for complex real-world cases such as the Liaoning ECR application, the expert-centered formulation process often spans hours or even weeks in practice, whereas SOP-MAS reduces the routine formulation stage to sub-minute automated generation and shifts the remaining work to expert review and refinement.
 
 \subsubsection{Modifications}
 Merged into Comment 1.3. Click \hyperref[resp:r1.3-modifications]{here to jump to the modifications for Comment 1.3.}
@@ -552,14 +588,7 @@ Addressed jointly with \hyperref[subsec:comment1.4]{Comment~1.4}; the manuscript
 ``In lines 314-315, the terms top\_p and max\_tokens are not defined.''
 
 \subsubsection{Response}
-We deeply appreciate the reviewer's careful and precise reading. You are correct that \texttt{top\_p} and \texttt{max\_tokens} were left undefined, which may confuse readers unfamiliar with LLM inference hyperparameters; we have revised accordingly.
-
-\texttt{top\_p} (nucleus sampling threshold) controls the cumulative probability mass from which the next token is sampled: a value of 1.0 retains the full vocabulary distribution and is the provider default, ensuring no artificial truncation of the output distribution.
-\texttt{max\_tokens} (maximum output length) sets an upper bound on the number of tokens the model may generate in a single call; using the provider default avoids artificially truncating long structured outputs (e.g., mathematical formulations or Gurobi code blocks) that vary in length across problem instances.
-
-Both parameters are held at their provider-specified default values throughout all experiments.
-This choice (i) aligns our runs with each provider's recommended baseline behaviour, (ii) eliminates an additional hyperparameter dimension that would otherwise need to be reported and tuned, and (iii) facilitates reproducibility, since any reader can replicate our calls by simply omitting these arguments from their API requests.
-We have added explicit inline definitions at the point of first use (Section~3.1) so that the text is self-contained.
+We are grateful to the reviewer for this attentive observation. Upon re-examining the manuscript, we confirmed that \texttt{top\_p} and \texttt{max\_tokens} were introduced without definition, leaving readers unfamiliar with LLM inference parameters to infer their meaning from context. We have added inline definitions at the point of first use (Section~3.1) and clarified their settings in the experimental setup (Section~4); see the modifications below.
 
 \subsubsection{Modifications}
 \begin{enumerate}
@@ -641,7 +670,7 @@ For clarity, we provide an illustrative example. The full agent set is $\mathcal
 \end{enumerate}
 
 % ----------------------------------------------------------------------------
-\subsection{Comment 3.3 --- Equation (1) Symbols Undefined \textbf{[COMPLETED]}}
+\subsection{Comment 3.3 --- Equation (1) Symbols Undefined}
 
 \subsubsection{Comment}
 ``The notation of variables in equation (1) is not clearly defined. What are the definitions of $e$, $S_i$, $s$, and $A_i$?''

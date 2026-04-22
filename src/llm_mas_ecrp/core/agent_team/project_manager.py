@@ -25,43 +25,6 @@ class ProjectManager(BaseAgent):
     Please provide your decision conclusion, The next agent is: <?>
 
     """
-    FORWARD_TASK_INSTRUCTIONS = """
-In this multi-agent system, there are many agents, each of whom is responsible for solving part of the problem. Your task is to CHOOSE THE NEXT AGENT TO CONSULT to solve the optimization problem. The names of the agents and their capabilities are listed below: {agent_list}. Please select the next agent to consult based on the following rules:
-
-# PROBLEM DESCRIPTION
-Current optimization problem to solve: {problem_description}
-
-# SELECTION CRITERIA
-1. **STRICT ORDERING REQUIREMENT** (HIGHEST PRIORITY):
-   - You MUST select agents in the order they appear in {agent_list}
-   - The agent_id sequence MUST be monotonically increasing: 0 → 1 → 2 → 3 → 4 → ...
-   - If the first agent (agent_id=0) has NOT been selected yet, you MUST select it first
-   - After selecting agent_id=N, you MUST select from agents with agent_id > N
-   - NEVER skip agents or select out of order unless an agent has already been selected
-
-2. Available Options:
-   - Already selected: {selected_agent_list}
-   - Available pool: {allowed_agent_list}
-   - Remaining quota: {remaining_collaborate_nums} / {max_collaborate_nums}
-
-3. Selection Logic:
-   - From {allowed_agent_list}, select the agent with the SMALLEST agent_id
-   - This ensures sequential execution following the designed workflow
-
-# WORKFLOW RATIONALE
-The agent order is designed to follow a natural problem-solving workflow:
-- DataEngineer (agent_id=0): Extract parameters and variables from problem description
-- OR Specialist (agent_id=1): Build mathematical model based on extracted information
-- Python Developer (agent_id=2): Implement the model in code
-- Testing Engineer (agent_id=3): Generate test cases and validate the code
-- BusinessExpert (agent_id=4): Translate results into business insights
-
-# ACTION REQUIREMENTS
-Output ONLY the selected agent's name (no explanation needed). 
-You MUST choose from {allowed_agent_list}.
-Next agent to consult: <?>
-    """
-
     def __init__(
         self,
         client: str,
@@ -121,7 +84,7 @@ Next agent to consult: <?>
         if not allowed_agent_list:
             raise ValueError("All agents have been selected, cannot select more agents")
         
-        prompt = self.FORWARD_TASK_INSTRUCTIONS.format(
+        prompt = self.FORWARD_TASK.format(
             problem_description=problem_description,
             agent_list=all_agents,
             selected_agent_list=[
