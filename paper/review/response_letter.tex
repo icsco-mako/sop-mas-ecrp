@@ -618,33 +618,38 @@ We deeply appreciate the reviewer's rigorous attention to detail. Pointing out t
 \end{enumerate}
 
 \smallskip
-For clarity, we provide an illustrative example. \noindent Set $K=3$, let the initial selectable set be $\mathcal{A}_1=\{a_{\text{DE}}, a_{\text{ME}}, a_{\text{PY}}, a_{\text{TE}}, a_{\text{BA}}\}$, and suppose $a_{\text{PM}}$ selects $a_{\text{ME}}$ at step $k\!=\!1$ according to the selection function defined in Equation~\eqref{eq:pm-selection-revised} (i.e., $a_1=\pi_{\mathrm{PM}}(s_1)=a_{\text{ME}}$; for this illustration we assume the LLM-driven selection skips $a_{\text{DE}}$ and directly yields $a_{\text{ME}}$). Note that the step index $k$ is determined by the position within the forward pass, whereas the agent subscript (e.g., ${\text{TE}}$) is a fixed identifier; the two are in general distinct:
+For clarity, we provide a concrete example with $K{=}3$ and $\mathcal{A}_1{=}\{a_{\text{DE}}, a_{\text{ME}}, a_{\text{PY}}, a_{\text{TE}}, a_{\text{BA}}\}$, where $a_{\text{PM}}$ selects $a_{\text{ME}}$ at step $k{=}1$ (i.e., $a_1{=}\pi_{\mathrm{PM}}(s_1){=}a_{\text{ME}}$). Note that the step index $k$ tracks the position within a single forward pass, whereas the agent subscript (e.g., $\text{TE}$) is a fixed identifier.
 
-\smallskip
-\noindent\textbf{Round 1 --- Iterative Modeling}\; ($K{=}3$; $a_{\text{PM}}$ selects $a_{\text{ME}}$ at $k{=}1$ per Eq.~\eqref{eq:pm-selection-revised}):
-\begin{center}
-\begin{tabular}{r@{\;}l@{\;$\longrightarrow$\;\,}l@{\;$\longrightarrow$\;\,}l}
-$k{=}1$: & $\mathcal{A}_1=\{a_{\text{DE}}, a_{\text{ME}}, a_{\text{PY}}, a_{\text{TE}}, a_{\text{BA}}\}$ & select $a_{\text{ME}}$ & $y_1$ \\
-$k{=}2$: & $\mathcal{A}_2=\{a_{\text{PY}}, a_{\text{TE}}, a_{\text{BA}}\}$ & select $a_{\text{PY}}$ & $y_2$ \\
-$k{=}3$: & $\mathcal{A}_3=\{a_{\text{TE}}, a_{\text{BA}}\}$ & select $a_{\text{TE}}$ & $y_3$ \\
-\end{tabular}
-\end{center}
+\medskip
+\begin{enumerate}\setlength{\itemsep}{6pt}
+\item \textbf{Round 1 --- Iterative Modeling}\; ($K{=}3$; $a_{\text{PM}}$ selects $a_{\text{ME}}$ at $k{=}1$ per Eq.~\eqref{eq:pm-selection-revised}):
+\[
+\begin{aligned}
+k{=}1&:\; \mathcal{A}_1{=}\{a_{\text{DE}}, a_{\text{ME}}, a_{\text{PY}}, a_{\text{TE}}, a_{\text{BA}}\}
+\;\xrightarrow{\;a_{\text{ME}}\;}\; y_1,\\
+k{=}2&:\; \mathcal{A}_2{=}\{a_{\text{PY}}, a_{\text{TE}}, a_{\text{BA}}\}
+\;\xrightarrow{\;a_{\text{PY}}\;}\; y_2,\\
+k{=}3&:\; \mathcal{A}_3{=}\{a_{\text{TE}}, a_{\text{BA}}\}
+\;\xrightarrow{\;a_{\text{TE}}\;}\; y_3.
+\end{aligned}
+\]
 
-\noindent\textbf{Step~7 --- Exception Backtracking}\; ($H=[a_{\text{ME}}, a_{\text{PY}}, a_{\text{TE}}]$; pop in LIFO order):
-\begin{quote}\small\setlength{\parskip}{4pt}
-\textsc{Pop} $a_{\text{TE}}$:\; $(\delta_3,\xi_3)\gets a_{\text{TE}}(C)$;\; $\delta_3{=}\mathrm{True}$ (propagate upward).\\
-\quad Revert $C{:=}\{y_1,y_2\}$;\; restore $\mathcal{A}_3{=}\{a_{\text{TE}},a_{\text{BA}}\}$;\; $H{:=}[a_{\text{ME}},a_{\text{PY}}]$.
+\item \textbf{Step~7 --- Exception Backtracking}\; ($H=[a_{\text{ME}}, a_{\text{PY}}, a_{\text{TE}}]$; pop in LIFO order):
+\begin{enumerate}\small\setlength{\itemsep}{3pt}
+\item \textsc{Pop} $a_{\text{TE}}$:\; $(\delta_3,\xi_3)\gets a_{\text{TE}}(C)$;\; $\delta_3{=}\mathrm{True}$ (propagate upward).\\
+Revert $C{:=}\{y_1,y_2\}$;\; restore $\mathcal{A}_3{=}\{a_{\text{TE}},a_{\text{BA}}\}$;\; $H{:=}[a_{\text{ME}},a_{\text{PY}}]$.
+\item \textsc{Pop} $a_{\text{PY}}$:\; $(\delta_2,\xi_2)\gets a_{\text{PY}}(C)$;\; $\delta_2{=}\mathrm{False}$ (claims fault), provides $y_2'$.\\
+Revert $C{:=}\{y_1,y_2'\}$;\; set $\mathcal{A}_{k+1}{:=}\{a_{\text{TE}},a_{\text{BA}}\}$.
+\end{enumerate}
 
-\textsc{Pop} $a_{\text{PY}}$:\; $(\delta_2,\xi_2)\gets a_{\text{PY}}(C)$;\; $\delta_2{=}\mathrm{False}$ (claims fault), provides $y_2'$.\\
-\quad Revert $C{:=}\{y_1,y_2'\}$;\; set $\mathcal{A}_{k+1}{:=}\{a_{\text{TE}},a_{\text{BA}}\}$.
-\end{quote}
-
-\noindent\textbf{Round 2 --- Re-Iterative Modeling}\; ($k$ resets; $C{=}\{y_1,y_2'\}$; $\mathcal{A}_1{=}\{a_{\text{TE}},a_{\text{BA}}\}$):
-\begin{center}
-\begin{tabular}{r@{\;}l@{\;$\longrightarrow$\;\,}l@{\;$\longrightarrow$\;\,}l}
-$k{=}1$: & $\mathcal{A}_1=\{a_{\text{TE}}, a_{\text{BA}}\}$ & select $a_{\text{TE}}$ & $y_1'$ \\
-\end{tabular}
-\end{center}
+\item \textbf{Round 2 --- Re-Iterative Modeling}\; ($k$ resets; $C{=}\{y_1,y_2'\}$; $\mathcal{A}_1{=}\{a_{\text{TE}},a_{\text{BA}}\}$):
+\[
+\begin{aligned}
+k{=}1&:\; \mathcal{A}_1{=}\{a_{\text{TE}}, a_{\text{BA}}\}
+\;\xrightarrow{\;a_{\text{TE}}\;}\; y_1'.
+\end{aligned}
+\]
+\end{enumerate}
 
 
 \noindent This example demonstrates four key distinctions: (1) the agent subscript is fixed (e.g., $a_{\text{TE}}$ always denotes the Testing Engineer), while step index $k$ resets per forward pass; (2) the same agent ($a_{\text{TE}}$) can appear at different step indices ($k\!=\!3$ in Round~1, $k\!=\!1$ in Round~2), and conversely, the same step index ($k\!=\!1$) refers to different agents in different rounds ($a_{\text{ME}}$ in Round~1 vs.\ $a_{\text{TE}}$ in Round~2); (3) $K$ bounds the number of selections \textit{per forward pass}, not the cumulative total; and (4) the selectable set $\mathcal{A}_k$ shrinks monotonically within a forward pass under the sub-sequence rule, and resets to $\{a_{\text{TE}},a_{\text{BA}}\}$ at the start of Round~2, ensuring the re-forward respects the same monotonic-identifier ordering anchored to the last fault-claiming agent.
@@ -660,18 +665,18 @@ $k{=}1$: & $\mathcal{A}_1=\{a_{\text{TE}}, a_{\text{BA}}\}$ & select $a_{\text{T
 
 \item \textbf{Section 3.2, Step 2 (L306--310) --- MODIFY}
 \begin{quote}
-\textbf{Before:} ``Denote the output at step $i$ as $y_i$, and the state as $s_i=(P,C, |A|-K-i)$.''\\[4pt]
+\textbf{Before:} ``Denote the output at step $i$ as $y_i$, and the state as $s_i=(P,C,A,K-i)$.''\\[4pt]
 \textbf{After:} ``Denote the output at step $k$ as $y_k$, the set of selectable agents at step $k$ as $\mathcal{A}_k$, and the state as $s_k=(P, C, K-k, \mathcal{A}_k)$.'' \textcolor{red}{The text following Equation (1) now further clarifies that the global agent set is denoted by $\mathcal{A}$, $\mathcal{A}_k$ denotes the selectable set at step $k$, $A_k$ denotes the random variable for the selected agent, and $a_k$ denotes the realized selected agent.}
 \end{quote}
 
 \item \textbf{Section 3.2, Steps 2--7 (L306--335) --- MODIFY}
 \begin{quote}
-\textbf{Change:} All step-indexed subscripts $i$ were replaced with $k$ throughout Steps 2--7 (including $y_k$, $s_k$, $a_k$, $f_k$, $\mathcal{T}_k$, $A_k$, $S_k$, $\delta_k$, and $\xi_k$). In addition, all set-valued notation is now written in calligraphic form, including the global agent set $\mathcal{A}$ and the intermediate selectable sets $\mathcal{A}_k$. The agent set now uses descriptive subscripts (e.g., $a_{\text{DE}}, a_{\text{ME}}, \ldots$) instead of numeric indices. The subsequence rule in Step 4 now introduces an ordered tuple $\mathcal{A}^{\uparrow}$ and uses $\mathrm{succ}(a_k)$ to denote the agents following $a_k$ in role order, and explicitly updates the next-step selectable set as $\mathcal{A}_{k+1}$. The backtracking description in Step 7 correspondingly restores $\mathcal{A}_k$ rather than the global action space. Step 5's termination condition was also simplified from ``current iteration count $k$ exceeds $K$'' to ``all $K$ steps have been executed.''
+\textbf{After:} All step-indexed subscripts $i$ were replaced with $k$ throughout Steps 2--7 (including $y_k$, $s_k$, $a_k$, $f_k$, $\mathcal{T}_k$, $A_k$, $S_k$, $\delta_k$, and $\xi_k$). In addition, all set-valued notation is now written in calligraphic form, including the global agent set $\mathcal{A}$ and the intermediate selectable sets $\mathcal{A}_k$. The agent set now uses descriptive subscripts (e.g., $a_{\text{DE}}, a_{\text{ME}}, \ldots$) instead of numeric indices. The subsequence rule in Step 4 now introduces an ordered tuple $\mathcal{A}^{\uparrow}$ and uses $\mathrm{succ}(a_k)$ to denote the agents following $a_k$ in role order, and explicitly updates the next-step selectable set as $\mathcal{A}_{k+1}$. The backtracking description in Step 7 correspondingly restores $\mathcal{A}_k$ rather than the global action space. Step 5's termination condition was also simplified from ``current iteration count $k$ exceeds $K$'' to ``all $K$ steps have been executed.''
 \end{quote}
 
 \item \textbf{Figure~1 --- MODIFY (symbol update; updated figure shown in Comment~3.4)}
 \begin{quote}
-\textbf{Change:} The two flowchart boxes that previously displayed $a_i \leftarrow a_0(P,C)$ (Agent Selection) and $y_i \leftarrow a_i(P,C)$ (Action Execution) have been updated to $a_k = \pi_{\mathrm{PM}}(s_k),\; a_k\!\in\!\mathcal{A}_k$ and $y_k \leftarrow a_k(P,C)$ respectively, aligning Figure~1 with the revised notation in Steps~2--3 of Section~3.2. The updated figure is presented in \hyperref[fig:updated-flowchart]{Comment~3.4}.
+\textbf{After:} The two flowchart boxes that previously displayed $a_i \leftarrow a_0(P,C)$ (Agent Selection) and $y_i \leftarrow a_i(P,C)$ (Action Execution) have been updated to $a_k = \pi_{\mathrm{PM}}(s_k),\; a_k\!\in\!\mathcal{A}_k$ and $y_k \leftarrow a_k(P,C)$ respectively, aligning Figure~1 with the revised notation in Steps~2--3 of Section~3.2. The updated figure is presented in \hyperref[fig:updated-flowchart]{Comment~3.4}.
 \end{quote}
 \end{enumerate}
 
@@ -710,7 +715,7 @@ $K$ & The maximum number of agents to be selected per forward pass \\
 \begin{enumerate}
 \item \textbf{Section 3.2 Equation (1) (L330--334) --- MODIFY}
 \begin{quote}
-\textbf{Before:} ``Denote the output at step $i$ as $y_i$, and the state as $s_i = (P, C, A - K - i)$. The policy selection function is defined as... ''\\[4pt]
+\textbf{Before:} ``Denote the output at step $i$ as $y_i$, and the state as $s_i = (P, C, A, K-i)$. The policy selection function is defined as... ''\\[4pt]
 \textbf{After:} ``\textcolor{red}{Denote the output at step $k$ as $y_k$, the set of selectable agents at step $k$ as $\mathcal{A}_k$, and the state as $s_k=(P, C, K-k, \mathcal{A}_k)$. The PM-Agent selection function is defined as:}''
 \begin{equation}
 \textcolor{red}{a_k = \pi_{\mathrm{PM}}\!\left(s_k\right), \quad a_k \in \mathcal{A}_k}
