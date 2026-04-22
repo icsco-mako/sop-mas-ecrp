@@ -61,6 +61,16 @@ env/
 ENV/
 .venv/
 
+# LaTeX auxiliary files
+*.aux
+*.bbl
+*.fdb_latexmk
+*.fls
+*.synctex.gz
+
+# Research log
+.rlog/
+
 # AI coding assistant artifacts
 AGENTS.md
 CLAUDE.md
