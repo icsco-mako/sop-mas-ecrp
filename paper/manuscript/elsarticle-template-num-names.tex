@@ -611,31 +611,33 @@ Based on the ECR problem setting described in Section~5.2 and the data presented
 
 \changed{To evaluate the benefits of hinterland lateral repositioning, a comparative analysis was conducted under the scenario without inter-dry-port exchange (Scenario~2), as illustrated in Figure~\ref{fig:cost_comparison}. As shown in Table~\ref{tab:cost_summary}, the total cost increases from CNY~1,190,336 to CNY~1,355,388 (+13.86\%). This increase is primarily driven by the repositioning costs, which rise from CNY~763,966 to CNY~925,238 (+21.11\%). Within the repositioning category, the sea--land repositioning cost surges from CNY~594,952 to CNY~864,910 (+45.38\%), as the network must compensate for the loss of hinterland lateral flows (CNY~110,718 reduced to zero) by routing more containers through the sea--dry corridors. Furthermore, the exacerbated difficulty in empty container flows leads to a greater number of containers failing to arrive at shortage seaports in a timely manner, which in turn increases the leasing demand at the affected seaports from CNY~395,500 to CNY~406,000 (+2.66\%). Overall, enabling hinterland lateral repositioning yields a 12.18\% reduction in total operational costs.}
 
-\changed{
 \begin{table}[htbp]
 \centering
-\caption{Comparison of cost structures under the two scenarios (CNY)}
+\caption{\changed{Comparison of cost structures under the two scenarios (CNY)}}
 \label{tab:cost_summary}
 \small
-\setlength{\tabcolsep}{6pt}
-\renewcommand{\arraystretch}{1.18}
-\begin{tabular}{@{}>{\raggedright\arraybackslash}p{0.46\linewidth} r r r@{}}
+\setlength{\tabcolsep}{7pt}
+\renewcommand{\arraystretch}{1.20}
+\begin{tabular}{@{}l r r r@{}}
 \toprule
 \textbf{Cost component} & \textbf{Scenario~1} & \textbf{Scenario~2} & \textbf{Change} \\
 \midrule
 \textbf{Repositioning cost} & \textbf{763,966} & \textbf{925,238} & +21.11\% \\
-\hspace{1.2em}Seaport feeder repositioning & 58,296 & 60,328 & +3.47\% \\
-\hspace{1.2em}Sea--land repositioning & 594,952 & 864,910 & +45.38\% \\
-\hspace{1.2em}Hinterland lateral repositioning & 110,718 & 0 & \textemdash{} \\
-\addlinespace[2pt]
+\quad Seaport feeder repositioning & 58,296 & 60,328 & +3.47\% \\
+\quad Sea--land repositioning & 594,952 & 864,910 & +45.38\% \\
+\quad Hinterland lateral repositioning & 110,718 & \multicolumn{1}{c}{---} & \multicolumn{1}{c}{---} \\
+\addlinespace
 Holding cost & 30,870 & 24,150 & $-$21.86\% \\
+\addlinespace
 Leasing cost & 395,500 & 406,000 & +2.66\% \\
 \midrule
 \textbf{Total cost} & \textbf{1,190,336} & \textbf{1,355,388} & +13.86\% \\
 \bottomrule
 \end{tabular}
+
+\footnotesize
+\textit{Note:} Scenario~1 permits hinterland lateral repositioning; Scenario~2 disables inter-dry-port exchange.
 \end{table}
-}
 
 \changed{Beyond the numerical comparison in Table~\ref{tab:cost_summary}, the BA-Agent converts the large-scale solver output for Scenario~2 into a structured business report. Specifically, it identifies the total cost as CNY~1,355,388 and attributes 68.26\% to repositioning (CNY~925,238), 29.95\% to leasing (CNY~406,000), and 1.78\% to holding (CNY~24,150). It further highlights the dominant supply and receiving hubs, identifies shortage-prone inland nodes, and recommends prioritizing the Yingkou--Dalian repositioning corridor, securing long-term leasing agreements in inland shortage locations, and clearing stagnant inventories in peripheral nodes. This example illustrates how the BA-Agent transforms a mathematically optimal solution into an actionable managerial interpretation.}
 
