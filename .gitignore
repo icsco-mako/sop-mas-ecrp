@@ -64,9 +64,16 @@ ENV/
 # LaTeX auxiliary files
 *.aux
 *.bbl
+*.bcf
+*.blg
 *.fdb_latexmk
 *.fls
+*.out
+*.run.xml
+*.spl
 *.synctex.gz
+*.toc
+*.xdv
 
 # Research log
 .rlog/
