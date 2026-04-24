@@ -3,8 +3,9 @@
 Loads experiments/topp_ablation/config.yaml and runs sop_mac() for every
 (config, instance, repeat) triple. Results are written to
 ``<output_root>/<config_id>/<dataset>__<prob_name>/run_<r>.json`` so that the
-aggregator script can compute AR (accuracy rate) and OAR (objective-agreement
-rate) without re-running anything.
+aggregator script can compute AR (accuracy rate), OAR (objective-agreement
+rate), and SAR (structural-signature agreement rate) without re-running
+anything.
 
 Usage::
 
@@ -118,6 +119,47 @@ def _expand_run_specs(cfg: Dict[str, Any], output_root: Path) -> List[RunSpec]:
     return specs
 
 
+def _json_safe(value: Any) -> Any:
+    """Convert numpy/Gurobi-adjacent values into JSON-serializable objects."""
+    if value is None or isinstance(value, (str, int, float, bool)):
+        return value
+    if isinstance(value, Path):
+        return str(value)
+    if isinstance(value, dict):
+        return {str(k): _json_safe(v) for k, v in value.items()}
+    if isinstance(value, (list, tuple, set)):
+        return [_json_safe(v) for v in value]
+
+    item = getattr(value, "item", None)
+    if callable(item):
+        try:
+            return _json_safe(item())
+        except (TypeError, ValueError):
+            pass
+
+    tolist = getattr(value, "tolist", None)
+    if callable(tolist):
+        try:
+            return _json_safe(tolist())
+        except (TypeError, ValueError):
+            pass
+
+    return str(value)
+
+
+def _has_formulation_signature(path: Path) -> bool:
+    if not path.exists():
+        return False
+    try:
+        record = json.loads(path.read_text())
+    except (json.JSONDecodeError, OSError):
+        return False
+    signature = record.get("formulation_signature")
+    if not isinstance(signature, dict):
+        return False
+    return all(k in signature for k in ("n_vars", "n_constrs", "n_bin", "n_int", "nnz"))
+
+
 def _execute_one(spec: RunSpec, cfg: Dict[str, Any]) -> Dict[str, Any]:
     """Run a single (config, instance, repeat). Returns a result dict that is
     also persisted to ``spec.out_path``."""
@@ -153,6 +195,7 @@ def _execute_one(spec: RunSpec, cfg: Dict[str, Any]) -> Dict[str, Any]:
             status=bool(result.get("status", False)),
             error_msg=result.get("error_msg", "None"),
             obj_value=result.get("obj_value"),
+            formulation_signature=result.get("formulation_signature"),
         )
     except Exception as exc:  # noqa: BLE001
         record.update(
@@ -164,6 +207,7 @@ def _execute_one(spec: RunSpec, cfg: Dict[str, Any]) -> Dict[str, Any]:
     finally:
         record["elapsed_sec"] = time.time() - started
 
+    record = _json_safe(record)
     spec.out_path.write_text(json.dumps(record, ensure_ascii=False, indent=2))
     return record
 
@@ -200,6 +244,11 @@ def main() -> int:
         action="store_true",
         help="Skip runs whose result file already exists.",
     )
+    parser.add_argument(
+        "--rerun-missing-signature",
+        action="store_true",
+        help="Run only missing files or existing records without formulation_signature.",
+    )
     args = parser.parse_args()
 
     cfg = yaml.safe_load(Path(args.config).read_text())
@@ -217,7 +266,9 @@ def main() -> int:
     _setup_logging(output_root / "ablation.log")
 
     specs = _expand_run_specs(cfg, output_root)
-    if args.skip_existing:
+    if args.rerun_missing_signature:
+        specs = [s for s in specs if not _has_formulation_signature(s.out_path)]
+    elif args.skip_existing:
         specs = [s for s in specs if not s.out_path.exists()]
 
     logging.info(

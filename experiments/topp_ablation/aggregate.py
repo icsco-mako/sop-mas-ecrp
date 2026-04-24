@@ -1,7 +1,7 @@
-"""Aggregate top-p ablation results into AR / OAR summary tables.
+"""Aggregate top-p ablation results into AR / OAR / SAR summary tables.
 
 Reads every ``run_*.json`` under ``<output_root>/<config_id>/<dataset>__<prob>/``
-and reports two metrics per config:
+and reports three metrics per config:
 
 * **AR (Accuracy Rate)**: fraction of runs (over all instances and repeats)
   whose ``status`` is True. Range [0, 1].
@@ -10,6 +10,11 @@ and reports two metrics per config:
   instances. Runs with status=False contribute their actual numeric obj_value
   if present (so structurally different but numerically identical answers
   still agree); runs with obj_value=None count as disagreeing with everyone.
+* **SAR (Structural-Agreement Rate)**: per instance, the fraction of repeat
+  pairs whose coarse formulation signatures agree. The signature is
+  ``(n_vars, n_constrs, n_bin, n_int, nnz)`` as captured from the generated
+  Gurobi model. Pairs missing a signature are excluded; if no valid signature
+  pairs exist for a config, SAR is left blank instead of being imputed.
 
 Outputs ``summary.csv`` and ``summary.md`` next to the raw results.
 """
@@ -36,6 +41,16 @@ def _values_agree(a: Optional[float], b: Optional[float], rel_tol: float) -> boo
         return math.isclose(float(a), float(b), rel_tol=rel_tol, abs_tol=1e-9)
     except (TypeError, ValueError):
         return False
+
+
+def _signature_key(signature: Any) -> Optional[tuple[int, int, int, int, int]]:
+    if not isinstance(signature, dict):
+        return None
+    keys = ("n_vars", "n_constrs", "n_bin", "n_int", "nnz")
+    try:
+        return tuple(int(signature[k]) for k in keys)
+    except (KeyError, TypeError, ValueError):
+        return None
 
 
 def _load_runs(output_root: Path) -> Dict[str, Dict[str, List[Dict[str, Any]]]]:
@@ -84,6 +99,28 @@ def _compute_metrics(
             else float("nan")
         )
 
+        sar_per_instance: List[float] = []
+        n_signature_pairs = 0
+        for recs in instance_map.values():
+            if len(recs) < 2:
+                continue
+            signatures = [_signature_key(r.get("formulation_signature")) for r in recs]
+            valid_pairs = [
+                (a, b)
+                for a, b in combinations(signatures, 2)
+                if a is not None and b is not None
+            ]
+            if not valid_pairs:
+                continue
+            n_signature_pairs += len(valid_pairs)
+            agree = sum(1 for a, b in valid_pairs if a == b)
+            sar_per_instance.append(agree / len(valid_pairs))
+        sar = (
+            sum(sar_per_instance) / len(sar_per_instance)
+            if sar_per_instance
+            else float("nan")
+        )
+
         # Pull (top_p, temperature) from any record (they're identical in a config).
         sample = all_records[0] if all_records else {}
         rows.append(
@@ -95,6 +132,8 @@ def _compute_metrics(
                 "n_instances": len(instance_map),
                 "AR": ar,
                 "OAR": oar,
+                "SAR": sar,
+                "n_signature_pairs": n_signature_pairs,
             }
         )
     return rows
@@ -103,29 +142,45 @@ def _compute_metrics(
 def _write_csv(rows: List[Dict[str, Any]], path: Path) -> None:
     import csv
 
-    fieldnames = ["config_id", "top_p", "temperature", "n_runs", "n_instances", "AR", "OAR"]
+    fieldnames = [
+        "config_id",
+        "top_p",
+        "temperature",
+        "n_runs",
+        "n_instances",
+        "AR",
+        "OAR",
+        "SAR",
+        "n_signature_pairs",
+    ]
     with path.open("w", newline="", encoding="utf-8") as fh:
         writer = csv.DictWriter(fh, fieldnames=fieldnames)
         writer.writeheader()
         for r in rows:
             writer.writerow(
                 {
-                    k: (f"{v:.4f}" if isinstance(v, float) and not math.isnan(v) else v)
+                    k: (
+                        ""
+                        if isinstance(v, float) and math.isnan(v)
+                        else f"{v:.4f}" if isinstance(v, float) else v
+                    )
                     for k, v in r.items()
                 }
             )
 
 
 def _write_markdown(rows: List[Dict[str, Any]], path: Path) -> None:
-    header = "| config | top_p | T | n_runs | n_inst | AR | OAR |"
-    sep = "|---|---|---|---|---|---|---|"
+    header = "| config | top_p | T | n_runs | n_inst | AR | OAR | SAR | sig_pairs |"
+    sep = "|---|---|---|---|---|---|---|---|---|"
     lines = [header, sep]
     for r in rows:
         ar = "—" if math.isnan(r["AR"]) else f"{r['AR']:.3f}"
         oar = "—" if math.isnan(r["OAR"]) else f"{r['OAR']:.3f}"
+        sar = "—" if math.isnan(r["SAR"]) else f"{r['SAR']:.3f}"
         lines.append(
             f"| {r['config_id']} | {r['top_p']} | {r['temperature']} | "
-            f"{r['n_runs']} | {r['n_instances']} | {ar} | {oar} |"
+            f"{r['n_runs']} | {r['n_instances']} | {ar} | {oar} | {sar} | "
+            f"{r['n_signature_pairs']} |"
         )
     path.write_text("\n".join(lines) + "\n")
 
@@ -153,9 +208,11 @@ def main() -> int:
     for r in rows:
         ar = "nan" if math.isnan(r["AR"]) else f"{r['AR']:.3f}"
         oar = "nan" if math.isnan(r["OAR"]) else f"{r['OAR']:.3f}"
+        sar = "nan" if math.isnan(r["SAR"]) else f"{r['SAR']:.3f}"
         print(
             f"  {r['config_id']}: top_p={r['top_p']} T={r['temperature']} "
-            f"AR={ar} OAR={oar} (n={r['n_runs']})"
+            f"AR={ar} OAR={oar} SAR={sar} "
+            f"(n={r['n_runs']}, sig_pairs={r['n_signature_pairs']})"
         )
     return 0
 

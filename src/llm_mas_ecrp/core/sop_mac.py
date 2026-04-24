@@ -1,6 +1,7 @@
 import json
 import math
 import logging
+import sys
 import time
 import gurobipy
 from typing import List, Dict, Tuple, Any
@@ -127,10 +128,38 @@ def __run_str_code(
                 if (te_data.get("execution_status") == "success"
                         and te_data.get("obj_value") is not None):
                     logger.info("Using TE-Agent execution result")
-                    return {"obj_value": te_data["obj_value"]}
+                    te_result = {"obj_value": te_data["obj_value"]}
+                    signature = _extract_formulation_signature(problem, message_pool)
+                    if signature is not None:
+                        te_result["formulation_signature"] = signature
+                    return te_result
             except (json.JSONDecodeError, KeyError):
                 pass
 
+        return _run_python_developer_code(problem, message_pool)
+    except Exception as e:
+        logger.error(f"Unexpected error in run_str_code: {str(e)}")
+        return {"obj_value": None, "error_type": "execution_error", "error_msg": str(e)}
+
+
+def _extract_formulation_signature(
+    problem: Dict,
+    message_pool: MessagePool,
+) -> Dict[str, int] | None:
+    """Best-effort signature extraction used when TE already solved the code."""
+    try:
+        result = _run_python_developer_code(problem, message_pool)
+    except Exception as exc:  # noqa: BLE001
+        logger.warning("Unable to extract formulation signature: %s", exc)
+        return None
+    return result.get("formulation_signature") if isinstance(result, dict) else None
+
+
+def _run_python_developer_code(
+    problem: Dict,
+    message_pool: MessagePool,
+) -> Dict:
+    try:
         globals_dict = dict(globals())
         globals_dict["gp"] = gurobipy
         globals_dict["GRB"] = gurobipy.GRB
@@ -147,15 +176,23 @@ def __run_str_code(
             }
 
         data = problem["sample"][0].get("data", problem["sample"][0]["input"])
-        result: Dict = globals_dict["optimize"](data)
+        result, signature = _call_optimize_with_signature(
+            globals_dict["optimize"], data
+        )
 
         if not isinstance(result, dict):
             logger.error("Invalid result type: expected dict")
-            return {
+            error_result = {
                 "obj_value": None,
                 "error_type": "result dict, invalid__type",
                 "error_msg": f"Expected dict, got {type(result)}",
             }
+            if signature is not None:
+                error_result["formulation_signature"] = signature
+            return error_result
+
+        if signature is not None:
+            result["formulation_signature"] = signature
 
         if _is_failed_result(result):
             error_msg = result.get("message") or result.get("error_msg") or f"invalid solve result: {result}"
@@ -164,6 +201,7 @@ def __run_str_code(
                 "obj_value": None,
                 "error_type": "solver_or_model_failure",
                 "error_msg": error_msg,
+                "formulation_signature": result.get("formulation_signature"),
             }
 
         if "obj_value" not in result:
@@ -173,17 +211,74 @@ def __run_str_code(
                 "obj_value": None,
                 "error_type": "missing_obj_value",
                 "error_msg": error_msg,
+                "formulation_signature": result.get("formulation_signature"),
             }
 
         if result["obj_value"] is None:
             error_msg = "obj_value is None, model infeasible!!!"
             logger.error(error_msg)
-            return {"obj_value": None, "error_msg": error_msg}
+            return {
+                "obj_value": None,
+                "error_msg": error_msg,
+                "formulation_signature": result.get("formulation_signature"),
+            }
 
         return result
     except Exception as e:
-        logger.error(f"Unexpected error in run_str_code: {str(e)}")
+        logger.error(f"Unexpected error while executing Python Developer code: {str(e)}")
         return {"obj_value": None, "error_type": "execution_error", "error_msg": str(e)}
+
+
+def _call_optimize_with_signature(optimize_fn, data: Dict) -> Tuple[Any, Dict[str, int] | None]:
+    """Run optimize(data) and capture the last Gurobi model visible in locals."""
+    models = []
+    signature_holder: Dict[str, Dict[str, int] | None] = {"signature": None}
+    generated_filename = getattr(getattr(optimize_fn, "__code__", None), "co_filename", None)
+    previous_trace = sys.gettrace()
+
+    def _trace(frame, event, arg):
+        if event in {"line", "return"} and frame.f_code.co_filename == generated_filename:
+            for value in frame.f_locals.values():
+                if isinstance(value, gurobipy.Model):
+                    if all(value is not m for m in models):
+                        models.append(value)
+                    try:
+                        # Capture as the generated code runs; some models are
+                        # disposed before the function's return event completes.
+                        signature_holder["signature"] = _formulation_signature(value)
+                    except gurobipy.GurobiError:
+                        pass
+        return _trace
+
+    sys.settrace(_trace)
+    try:
+        result = optimize_fn(data)
+    finally:
+        sys.settrace(previous_trace)
+
+    if signature_holder["signature"] is not None:
+        return result, signature_holder["signature"]
+
+    try:
+        signature = _formulation_signature(models[-1]) if models else None
+    except gurobipy.GurobiError:
+        signature = None
+    return result, signature
+
+
+def _formulation_signature(model: gurobipy.Model) -> Dict[str, int]:
+    """Return a coarse structural signature for formulation-level diagnostics."""
+    try:
+        model.update()
+    except gurobipy.GurobiError:
+        pass
+    return {
+        "n_vars": int(model.NumVars),
+        "n_constrs": int(model.NumConstrs),
+        "n_bin": int(model.NumBinVars),
+        "n_int": int(model.NumIntVars),
+        "nnz": int(model.NumNZs),
+    }
 
 
 def __verify_result(
@@ -277,6 +372,7 @@ def sop_mac(
             "status": True,
             "error_msg": "None",
             "obj_value": result.get("obj_value"),
+            "formulation_signature": result.get("formulation_signature"),
         }
 
     bw_res = []
@@ -332,6 +428,7 @@ def sop_mac(
                     "status": True,
                     "error_msg": "None",
                     "obj_value": result.get("obj_value"),
+                    "formulation_signature": result.get("formulation_signature"),
                 }
             error_msg = new_error_msg
 
@@ -344,4 +441,5 @@ def sop_mac(
         "status": False,
         "error_msg": error_msg,
         "obj_value": result.get("obj_value") if isinstance(result, dict) else None,
+        "formulation_signature": result.get("formulation_signature") if isinstance(result, dict) else None,
     }

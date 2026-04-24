@@ -6,6 +6,7 @@
 \usepackage{longtable}
 \usepackage{listings}
 \usepackage{xcolor}
+\usepackage[most]{tcolorbox}
 \lstset{
   basicstyle=\small\ttfamily,
   backgroundcolor=\color{gray!10},
@@ -16,13 +17,7 @@
 }
 \lstdefinestyle{prompttemplate}{
   backgroundcolor=\color{gray!6},
-  frame=single,
-  frameround=tttt,
-  framesep=6pt,
-  framerule=0.35pt,
-  rulecolor=\color{black!35},
-  xleftmargin=0.5em,
-  xrightmargin=0.5em,
+  frame=none,
   basicstyle=\scriptsize\ttfamily,
   numbers=none,
   breaklines=true,
@@ -31,6 +26,15 @@
   keepspaces=true,
   showstringspaces=false,
   captionpos=b
+}
+\newtcolorbox{promptbox}{%
+  enhanced,
+  colback=gray!6,
+  colframe=black!35,
+  boxrule=0.35pt,
+  arc=6pt,
+  left=6pt, right=6pt,
+  top=4pt, bottom=4pt,
 }
 \usepackage[colorlinks=true,linkcolor=blue,urlcolor=blue,citecolor=blue]{hyperref}
 \usepackage{geometry}
@@ -76,9 +80,8 @@ Both examples share the same setting: the DE-Agent extracts $S{=}[100,50,0]$, $D
 \item \textbf{Example 1 (with TE-Agent): DE-Agent $\rightarrow$ ME-Agent $\rightarrow$ PY-Agent $\rightarrow$ TE-Agent.}
 \begin{itemize}
 \item \textbf{Step~5: Iterative modeling.} After the PY-Agent posts the defective code, the TE-Agent performs one supplementary execution within a sandbox environment and returns a structured diagnostic report. A representative excerpt is shown below.
-\begin{lstlisting}[
-  style=prompttemplate
-]
+\begin{promptbox}
+\begin{lstlisting}[style=prompttemplate]
 {
   "execution_status": "success",
   "diagnostic_summary": "The solver returns an optimal plan, but the shipment into port C falls short of the demand D[C]=150.",
@@ -87,6 +90,7 @@ Both examples share the same setting: the DE-Agent extracts $S{=}[100,50,0]$, $D
   "recommendations": "Re-examine the PY-Agent implementation of the flow-balance constraints, especially for the demand node C."
 }
 \end{lstlisting}
+\end{promptbox}
 \item \textbf{Step~6: Execution and verification.} The framework reuses the TE-Agent execution result and applies the correctness gate. The returned objective and shipment plan deviate from the benchmark target, so the gate emits a failure signal even though execution itself completed.
 \item \textbf{Step~7: Exception backtracking.} With \texttt{is\_backward}=\texttt{True}, the PM-Agent pops the stack in reverse order, guided by both the framework-level failure signal and the TE-Agent report. Because the report localizes the defect to the code-to-formulation translation, the PM-Agent first queries the PY-Agent for code-level revision; backtracking propagates further to the ME-Agent only if the repaired code still fails verification.
 \end{itemize}
@@ -140,28 +144,28 @@ This comment overlaps substantially with Comment~1.2 and is therefore addressed 
 \end{enumerate}
 
 \subsubsection{Response}
-We thank the reviewer for this constructive and inspiring suggestion. We wish to clarify that Section~4.2 already presents a comprehensive sensitivity analysis examining the effect of temperature on framework performance. Specifically, a grid search was performed over $t_{ME}, t_{PY} \in [0.2, 0.4, 0.8, 1.0]$ while varying $K \in [2,5]$, using AR as the evaluation metric. The results, presented in Figure~3, demonstrate that lower temperatures consistently yield higher accuracy for both the ME-Agent and PY-Agent.
+We thank the reviewer for this constructive and inspiring suggestion. We wish to clarify that Section~4.2 already presents a comprehensive sensitivity analysis examining the effect of temperature on framework performance. Specifically, a grid search was performed over $t_\text{ME}, t_\text{PY} \in [0.2, 0.4, 0.8, 1.0]$ while varying $K \in [2,5]$, using AR as the evaluation metric. The results, presented in Figure~3, demonstrate that lower temperatures consistently yield higher accuracy for both the ME-Agent and PY-Agent.
 
-Regarding the scope of temperature coverage, we focused on $t_{ME}$ and $t_{PY}$ because these two agents are directly responsible for mathematical model construction and executable code generation, respectively, which are the primary determinants of solution accuracy. The temperatures of the remaining agents have a relatively minor impact for different reasons: the DE-Agent performs structured data extraction whose output format is largely determined by the input schema; the PM-Agent's selection strategy is constrained by the sub-sequence rules, which limits the effect of temperature-induced randomness; the TE-Agent is not a primary determinant of formulation accuracy, although it can indirectly improve final performance by providing finer-grained diagnostic evidence during backtracking; and the BA-Agent operates after optimization and therefore does not materially affect model accuracy, as validated by the ablation study in Section~4.3 (Group~2 and Group~4).
+Regarding the scope of temperature coverage, we focused on $t_\text{ME}$ and $t_\text{PY}$ because these two agents are directly responsible for mathematical model construction and executable code generation, respectively, which are the primary determinants of solution accuracy. The temperatures of the remaining agents have a relatively minor impact for different reasons: the DE-Agent performs structured data extraction whose output format is largely determined by the input schema; the PM-Agent's selection strategy is constrained by the sub-sequence rules, which limits the effect of temperature-induced randomness; the TE-Agent is not a primary determinant of formulation accuracy, although it can indirectly improve final performance by providing finer-grained diagnostic evidence during backtracking; and the BA-Agent operates after optimization and therefore does not materially affect model accuracy, as validated by the ablation study in Section~4.3 (Group~2 and Group~4).
 
-Concerning the $\texttt{top\_p}$ parameter raised jointly in Comment~1.7, it is kept at its default value of $1.0$ throughout the main experiments. To directly address the reviewer's request for empirical evidence rather than relying on the design rationale alone, we conducted a dedicated $\texttt{top\_p}$ sensitivity study on the SOP-MAS framework with the DeepSeek-V3 backbone. Specifically, we performed a $4 \times 2$ factorial sweep over $\texttt{top\_p} \in \{0.5, 0.7, 0.9, 1.0\}$ and $t_{ME} = t_{PY} \in \{0.2, 0.8\}$, applying the swept values only to the ME-Agent and PY-Agent (other agents remain deterministic). The study covers five representative instances spanning ComplexOR (\texttt{aircraft\_landing}, \texttt{diet\_problem}, \texttt{knapsack\_optimization}) and NLP4LP (instances \texttt{74} and \texttt{187}), each repeated $R{=}3$ times under \texttt{is\_backward}~=~\texttt{False}. Beyond AR, we additionally report an Objective-Agreement Rate (OAR), defined per instance as the fraction of repeat pairs whose objective values agree within a relative tolerance of $10^{-4}$ and then averaged across instances; OAR captures stability independently of correctness. The results in Table~\ref{tab:topp_ablation} show that AR is essentially invariant to $\texttt{top\_p}$ (0.600 in seven of the eight configurations), and OAR remains $1.000$ except in the highest-stochasticity corner ($\texttt{top\_p}{=}0.9$, $T{=}0.8$), where it drops modestly to $0.733$. This empirically confirms that, for this task, varying $\texttt{top\_p}$ does not alter the conclusions drawn from the temperature-only sweep in Section~4.2, consistent with the OpenAI API documentation~\footnote{\url{https://platform.openai.com/docs/api-reference/chat/create}} guidance that practitioners alter $\texttt{top\_p}$ \emph{or} $\texttt{temperature}$ but not both, and with prior work such as Chain-of-Experts (CoE)~[Xiao et al., 2023] where only temperature is tuned.
+Concerning the $\texttt{top\_p}$ parameter raised jointly in Comment~1.7, it is kept at its default value of $1.0$ throughout the main experiments. To directly address the reviewer's request for empirical evidence rather than relying on the design rationale alone, we conducted a dedicated $\texttt{top\_p}$ sensitivity study on the SOP-MAS framework with the DeepSeek-V3 backbone. Specifically, we performed a $4 \times 2$ factorial sweep over $\texttt{top\_p} \in \{0.5, 0.7, 0.9, 1.0\}$ and $t_\text{ME} = t_\text{PY} \in \{0.2, 0.8\}$, applying the swept values only to the ME-Agent and PY-Agent (other agents remain deterministic). The study covers five representative instances spanning ComplexOR (\texttt{aircraft\_landing}, \texttt{diet\_problem}, \texttt{knapsack\_optimization}) and NLP4LP (instances \texttt{74} and \texttt{187}), each repeated $R{=}5$ times under \texttt{is\_backward}~=~\texttt{False}. Beyond AR, we additionally report two stability metrics: Objective-Agreement Rate (OAR), defined per instance as the fraction of repeat pairs whose objective values agree within a relative tolerance of $10^{-4}$ and then averaged across instances; and Structural-Agreement Rate (SAR), defined as pairwise agreement of a coarse formulation signature $(n_{\text{vars}}, n_{\text{constrs}}, n_{\text{bin}}, n_{\text{int}}, \text{nnz})$. OAR captures objective-level stability independently of correctness, whereas SAR provides a formulation-level structural diagnostic stricter than OAR. The results in Table~\ref{tab:topp_ablation} show that AR remains within a narrow range of $0.560$--$0.600$, OAR ranges from $0.860$--$1.000$, and SAR ranges from $0.720$--$0.860$ across all tested $\texttt{top\_p}$ settings. Neither OAR nor SAR exhibits a monotonic trend with respect to $\texttt{top\_p}$ or temperature, indicating that varying these parameters does not materially affect formulation stability or outcome consistency. This is also consistent with the OpenAI API documentation~\footnote{\url{https://platform.openai.com/docs/api-reference/chat/create}} guidance that practitioners alter $\texttt{top\_p}$ \emph{or} $\texttt{temperature}$ but not both, and with prior work such as Chain-of-Experts (CoE)~[Xiao et al., 2023] where only temperature is tuned.
 
 \begin{table}[htbp]
   \centering
-  \caption{$\texttt{top\_p}$ sensitivity ablation on the SOP-MAS framework (DeepSeek-V3 backbone, $K{=}5$, \texttt{is\_backward}~=~\texttt{False}, 5 instances $\times$ 3 repeats = 15 runs per configuration). AR is the Accuracy Rate; OAR is the Objective-Agreement Rate (averaged pairwise consistency of objective values across repeats, per instance).}
+  \caption{$\texttt{top\_p}$ sensitivity ablation on the SOP-MAS framework ($K{=}5$, \texttt{is\_backward}~=~\texttt{False}, 5 instances $\times$ $R{=}5$ repeats = 25 runs per configuration). AR is the Accuracy Rate; OAR is the Objective-Agreement Rate (averaged pairwise consistency of objective values across repeats, per instance); SAR is the Structural-Agreement Rate (averaged pairwise consistency of the formulation signature $(n_{\text{vars}}, n_{\text{constrs}}, n_{\text{bin}}, n_{\text{int}}, \text{nnz})$ across repeats, per instance). SAR $\le$ OAR in expectation because structural identity implies outcome identity, but not vice versa.}
   \label{tab:topp_ablation}
-  \begin{tabular}{cccccc}
+  \begin{tabular}{cccccccc}
     \toprule
-    Config & $\texttt{top\_p}$ & $t_{ME}{=}t_{PY}$ & $n_{\mathrm{runs}}$ & AR & OAR \\
+    Config & $\texttt{top\_p}$ & $t_\text{ME}{=}t_\text{PY}$ & $n_{\mathrm{runs}}$ & AR & OAR & SAR & sig\_pairs \\
     \midrule
-    c1 & 0.5 & 0.2 & 15 & 0.600 & 1.000 \\
-    c2 & 0.7 & 0.2 & 15 & 0.600 & 1.000 \\
-    c3 & 0.9 & 0.2 & 15 & 0.600 & 1.000 \\
-    c4 & 1.0 & 0.2 & 15 & 0.600 & 1.000 \\
-    c5 & 0.5 & 0.8 & 15 & 0.600 & 1.000 \\
-    c6 & 0.7 & 0.8 & 15 & 0.600 & 1.000 \\
-    c7 & 0.9 & 0.8 & 15 & 0.533 & 0.733 \\
-    c8 & 1.0 & 0.8 & 15 & 0.600 & 1.000 \\
+    c1 & 0.5 & 0.2 & 25 & 0.600 & 0.920 & 0.800 & 46 \\
+    c2 & 0.7 & 0.2 & 25 & 0.560 & 0.920 & 0.720 & 50 \\
+    c3 & 0.9 & 0.2 & 25 & 0.600 & 0.860 & 0.740 & 43 \\
+    c4 & 1.0 & 0.2 & 25 & 0.600 & 1.000 & 0.820 & 50 \\
+    c5 & 0.5 & 0.8 & 25 & 0.560 & 0.920 & 0.820 & 50 \\
+    c6 & 0.7 & 0.8 & 25 & 0.600 & 0.860 & 0.820 & 43 \\
+    c7 & 0.9 & 0.8 & 25 & 0.600 & 1.000 & 0.860 & 50 \\
+    c8 & 1.0 & 0.8 & 25 & 0.560 & 0.920 & 0.820 & 50 \\
     \bottomrule
   \end{tabular}
 \end{table}
@@ -176,16 +180,16 @@ Further, we consulted the official OpenAI API documentation (reproduced in Figur
   \label{fig:openai_docs}
 \end{figure}
 
-Regarding MIP formulation stability across runs, we acknowledge that variable naming and symbolic representation inevitably differ across runs due to the inherent stochasticity of LLM generation. However, such differences are cosmetic and do not affect mathematical equivalence. For structural consistency: when exception backtracking is enabled (\texttt{is\_backward}~=~\texttt{True}), the verification--backtracking loop corrects formulation errors based on ground-truth comparison, so the final formulation reliably converges to a correct model. When backtracking is disabled (\texttt{is\_backward}~=~\texttt{False}), structural inconsistency across runs is possible, a model may use a different constraint set or modeling approach while still yielding the correct optimal objective value. The sensitivity analysis in Section~4.2 was conducted under \texttt{is\_backward}~=~\texttt{False} to isolate the effect of temperature; the resulting AR values therefore reflect single-pass generation reliability rather than post-correction consistency.
+Regarding MIP formulation stability across runs, we acknowledge that variable naming and symbolic representation inevitably differ across runs due to the inherent stochasticity of LLM generation. Therefore, we do not claim symbolic identity of the generated formulations. Instead, Table~\ref{tab:topp_ablation} separates three levels of evidence: AR for correctness, OAR for objective-level repeatability, and SAR for coarse structural-signature repeatability. The results indicate that objective-level outputs and coarse structural signatures remain broadly stable across the tested $\texttt{top\_p}$ values, without a monotone deterioration as $\texttt{top\_p}$ increases. When exception backtracking is enabled (\texttt{is\_backward}~=~\texttt{True}), the verification--backtracking loop can further correct formulation errors based on ground-truth comparison; in contrast, this supplementary sensitivity study intentionally disables backtracking to isolate single-pass generation variability.
 
-We have revised Section~4.2 to (1)~explicitly justify the focus on $t_{ME}$ and $t_{PY}$, (2)~report the dedicated $\texttt{top\_p}$ sensitivity ablation summarized in Table~\ref{tab:topp_ablation}, which empirically shows AR and OAR are essentially invariant to $\texttt{top\_p}$ across the four sampled values, and (3)~correct an inconsistency in Step~6 where the verification criterion allowed a Feasible status, which has been tightened to require an Optimal status to align with the AR definition in Section~4.1.
+We have revised Section~4.2 to (1)~explicitly justify the focus on $t_\text{ME}$ and $t_\text{PY}$, (2)~report the dedicated $\texttt{top\_p}$ sensitivity ablation summarized in Table~\ref{tab:topp_ablation}, which empirically shows that AR, OAR, and SAR are not monotonically sensitive to $\texttt{top\_p}$ in the tested range, and (3)~correct an inconsistency in Step~6 where the verification criterion allowed a Feasible status, which has been tightened to require an Optimal status to align with the AR definition in Section~4.1.
 
 \subsubsection{Modifications}
 \begin{enumerate}
 \item \textbf{Section 4.2, Sensitivity Analysis (L430) --- MODIFY (restructure and merge two paragraphs into one)}
 \begin{quote}
-\textbf{Before:} ``Within the SOP-MAS framework, pivotal parameters encompass the maximum collaboration count $K$ of the PM-Agent, alongside the temperatures of the ME-Agent and PY-Agent, denoted as $t_{ME}$ and $t_{PY}$, respectively. The parameter $K$ exerts influence over the overall depth and breadth of the workflow by modulating the number of agent invocations. Temperature significantly affects the optimization modeling and solution outputs generated by the agents. Specifically, elevated temperatures foster the development of more innovative solutions, while reduced temperatures bolster deterministic reasoning, and in consequence ensuring stability and compliance of the outputs. This trade-off between precision and creativity mandates meticulous calibration of the temperature parameters tailored to specific task scenarios. [paragraph break] Among all agents, the temperatures of the ME-Agent and PY-Agent are prioritized for sensitivity analysis because\dots''\\[4pt]
-\textbf{After:} ``\textcolor{red}{Within the SOP-MAS framework, the maximum collaboration count $K$ of the PM-Agent governs the depth and breadth of the workflow by modulating the number of agent invocations. Among the six agents, the temperatures of the ME-Agent and PY-Agent, denoted as $t_{ME}$ and $t_{PY}$, are the primary determinants of solution accuracy, because these two agents are directly responsible for mathematical model construction and executable code generation, respectively. The temperatures of the remaining agents (DE-Agent, PM-Agent, TE-Agent, and BA-Agent) have a relatively minor impact on the optimization outcome, as validated by the ablation study in Section~4.3. Temperature significantly affects the optimization modeling and solution outputs generated by the agents: elevated temperatures foster more innovative solutions, while reduced temperatures bolster deterministic reasoning, ensuring stability and compliance of the outputs. This trade-off between precision and creativity mandates meticulous calibration of the temperature parameters tailored to specific task scenarios.}''
+\textbf{Before:} ``Within the SOP-MAS framework, pivotal parameters encompass the maximum collaboration count $K$ of the PM-Agent, alongside the temperatures of the ME-Agent and PY-Agent, denoted as $t_\text{ME}$ and $t_\text{PY}$, respectively. The parameter $K$ exerts influence over the overall depth and breadth of the workflow by modulating the number of agent invocations. Temperature significantly affects the optimization modeling and solution outputs generated by the agents. Specifically, elevated temperatures foster the development of more innovative solutions, while reduced temperatures bolster deterministic reasoning, and in consequence ensuring stability and compliance of the outputs. This trade-off between precision and creativity mandates meticulous calibration of the temperature parameters tailored to specific task scenarios. [paragraph break] Among all agents, the temperatures of the ME-Agent and PY-Agent are prioritized for sensitivity analysis because\dots''\\[4pt]
+\textbf{After:} ``\textcolor{red}{Within the SOP-MAS framework, the maximum collaboration count $K$ of the PM-Agent governs the depth and breadth of the workflow by modulating the number of agent invocations. Among the six agents, the temperatures of the ME-Agent and PY-Agent, denoted as $t_\text{ME}$ and $t_\text{PY}$, are the primary determinants of solution accuracy, because these two agents are directly responsible for mathematical model construction and executable code generation, respectively. The temperatures of the remaining agents (DE-Agent, PM-Agent, TE-Agent, and BA-Agent) have a relatively minor impact on the optimization outcome, as validated by the ablation study in Section~4.3. Temperature significantly affects the optimization modeling and solution outputs generated by the agents: elevated temperatures foster more innovative solutions, while reduced temperatures bolster deterministic reasoning, ensuring stability and compliance of the outputs. This trade-off between precision and creativity mandates meticulous calibration of the temperature parameters tailored to specific task scenarios.}''
 \end{quote}
 
 \item \textbf{Section 3.2, Step 6 (L315) --- MODIFY}
@@ -234,9 +238,8 @@ Although a formal user study remains beyond the scope of the present revision, w
 
 \begin{quote}
 \textbf{Representative BA-Agent output (translated from the actual run).}
-\begin{lstlisting}[
-  style=prompttemplate
-]
+\begin{promptbox}
+\begin{lstlisting}[style=prompttemplate]
 {
   "executive_summary": "The optimizer found the minimum-cost plan
   for the inter-port empty-container repositioning task, with a
@@ -257,6 +260,7 @@ Although a formal user study remains beyond the scope of the present revision, w
   containers from Port B to Port C."
 }
 \end{lstlisting}
+\end{promptbox}
 \end{quote}
 
 Second, in the large-scale empirical case (Section~5.3), the BA-Agent summarizes the CNY~1,355,388 solution into an exact cost decomposition, repositioning CNY~925,238 (68.26\%), leasing CNY~406,000 (29.95\%), and holding CNY~24,150 (1.78\%),and further provides actionable operational recommendations. These additions demonstrate that the BA-Agent does more than paraphrase variable values: it converts mathematically valid solutions into structured managerial insight.
@@ -406,17 +410,14 @@ We thank the reviewer for raising this important point. We fully agree that a pa
 \subsubsection{Response}
 We thank the reviewer for this careful observation. After re-checking the implementation, we agree that the original probabilistic notation $\Pr\{A_k=e\mid S_k=s\}$ overstated the role of randomness in PM-Agent selection. \textcolor{red}{In the implementation, the PM-Agent operates under two structural constraints: (i) the candidate set $\mathcal{A}_k$ is restricted by the sub-sequence rule, which forbids re-selecting already-used agents and maintains relative ordering; and (ii) decoding is performed with temperature 0.0, so for a fixed contextual state $s_k$ the LLM produces a single, repeatable output. The selection within $\mathcal{A}_k$ is not reduced to a hard-coded rule; rather, the PM-Agent reasons over the current message-pool state to decide the next role, which in particular accommodates agent reuse, early termination, and backtracking decisions (Section~3.3).} \textcolor{red}{Empirically, across all $K=5$ independent runs on every benchmark instance, the realized PM-Agent selection sequence was identical, indicating that the realized policy behaves as a state-dependent decision function rather than a stochastic distribution.} Accordingly, the formalization should be a state-dependent selection function rather than a probability distribution. The relevant PM-Agent prompt template is reproduced below:
 
-\begin{lstlisting}[
-  style=prompttemplate,
-  caption={Complete ECR mathematical formulation generated by SOP-MAS},
-  label={lst:ecr-mathematical-model}
-]
-Now, you are presented with an operational optimization-related problem: {problem_description}. In this 
-multi-agent system, there are many agents, each of whom is responsible for solving part of the problem. 
-Your task is to CHOOSE THE NEXT AGENT TO CONSULT to solve the optimization problem. The names of the 
-agents and their capabilities are listed below: {agent_list}. Experts that have already been selected 
-include: {selected_agent_list}. Please select an agent to consult from the remaining agent names 
-{allowed_agent_list}. Please note that the maximum number of asked agents is {max_collaborate_nums}, and 
+\begin{promptbox}
+\begin{lstlisting}[style=prompttemplate, caption={Complete ECR mathematical formulation generated by SOP-MAS}, label={lst:ecr-mathematical-model}]
+Now, you are presented with an operational optimization-related problem: {problem_description}. In this
+multi-agent system, there are many agents, each of whom is responsible for solving part of the problem.
+Your task is to CHOOSE THE NEXT AGENT TO CONSULT to solve the optimization problem. The names of the
+agents and their capabilities are listed below: {agent_list}. Experts that have already been selected
+include: {selected_agent_list}. Please select an agent to consult from the remaining agent names
+{allowed_agent_list}. Please note that the maximum number of asked agents is {max_collaborate_nums}, and
 you can ask {remaining_collaborate_nums} more times. You should output the name of agent directly.
 
 # Decision Logic
@@ -428,6 +429,7 @@ Select agents based on these priorities:
    without requiring continuity, but the relative order of elements
    in the {agent_list} must be maintained.
 \end{lstlisting}
+\end{promptbox}
 
 \textcolor{red}{The prompt requires maintaining the relative order of agents in the selectable set, which constrains $\mathcal{A}_k$ but does not reduce the selection to a fixed closed-form rule.} Accordingly, we revised Equation~(1) and the surrounding text in the manuscript to remove the probabilistic formulation and restate the PM-Agent policy as a state-dependent selection function conditioned on the current state and admissible agent set. We also updated the notation explanation in Comment~3.3 to match this revision.
 
@@ -441,7 +443,7 @@ Select agents based on these priorities:
 \begin{equation}\label{eq:pm-selection-revised}
 a_k=\pi_{\mathrm{PM}}\left(s_k\right), \quad a_k\in\mathcal{A}_k
 \end{equation}
-where $\mathcal{A}_k$ denotes the admissible agent set at step $k$ induced by the sub-sequence rule. Although $\pi_{\mathrm{PM}}$ is realized through an LLM call rather than a closed-form rule, temperature~0 decoding makes the realized selection repeatable for a given state $s_k$; this was empirically verified by identical selection trajectories across $K=5$ independent runs on all benchmark instances. We therefore formalize $\pi_{\mathrm{PM}}$ as a deterministic mapping over the admissible set rather than as a probability distribution, and defer its inner reasoning (which depends on the message-pool state) to the prompt specification.}''
+where $s_k$ denotes the current state comprising the problem description, message pool history, remaining selection quota, and the current selectable set $\mathcal{A}_k$; $\pi_{\mathrm{PM}}$ denotes the PM-Agent selection function; $\mathcal{A}_k \subseteq \mathcal{A}$ denotes the set of agents available for selection at step $k$; and $a_k$ denotes the selected agent at step $k$. Here, $\pi_{\mathrm{PM}}$ is an LLM-based decision function that maps the current state $s_k$ to a selected agent $a_k \in \mathcal{A}_k$.}''
 \end{quote}
 \end{enumerate}
 
@@ -459,9 +461,8 @@ In SOP-MAS, the problem description $P$ (e.g., \texttt{description.txt}) is expr
 \medskip
 \noindent\textbf{Case A: Problem description with embedded data (not adopted).} If concrete data were embedded, even a simple 3-port ECR example would need to enumerate all values explicitly:
 
-\begin{lstlisting}[
-  style=prompttemplate
-]
+\begin{promptbox}
+\begin{lstlisting}[style=prompttemplate]
 # ECR Problem: 3 ports (A, B, C), T=1
 
 The supply vector is S = [100, 50, 0] (TEU), where
@@ -475,12 +476,12 @@ Storage cost h_i = 0, initial inventory I_i0 = 0.
   ... (for larger scale: 3 seaports + 5 dry ports + 7 time periods
    => text grows to O(|N|^2 * |T|) entries)
 \end{lstlisting}
+\end{promptbox}
 
 \noindent\textbf{Case B: Problem description with separated data (adopted by SOP-MAS).} The description uses abstract symbolic notation, remaining concise regardless of scale:
 
-\begin{lstlisting}[
-  style=prompttemplate
-]
+\begin{promptbox}
+\begin{lstlisting}[style=prompttemplate]
 # ECR Problem: Multi-period Network Flow Optimization
 
 Network: Directed graph G=(N,E), where N = H (seaports) union L (dry ports).
@@ -497,6 +498,7 @@ Parameters:
 - U_i^max: storage capacity at node i
 (Data provided separately in sample.json)
 \end{lstlisting}
+\end{promptbox}
 
 \noindent As shown, Case B's description length is independent of the number of ports or time periods, whereas Case A's text length grows proportionally to $O(|N|^2 \times |T|)$ as problem scale increases. For the empirical case study (in the manuscript section 5) with 3 seaports, 5 dry ports, and 7 time periods, Case A would require enumerating hundreds of specific values, whereas Case B's abstract description remains unchanged.
 
@@ -542,7 +544,7 @@ Merged into Comment 1.3. Click \hyperref[resp:r1.3-modifications]{here to jump t
 
 \subsubsection{Response}
 We sincerely thank the reviewer for this insightful and constructive comment. This point is highly important and has directly helped
-us improve the clarity, rigor, and overall quality of the manuscript. We agree that hardware usage and latency composition should be stated explicitly for a meaningful efficiency interpretation. In the revised manuscript, we now clarify that the Intel i5-4210U machine is used for local orchestration and execution tasks (workflow control, message-pool management, and local Gurobi execution), while DeepSeek-v3 is accessed through a cloud API. We further clarify that the reported per-agent runtimes are end-to-end caller-side latencies, where LLM-call durations inherently bundle network round-trip and server-side inference time. Because this study reports practical end-to-end runtime rather than provider-internal service-time telemetry, we do not claim a strict decomposition between network and inference components; however, we make this boundary explicit and discuss it as a limitation to avoid over-interpretation.
+us improve the clarity, rigor, and overall quality of the manuscript. We agree that hardware usage and latency composition should be stated explicitly for a meaningful efficiency interpretation. In the revised manuscript, we now clarify that the Intel i5-4210U machine is used for local orchestration and execution tasks (workflow control, message-pool management, and local solver execution), while DeepSeek-v3 is accessed through a cloud API. We further clarify that the reported per-agent runtimes are end-to-end caller-side latencies, where LLM-call durations inherently bundle network round-trip and server-side inference time. Because this study reports practical end-to-end runtime rather than provider-internal service-time telemetry, we do not claim a strict decomposition between network and inference components; however, we make this boundary explicit and discuss it as a limitation to avoid over-interpretation.
 
 \subsubsection{Modifications}
 \begin{enumerate}
@@ -804,13 +806,13 @@ We sincerely thank the reviewer for identifying this error. We acknowledge that 
 \item \textbf{Section 3.4 (opening paragraph) --- REWRITE}
 \begin{quote}
 \textbf{Before:} ``In order to effectively demonstrate the capabilities of the proposed SOP-MAS workflow...a step-by-step exposition based on a classic case of ECR in container SCM is provided, as illustrated in Figure~2.''\\[4pt]
-\textbf{After:} ``\textcolor{red}{To demonstrate the end-to-end capability of the proposed SOP-MAS framework, we apply it to a single-period, three-port ECR instance. Ports A and B hold surplus containers (100 and 50 TEU, respectively) while port C demands 150 TEU; the unit transportation costs $c_{ij}$ range from 2 to 10 \textyen/TEU. The SOP-MAS is configured with $K{=}5$ collaborating agents, backtracking enabled, DeepSeek-V3-0324 as the backbone LLM, and Gurobi as the solver. The complete workflow is illustrated in Figure~2.}''
+\textbf{After:} ``\textcolor{red}{To demonstrate the end-to-end capability of the proposed SOP-MAS framework, we apply it to a single-period, three-port ECR instance. Ports A and B hold surplus containers (100 and 50 TEU, respectively) while port C demands 150 TEU; the unit transportation costs $c_{ij}$ range from 2 to 10 \textyen/TEU. The SOP-MAS is configured with $K{=}5$ collaborating agents, backtracking enabled, DeepSeek-V3-0324 as the backbone LLM, and OR-Tools as the solver. The complete workflow is illustrated in Figure~2.}''
 \end{quote}
 
 \item \textbf{Section 3.4 (agent walkthrough paragraph) --- REWRITE}
 \begin{quote}
 \textbf{Before:} ``The DE-Agent converts unstructured data and business constraints into consistent and reproducible modeling parameters... The ME-Agent automatically formulates a multi-period, multi-node mathematical model... The PY-Agent generates comprehensive, executable Python code... The TE-Agent executes the code within a sandboxed environment... The BA-Agent translates the model outputs...into an interpretable business-analysis report.''\\[4pt]
-\textbf{After:} ``\textcolor{red}{The PM-Agent orchestrates the five agents in sequence. First, the DE-Agent parses the natural-language problem description and extracts structured parameters: the supply vector $S{=}[100,50,0]$, the demand vector $D{=}[0,0,150]$, and the cost matrix $c_{ij}$. Second, the ME-Agent formulates the LP: $\min \sum_{i,j}c_{ij}x_{ij}$ subject to flow-balance constraints $\sum_j x_{ij}-\sum_j x_{ji}=S_i-D_i$ for each port $i$ and non-negativity $x_{ij}\geq 0$. Third, the PY-Agent generates executable Gurobi code implementing this model. Fourth, because the TE-Agent is selected in this example, it performs one supplementary execution during the forward pass, captures the solver log, and produces a structured diagnostic report; Gurobi solves the resulting LP in 2 iterations, yielding an optimal total repositioning cost of \textyen650. After the forward pass, the framework enters its unified verification stage and directly reuses this successful TE-Agent result. Fifth, the BA-Agent translates the optimal solution ($x_{AB}{=}100$, $x_{BC}{=}150$, with all other flows equal to zero) into a business-analysis report, correctly stating the optimal total transportation cost of CNY~650, explaining why the low-cost A--B and B--C arcs are selected to satisfy port~C's demand through Port~B as the transfer hub, and clarifying why the expensive direct A--C route and reverse movements remain zero.}''
+\textbf{After:} ``\textcolor{red}{The PM-Agent orchestrates the five agents in sequence. First, the DE-Agent parses the natural-language problem description and extracts structured parameters: the supply vector $S{=}[100,50,0]$, the demand vector $D{=}[0,0,150]$, and the cost matrix $c_{ij}$. Second, the ME-Agent formulates the LP: $\min \sum_{i,j}c_{ij}x_{ij}$ subject to flow-balance constraints $\sum_j x_{ij}-\sum_j x_{ji}=S_i-D_i$ for each port $i$ and non-negativity $x_{ij}\geq 0$. Third, the PY-Agent generates executable solver code implementing this model. Fourth, because the TE-Agent is selected in this example, it performs one supplementary execution during the forward pass, captures the solver log, and produces a structured diagnostic report; OR-Tools solves the resulting LP in 2 iterations, yielding an optimal total repositioning cost of \textyen650. After the forward pass, the framework enters its unified verification stage and directly reuses this successful TE-Agent result. Fifth, the BA-Agent translates the optimal solution ($x_{AB}{=}100$, $x_{BC}{=}150$, with all other flows equal to zero) into a business-analysis report, correctly stating the optimal total transportation cost of CNY~650, explaining why the low-cost A--B and B--C arcs are selected to satisfy port~C's demand through Port~B as the transfer hub, and clarifying why the expensive direct A--C route and reverse movements remain zero.}''
 \end{quote}
 
 \item \textbf{Section 3.4 (exception backtracking paragraph) --- ADD}
@@ -856,7 +858,7 @@ We verified the calculation: $(52.26-48.08)/48.08 = 8.69\%$, confirming the rela
 ``In line 534, the phrase `...was deactivated (is\_backward = False)' should have `is\_backward = False' emphasized in bold, as it is in line 369.''
 
 \subsubsection{Response}
-We unified the formatting of \texttt{is\_backward} throughout the manuscript to use consistent monospace type.
+We deeply appreciate the reviewer's rigorous attention to detail. We unified the formatting of \texttt{is\_backward} throughout the manuscript to use consistent monospace type.
 
 \subsubsection{Modifications}
 \begin{enumerate}
@@ -895,7 +897,7 @@ We have now incorporated these annotations directly into the group labels of Tab
 ``In line 689, the variable `$t$' within `$S_i^t$' lacks a definition.''
 
 \subsubsection{Response}
-We thank the reviewer for identifying this omission. The time period index $t$ was indeed used without prior definition in the problem description. We have added an explicit definition of the time period set $T$ and index $t \in T$ at the beginning of Section~5.2. Furthermore, upon systematic inspection prompted by this comment, we discovered that the ECR model notation (Sections~5.2 and Appendix~C) shared several symbols with the SOP-MAS methodology (Section~3), including $H$ (backtracking stack vs.\ seaport set), $K/k$ (agent iteration steps vs.\ transport modes), $S$ (state variable vs.\ supply), and $y$ (agent output vs.\ rental quantity). To eliminate all ambiguities, we have comprehensively redesigned the ECR notation using a three-tier convention (calligraphic capitals for sets, uppercase Romans for parameters, lowercase Romans for decision variables) while keeping Section~3 unchanged. The complete mapping is provided in the Modifications subsection below.
+We thank the reviewer for identifying this omission. The time period index $t$ was indeed used without prior definition. We have added an explicit definition of the time period set $T$ and index $t \in T$ at the beginning of Section~5.2. Prompted by this comment, we also reviewed the ECR model notation (Sections~5.2 and Appendix~C) and harmonized it with the SOP-MAS methodology (Section~3) to eliminate any remaining symbol overlaps. The complete mapping is provided in the Modifications subsection below.
 
 \subsubsection{Modifications}
 

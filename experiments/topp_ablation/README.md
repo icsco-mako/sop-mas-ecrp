@@ -23,6 +23,11 @@ measure raw forward-pass behaviour.
 - **OAR (Objective-Agreement Rate)** — per instance, the fraction of pairs
   of repeats whose objective values agree (within `rel_tol`); averaged
   across instances. Captures stability independent of correctness.
+- **SAR (Structural-Agreement Rate)** — per instance, the fraction of pairs
+  of repeats whose coarse formulation signatures agree; averaged across
+  instances. The signature is `(n_vars, n_constrs, n_bin, n_int, nnz)` as
+  captured from the generated Gurobi model. SAR is a structural diagnostic,
+  not a proof of symbolic formulation equivalence.
 
 ## Files
 
@@ -30,7 +35,8 @@ measure raw forward-pass behaviour.
 - `run_ablation.py` — runs every (config, instance, repeat) and writes
   `results/topp_ablation/<config>/<instance>/run_<r>.json`.
 - `aggregate.py` — produces `summary.csv` / `summary.md` from the run
-  records.
+  records. Existing records generated before signature capture will have
+  blank SAR values until the corresponding runs are regenerated.
 
 ## Usage
 
@@ -40,6 +46,10 @@ poetry run python experiments/topp_ablation/run_ablation.py
 
 # Resume after interruption
 poetry run python experiments/topp_ablation/run_ablation.py --skip-existing
+
+# Repair only missing/legacy SAR records
+poetry run python experiments/topp_ablation/run_ablation.py \
+    --rerun-missing-signature --concurrency 1
 
 # Single-config debug
 poetry run python experiments/topp_ablation/run_ablation.py \
