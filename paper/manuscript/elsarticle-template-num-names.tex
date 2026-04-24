@@ -51,6 +51,7 @@
 \usepackage{xcolor}
 \usepackage{mdframed}
 \usepackage{listings}
+\usepackage[most]{tcolorbox}
 \usepackage{hyperref}
 \usepackage{rotating}
 \usepackage{geometry}
@@ -60,6 +61,7 @@
 \usepackage{subcaption}
 \usepackage{siunitx}
 \usepackage{threeparttable}
+\usepackage{caption}
 \sisetup{
   group-separator = {,},
   group-minimum-digits = 4
@@ -79,25 +81,15 @@
 \newcommand{\costincrease}[1]{\textcolor{costinc}{\textbf{#1}}}
 \newcommand{\costdecrease}[1]{\textcolor{costdec}{\textbf{#1}}}
 \lstset{
-  backgroundcolor=\color{gray!10},
-  frame=single,
-  frameround=tttt,
-  rulecolor=\color{black},
+  basicstyle=\scriptsize\ttfamily,
   breaklines=true,
   breakatwhitespace=true,
-  basicstyle=\scriptsize\ttfamily,
   columns=flexible,
   keepspaces=true
 }
 \lstdefinestyle{prompttemplate}{
   backgroundcolor=\color{gray!6},
-  frame=single,
-  frameround=tttt,
-  framesep=6pt,
-  framerule=0.35pt,
-  rulecolor=\color{black!35},
-  xleftmargin=0.5em,
-  xrightmargin=0.5em,
+  frame=none,
   basicstyle=\scriptsize\ttfamily,
   numbers=none,
   breaklines=true,
@@ -106,6 +98,16 @@
   keepspaces=true,
   showstringspaces=false,
   captionpos=b
+}
+\newtcolorbox{promptbox}{%
+  enhanced,
+  breakable,
+  colback=gray!6,
+  colframe=black!35,
+  boxrule=0.35pt,
+  arc=6pt,
+  left=6pt, right=6pt,
+  top=4pt, bottom=4pt,
 }
 \journal{Applied Soft Computing Journal}
 \emergencystretch=2em
@@ -371,7 +373,7 @@ The algorithm concludes its execution and yields the optimal solution.
 \centering%% For centre alignment of image.
 \includegraphics[scale=0.8]{figure/sop_mas_flowchat_black.pdf}
 %% Use \caption command for figure caption and label.
-\caption{SOP-MAS Flowchart}\label{fig1}
+\caption{SOP-MAS flowchart}\label{fig1}
 %% https://en.wikibooks.org/wiki/LaTeX/Importing_Graphics#Importing_external_graphics
 \end{figure}
 
@@ -459,7 +461,7 @@ Following the metrics proposed in \citet{xiaoChainofExpertsWhenLLMs2023}, the ev
 \begin{table}[t]%% placement specifier
 %% Use tabular environment to tag the tabular data.
 %% https://en.wikibooks.org/wiki/LaTeX/Tables#The_tabular_environment
-\caption{Comparison of SOP-MAS and Baseline Algorithms}\label{tab:benchmark}
+\caption{Comparison of SOP-MAS and baseline algorithms}\label{tab:benchmark}
 
 \centering%% For centre alignment of tabular.
 \begin{tabular}{l c c c}
@@ -495,7 +497,7 @@ In order to systematically evaluate the effects of parameter configurations on t
 \centering%% For centre alignment of image.
 \includegraphics[scale=0.9]{figure/figure_sensitivity_analysis.pdf}
 %% Use \caption command for figure caption and label.
-\caption{Faceted Contour Plot of Parameter Sensitivity Analysis}\label{fig3}
+\caption{Faceted contour plot of parameter sensitivity analysis}\label{fig3}
 %% https://en.wikibooks.org/wiki/LaTeX/Importing_Graphics#Importing_external_graphics
 \end{figure}
 
@@ -521,7 +523,7 @@ The entirety of SOP-MAS functions as the control group for assessing performance
 
 \begin{table}[htbp]
     \centering
-    \caption{Ablation Study}\label{tab:ablation}
+    \caption{Ablation study}\label{tab:ablation}
     \begin{tabular}{lccc}
         \hline
         Group No. & CER & RER & AR \\
@@ -552,7 +554,7 @@ To provide a comprehensive performance analysis, we present a detailed evaluatio
 \centering%% For centre alignment of image.
 \includegraphics[scale=0.4]{figure/agent_runtime_combined.pdf}
 %% Use \caption command for figure caption and label.
-\caption{Average Execution Time and Time Share Distribution}\label{fig4}
+\caption{Average execution time and time share distribution}\label{fig4}
 %% https://en.wikibooks.org/wiki/LaTeX/Importing_Graphics#Importing_external_graphics
 \end{figure}
 
@@ -582,7 +584,7 @@ The examination of empty container repositioning within this regional port clust
 \centering%% For centre alignment of image.
 \includegraphics[scale=0.6]{figure/port_hinterland_map.pdf}
 %% Use \caption command for figure caption and label.
-\caption{Port Hinterland Map}\label{fig:port_hinterland_map}
+\caption{Port hinterland map}\label{fig:port_hinterland_map}
 %% https://en.wikibooks.org/wiki/LaTeX/Importing_Graphics#Importing_external_graphics
 \end{figure}
 
@@ -650,7 +652,7 @@ Leasing cost & 395,500 & 406,000 & +2.66\% \\
 \centering%% For centre alignment of image.
 \includegraphics[scale=0.4]{figure/cost_style4_sunburst.pdf}
 %% Use \caption command for figure caption and label.
-\caption{Cost Comparison}\label{fig:cost_comparison}
+\caption{Cost comparison}\label{fig:cost_comparison}
 %% https://en.wikibooks.org/wiki/LaTeX/Importing_Graphics#Importing_external_graphics
 \end{figure}
 
@@ -674,11 +676,9 @@ The code and data that support the findings of this study are publicly available
 \section{Agent Prompt Template}\label{app1}
 We present the prompt template of the core agent (ME-Agent) as a representative example. Complete templates for all agents are available at \url{https://github.com/icsco-mako/sop-mas-ecrp}.
 
-\begin{lstlisting}[
-  style=prompttemplate,
-  caption={Representative prompt template for the ME-Agent},
-  label={lst:me-agent-prompt}
-]
+\begin{nolinenumbers}
+\begin{promptbox}
+\begin{lstlisting}[style=prompttemplate]
 # ROLE: Modeling Expert
 
 ## INPUT
@@ -727,8 +727,10 @@ Build a complete mathematical optimization model through:
 # ambiguities
 (any unclear points from the problem description)
 \end{lstlisting}
-
-\newpage
+\end{promptbox}
+\captionof{lstlisting}{Representative prompt template for the ME-Agent}
+\label{lst:me-agent-prompt}
+\end{nolinenumbers}
 \section{Empirical Case Data}\label{app2}
 
 \begin{table}[htbp]
@@ -823,15 +825,11 @@ Qiqihar & $(100, 20^2)$ & $(100, 20^2)$ \\
 \end{table}
 \clearpage
 
-\newpage
-
 \section{ECR Mathematical Model (LaTeX Listing)}\label{app3}
 Since one of our core contributions is the automatic synthesis of publication-ready modeling code, we retain the raw LaTeX listing below to illustrate the complete mathematical formulation generated by the SOP-MAS framework. The main text summarizes the problem setting, key decision logic, and operational assumptions in Section~5.2, while this appendix provides the full formulation for readers seeking model-level detail.
-\begin{lstlisting}[
-  style=prompttemplate,
-  caption={Complete ECR mathematical formulation generated by SOP-MAS},
-  label={lst:ecr-mathematical-model}
-]
+\begin{nolinenumbers}
+\begin{promptbox}
+\begin{lstlisting}[style=prompttemplate]
 ### **Parameters**
 
 - $ \mathcal{P} $: Set of seaports
@@ -934,6 +932,10 @@ w_i^t \geq 0, \quad x_{ijm}^t \geq 0, \quad r_i^t \geq 0 \quad \forall i,j \in \
 $$
 
 \end{lstlisting}
+\end{promptbox}
+\captionof{lstlisting}{Complete ECR mathematical formulation generated by SOP-MAS}
+\label{lst:ecr-mathematical-model}
+\end{nolinenumbers}
 \newpage
 %% For citations use:
 %%       \cite{<label>} ==> [1]
