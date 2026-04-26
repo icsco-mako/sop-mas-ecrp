@@ -69,6 +69,8 @@ class RunSpec:
     config_id: str
     top_p: float
     temperature: float
+    client: str
+    model: str
     dataset: str
     prob_name: str
     repeat: int
@@ -100,6 +102,8 @@ def _build_agents_config(
 def _expand_run_specs(cfg: Dict[str, Any], output_root: Path) -> List[RunSpec]:
     specs: List[RunSpec] = []
     for c in cfg["configs"]:
+        client = c.get("client", cfg["llm"]["client"])
+        model = c.get("model", cfg["llm"]["model"])
         for inst in cfg["instances"]:
             instance_dir = (
                 output_root / c["id"] / f"{inst['dataset']}__{inst['prob_name']}"
@@ -108,8 +112,10 @@ def _expand_run_specs(cfg: Dict[str, Any], output_root: Path) -> List[RunSpec]:
                 specs.append(
                     RunSpec(
                         config_id=c["id"],
-                        top_p=float(c["top_p"]),
-                        temperature=float(c["temperature"]),
+                        top_p=float(c.get("top_p", cfg.get("defaults", {}).get("top_p", 1.0))),
+                        temperature=float(c.get("temperature", cfg.get("defaults", {}).get("temperature", 0.2))),
+                        client=client,
+                        model=model,
                         dataset=inst["dataset"],
                         prob_name=str(inst["prob_name"]),
                         repeat=r,
@@ -163,39 +169,61 @@ def _has_formulation_signature(path: Path) -> bool:
 def _execute_one(spec: RunSpec, cfg: Dict[str, Any]) -> Dict[str, Any]:
     """Run a single (config, instance, repeat). Returns a result dict that is
     also persisted to ``spec.out_path``."""
+    from concurrent.futures import ThreadPoolExecutor, TimeoutError as FuturesTimeout
+
     spec.out_path.parent.mkdir(parents=True, exist_ok=True)
 
     record: Dict[str, Any] = {
         "config_id": spec.config_id,
         "top_p": spec.top_p,
         "temperature": spec.temperature,
+        "client": spec.client,
+        "model": spec.model,
         "dataset": spec.dataset,
         "prob_name": spec.prob_name,
         "repeat": spec.repeat,
     }
 
-    started = time.time()
-    try:
+    timeout_sec = float(cfg.get("timeout_sec", 1800))
+
+    def _run() -> Dict[str, Any]:
         problem = dataset_loader(spec.dataset, spec.prob_name)
         agents_config = _build_agents_config(
-            client=cfg["llm"]["client"],
-            model=cfg["llm"]["model"],
+            client=spec.client,
+            model=spec.model,
             creative_agents=cfg["creative_agents"],
             temperature=spec.temperature,
             top_p=spec.top_p,
         )
-        result = sop_mac(
+        return sop_mac(
             problem=problem,
             max_collaborate_nums=int(cfg["pipeline"]["max_collaborate_nums"]),
             is_backtrack=bool(cfg["pipeline"]["is_backtrack"]),
             AGENTs_CONFIG=agents_config,
         )
 
+    started = time.time()
+    try:
+        with ThreadPoolExecutor(max_workers=1) as pool:
+            future = pool.submit(_run)
+            result = future.result(timeout=timeout_sec)
+
         record.update(
             status=bool(result.get("status", False)),
             error_msg=result.get("error_msg", "None"),
             obj_value=result.get("obj_value"),
             formulation_signature=result.get("formulation_signature"),
+            agent_times=result.get("agent_times"),
+        )
+    except FuturesTimeout:
+        record.update(
+            status=False,
+            error_msg=f"timeout after {timeout_sec:.0f}s",
+            obj_value=None,
+        )
+        logging.warning(
+            "TIMEOUT %s/%s/%s repeat=%d after %.0fs",
+            spec.config_id, spec.dataset, spec.prob_name, spec.repeat, timeout_sec,
         )
     except Exception as exc:  # noqa: BLE001
         record.update(

@@ -1,0 +1,33 @@
+# Multi-model timing experiment via OpenRouter free-tier models
+
+llm:
+  client: OpenRouter
+  model: inclusionai/ling-2.6-1t:free
+
+defaults:
+  top_p: 1.0
+  temperature: 0.2
+
+pipeline:
+  algorithm: sop_mac
+  max_collaborate_nums: 5
+  is_backtrack: false
+
+repeats: 3
+timeout_sec: 300
+
+creative_agents: [ModelEngineer, PythonDeveloper]
+
+configs:
+  - {id: ling, client: OpenRouter, model: "inclusionai/ling-2.6-1t:free"}
+
+instances:
+  - {dataset: ComplexOR, prob_name: aircraft_landing}
+  - {dataset: ComplexOR, prob_name: diet_problem}
+  - {dataset: ComplexOR, prob_name: knapsack_optimization}
+  - {dataset: NLP4LP, prob_name: "74"}
+  - {dataset: NLP4LP, prob_name: "187"}
+
+output_root: results/model_timing
+
+concurrency: 3

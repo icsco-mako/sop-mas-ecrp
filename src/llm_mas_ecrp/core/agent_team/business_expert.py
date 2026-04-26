@@ -31,11 +31,8 @@ def _compact_testing_output(testing_output_raw: str) -> str:
         "execution_status": parsed.get("execution_status"),
         "obj_value": parsed.get("obj_value"),
         "result_summary": parsed.get("result_summary", {}),
-        "business_summary": parsed.get("business_summary", {}),
-        "diagnostic_summary": parsed.get("diagnostic_summary", ""),
-        "solver_log_summary": parsed.get("solver_log_summary", ""),
-        "recommendations": parsed.get("recommendations", ""),
         "error_analysis": parsed.get("error_analysis", ""),
+        "recommendations": parsed.get("recommendations", ""),
     }
     return json.dumps(compact, ensure_ascii=False, indent=2)
 
@@ -69,7 +66,7 @@ class BusinessExpert(BaseAgent):
 
 你将接收：
 - **model_blueprint**: ModelExpert定义的变量含义和目标函数
-- **optimization_results**: TestingEngineer压缩后的Gurobi求解结果摘要，其中可能包含 business_summary；若 business_summary 中已有精确 cost_breakdown，必须优先使用其中的数值，不要写“估算”
+- **optimization_results**: TestingEngineer压缩后的Gurobi求解结果摘要，包含变量值和求解状态
 - **business_context**: 原始问题的业务背景信息
 
 ---

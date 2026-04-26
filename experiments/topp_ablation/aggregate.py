@@ -139,6 +139,51 @@ def _compute_metrics(
     return rows
 
 
+def _compute_agent_timing(
+    runs: Dict[str, Dict[str, List[Dict[str, Any]]]],
+) -> Dict[str, Dict[str, Any]]:
+    """Compute per-agent mean ± std across all runs (all configs combined)."""
+    from statistics import mean, stdev
+
+    agent_times_coll: Dict[str, List[float]] = {}
+    elapsed_all: List[float] = []
+
+    for instance_map in runs.values():
+        for recs in instance_map.values():
+            for r in recs:
+                at = r.get("agent_times")
+                if isinstance(at, dict):
+                    for name, t in at.items():
+                        try:
+                            agent_times_coll.setdefault(name, []).append(float(t))
+                        except (TypeError, ValueError):
+                            pass
+                es = r.get("elapsed_sec")
+                if es is not None:
+                    try:
+                        elapsed_all.append(float(es))
+                    except (TypeError, ValueError):
+                        pass
+
+    result: Dict[str, Dict[str, Any]] = {}
+    for name in sorted(agent_times_coll):
+        vals = agent_times_coll[name]
+        entry: Dict[str, Any] = {"mean": mean(vals), "n": len(vals)}
+        if len(vals) >= 2:
+            entry["std"] = stdev(vals)
+        else:
+            entry["std"] = 0.0
+        result[name] = entry
+
+    if elapsed_all:
+        result["_total_elapsed"] = {
+            "mean": mean(elapsed_all),
+            "std": stdev(elapsed_all) if len(elapsed_all) >= 2 else 0.0,
+            "n": len(elapsed_all),
+        }
+    return result
+
+
 def _write_csv(rows: List[Dict[str, Any]], path: Path) -> None:
     import csv
 
@@ -205,6 +250,16 @@ def main() -> int:
     _write_csv(rows, output_root / "summary.csv")
     _write_markdown(rows, output_root / "summary.md")
     print(f"Wrote {output_root / 'summary.csv'} and summary.md")
+
+    timing = _compute_agent_timing(runs)
+    if timing:
+        timing_path = output_root / "agent_timing.json"
+        timing_path.write_text(
+            json.dumps(timing, ensure_ascii=False, indent=2) + "\n"
+        )
+        print(f"\nAgent timing (mean ± std) across all runs:")
+        for name, stats in timing.items():
+            print(f"  {name}: {stats['mean']:.2f} ± {stats['std']:.2f}s (n={stats['n']})")
     for r in rows:
         ar = "nan" if math.isnan(r["AR"]) else f"{r['AR']:.3f}"
         oar = "nan" if math.isnan(r["OAR"]) else f"{r['OAR']:.3f}"

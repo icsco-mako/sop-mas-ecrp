@@ -1,3 +1,4 @@
+import io
 import json
 import math
 import logging
@@ -19,6 +20,68 @@ def _is_failed_result(result: Dict) -> bool:
     if status in {"error", "failure", "failed", "infeasible", "unbounded", "inf_or_unbd", "infeasible_or_unbounded"}:
         return True
     return result.get("obj_value") is None
+
+
+def _execute_solver_code(
+    problem: Dict, message_pool: MessagePool,
+) -> Tuple[Dict, str, Any]:
+    """Framework-level solver code execution for TE-Agent diagnostic support."""
+    code = message_pool.get("Python Developer")
+    data = problem["sample"][0].get("data", problem["sample"][0]["input"])
+
+    execution_outcome = {}
+    raw_result = None
+    solver_log_content = ""
+
+    old_stdout, old_stderr = sys.stdout, sys.stderr
+    solver_log = io.StringIO()
+
+    try:
+        sys.stdout = solver_log
+        sys.stderr = solver_log
+
+        exec_env = {"gp": gurobipy, "GRB": gurobipy.GRB, "__builtins__": __builtins__}
+        exec(code, exec_env)
+
+        if "optimize" not in exec_env:
+            raise NameError("optimize function not found in the generated code")
+
+        result = exec_env["optimize"](data)
+        raw_result = result if isinstance(result, dict) else None
+
+        if _is_failed_result(result):
+            execution_outcome = {
+                "status": "failure",
+                "obj_value": None,
+                "error_type": "solver_or_model_failure",
+                "error_msg": (
+                    result.get("message", str(result))
+                    if isinstance(result, dict)
+                    else str(result)
+                ),
+            }
+        else:
+            execution_outcome = {
+                "status": "success",
+                "obj_value": result.get("obj_value"),
+            }
+    except Exception as e:
+        execution_outcome = {
+            "status": "failure",
+            "error_type": type(e).__name__,
+            "error_msg": str(e),
+        }
+    finally:
+        sys.stdout = old_stdout
+        sys.stderr = old_stderr
+        solver_log_content = solver_log.getvalue()
+
+    logger.info(
+        "Framework execution: status=%s obj_value=%s",
+        execution_outcome.get("status"),
+        execution_outcome.get("obj_value"),
+    )
+    return execution_outcome, solver_log_content, raw_result
 
 
 def __create_agent(agent_config: List):
@@ -55,6 +118,17 @@ def __iterative_modeling(
         # 记录智能体开始时间
         agent_start_time = time.time()
         
+        # Framework-level code execution for TE-Agent
+        if agent.NAME == "Testing Engineer":
+            _exec_outcome, _solver_log, _raw_result = _execute_solver_code(
+                problem, message_pool,
+            )
+            problem["_framework_execution"] = {
+                "execution_outcome": _exec_outcome,
+                "raw_result": _raw_result,
+                "solver_log": _solver_log,
+            }
+
         # 执行智能体任务
         msg: str = agent.forward_step(problem, message_pool)
         
@@ -120,21 +194,18 @@ def __run_str_code(
     message_pool: MessagePool,
 ) -> Dict:
     try:
-        # Prefer TE-Agent's execution result if available
-        te_output = message_pool.get("Testing Engineer")
-        if te_output:
-            try:
-                te_data = json.loads(te_output)
-                if (te_data.get("execution_status") == "success"
-                        and te_data.get("obj_value") is not None):
-                    logger.info("Using TE-Agent execution result")
-                    te_result = {"obj_value": te_data["obj_value"]}
-                    signature = _extract_formulation_signature(problem, message_pool)
-                    if signature is not None:
-                        te_result["formulation_signature"] = signature
-                    return te_result
-            except (json.JSONDecodeError, KeyError):
-                pass
+        # Reuse framework execution result if available (from forward pass)
+        framework_exec = problem.get("_framework_execution")
+        if framework_exec:
+            outcome = framework_exec.get("execution_outcome", {})
+            if (outcome.get("status") == "success"
+                    and outcome.get("obj_value") is not None):
+                logger.info("Using framework execution result from forward pass")
+                result = {"obj_value": outcome["obj_value"]}
+                signature = _extract_formulation_signature(problem, message_pool)
+                if signature is not None:
+                    result["formulation_signature"] = signature
+                return result
 
         return _run_python_developer_code(problem, message_pool)
     except Exception as e:
@@ -380,7 +451,18 @@ def sop_mac(
         log_separator(logger, "Backward Tracking Process", "=", 80)
         logger.info("====================异常回溯开始====================\n")
 
-        error_info: str = json.dumps(result)
+        error_info = {"framework_result": result}
+        te_output = message_pool.get("Testing Engineer")
+        if te_output:
+            try:
+                te_data = json.loads(te_output)
+                error_info["te_diagnosis"] = {
+                    "error_analysis": te_data.get("error_analysis", ""),
+                    "recommendations": te_data.get("recommendations", ""),
+                }
+            except (json.JSONDecodeError, KeyError):
+                pass
+        error_info: str = json.dumps(error_info, ensure_ascii=False)
         try:
             is_error_found, bw_res = __exception_traceback(
                 problem, pm, error_info, stack, message_pool
