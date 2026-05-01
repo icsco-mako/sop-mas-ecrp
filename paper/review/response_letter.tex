@@ -67,57 +67,56 @@
 \end{enumerate}
 
 \subsubsection{Response}
-We thank the reviewer for pointing out this ambiguity. We agree that the original manuscript did not make the failure detection and backtracking procedure sufficiently explicit. We have therefore revised Section 3.2 to distinguish (i) failure detection during SOP-MAS-orchestrated execution and verification in Step 6 from (ii) PM-Agent-led diagnosis and stack-based backtracking in Step 7. In the SOP-MAS framework, exception backtracking is triggered whenever the post-generation execution or verification stage fails and \texttt{is\_backward=True}; therefore, its activation does not depend on whether the TE-Agent has been selected in the current forward pass.
+We sincerely thank the reviewer for pointing out this ambiguity. We agree that the original manuscript did not make the failure detection and backtracking procedure sufficiently explicit. We have therefore revised Section 3.2 to distinguish (i) the Failure Detection stage (Step~6) from (ii) PM-Agent-led diagnosis and stack-based backtracking in Step~7. In the SOP-MAS framework, exception backtracking is triggered whenever the Failure Detection stage fails and \texttt{is\_backward=True}; therefore, its activation does not depend on whether the TE-Agent has been selected in the current forward pass.
 
-More specifically, when the forward pass includes the TE-Agent, the TE-Agent performs execution and testing step during the forward pass within a sandbox environment and provides structured diagnostic evidence, such as execution results and solver logs, which helps localize the error source more precisely during exception backtracking. After the forward pass, the framework still enters the same unified execution/verification stage; it first checks whether the TE-Agent has already produced a successful execution result and reuses that result if available, otherwise it executes the latest solver code itself. When $K$ is smaller and the TE-Agent is not selected, the framework can still trigger stack-based exception backtracking on the basis of the failure signal returned by the execution and verification stage. In that case, previously selected agents are queried in reverse order to determine whether their outputs caused the failure and to refine them if necessary, although the available error information is less detailed than in the TE-Agent-assisted case.
+More specifically, in the Failure Detection stage (Step~6), the framework always executes the solver code and applies the correctness gate. If the TE-Agent was selected during the forward pass, it receives the execution outcome and generates a structured diagnostic report (classifying errors into code-level, model-level, or data-level categories), which helps localize the error source during exception backtracking. If the TE-Agent was not selected, the framework can still trigger exception backtracking on failure; previously selected agents are queried in reverse order to determine fault and refine their outputs, although the available error information is less detailed.
 
-We further clarify that the transition to the PY-Agent or ME-Agent is not implemented as a hard-coded branch on TE-Agent error types. Instead, the PM-Agent queries agents in reverse workflow order, so code-level defects are typically localized first to the PY-Agent, whereas failures that persist beyond code correction propagate further to the ME-Agent for model-level revision. We have revised the manuscript accordingly to make this trigger procedure explicit and to clarify that the TE-Agent enhances error diagnosis, rather than serving as the sole trigger of exception backtracking.
+We further clarify that the transition to the PY-Agent or ME-Agent is not implemented as a hard-coded branch on TE-Agent error types. Instead, the PM-Agent queries agents in reverse workflow order, so code-level defects are typically localized first to the PY-Agent, whereas failures that persist beyond code correction propagate further to the ME-Agent for model-level revision. We have revised the manuscript accordingly to make this trigger procedure explicit and to clarify that the TE-Agent provides structural error diagnosis, rather than serving as the sole trigger of exception backtracking.
 
-For clarity, we now restate the TE-Agent and backtracking procedure in list form through two examples built on the same three-port ECR setting described in Section~3.4 of the revised manuscript.
-
-Both examples share the same setting: the DE-Agent extracts $S{=}[100,50,0]$, $D{=}[0,0,150]$, and the transportation cost matrix; the ME-Agent specifies the intended LP formulation with flow-balance constraints at every port; and the PY-Agent translates the formulation into solver code, but accidentally omits the flow-balance constraint for port~C during code generation. The two examples then differ only in whether the TE-Agent is selected, so as to isolate its contribution to diagnosis and backtracking.
+To illustrate the procedure concretely, we present two examples based on the three-port ECR setting described in Section~3.4. Both examples share the same setting: the DE-Agent extracts $S{=}[100,50,0]$, $D{=}[0,0,150]$, and the transportation cost matrix; the ME-Agent specifies the intended LP formulation with flow-balance constraints at every port; and the PY-Agent translates the formulation into solver code, but accidentally omits the flow-balance constraint for port~C during code generation. The two examples then differ only in whether the TE-Agent is selected, so as to isolate its contribution to diagnosis and backtracking.
 
 \begin{enumerate}
 \item \textbf{Example 1 (with TE-Agent): DE-Agent $\rightarrow$ ME-Agent $\rightarrow$ PY-Agent $\rightarrow$ TE-Agent.}
 \begin{itemize}
-\item \textbf{Step~5: Iterative modeling.} After the PY-Agent posts the defective code, the framework executes the solver code and supplies the raw execution outcome to the TE-Agent. The TE-Agent interprets this outcome and returns a diagnostic report. A representative excerpt is shown below.
+\item \textbf{Step~5: Iterative modeling.} After the PY-Agent posts the defective code, the PM-Agent selects the TE-Agent as the next agent. The TE-Agent is now in the forward-pass agent stack and will receive the execution outcome during the subsequent Failure Detection stage.
+\item \textbf{Step~6: Failure Detection.} The framework executes the latest PY-Agent solver code to obtain the execution outcome. Because the TE-Agent was selected during the forward pass, it receives this outcome, interprets it, and returns a diagnostic report. A representative excerpt is shown below.
 \begin{promptbox}
 \begin{lstlisting}[style=prompttemplate]
 {
-  "execution_status": "success",
-  "diagnostic_summary": "The solver returns an optimal plan, but the shipment into port C falls short of the demand D[C]=150.",
-  "error_analysis": "Code-level translation defect: the flow-balance constraint at port C, present in the ME-Agent formulation, is missing from the PY-Agent code.",
-  "solver_log_summary": "Solver terminates normally; the failure is not a runtime exception but an unenforced constraint.",
-  "recommendations": "Re-examine the PY-Agent implementation of the flow-balance constraints, especially for the demand node C."
+  "error_classification": "code-level",
+  "diagnostic_summary": "Flow-balance constraint at port C present in ME-Agent formulation but missing from PY-Agent code.",
+  "recommendation": "Re-examine PY-Agent implementation of flow-balance constraints for demand node C."
 }
 \end{lstlisting}
 \end{promptbox}
-\item \textbf{Step~6: Execution and verification.} The framework reuses the objective value from the forward-pass execution and applies the correctness gate. The returned objective and shipment plan deviate from the benchmark target, so the gate emits a failure signal even though execution itself completed.
+The correctness gate is then applied: the returned objective deviates from the benchmark target, so the gate emits a failure signal.
 \item \textbf{Step~7: Exception backtracking.} With \texttt{is\_backward}=\texttt{True}, the PM-Agent pops the stack in reverse order, guided by both the framework-level failure signal and the TE-Agent's diagnostic interpretation. Because the diagnostic report localizes the defect to the code-to-formulation translation, the PM-Agent first queries the PY-Agent for code-level revision; backtracking propagates further to the ME-Agent only if the repaired code still fails verification.
 \end{itemize}
 
 \item \textbf{Example 2 (without TE-Agent): DE-Agent $\rightarrow$ ME-Agent $\rightarrow$ PY-Agent.}
 \begin{itemize}
 \item \textbf{Step~5: Iterative modeling.} The forward pass ends at the PY-Agent and no diagnostic report is produced.
-\item \textbf{Step~6: Execution and verification.} The framework itself executes the latest solver code and applies the correctness gate. As in Example~1, the gate detects that the returned solution is inconsistent with the benchmark target, but the only signal available to downstream backtracking is the framework-level verification failure, without an attribution to the code level or the model level.
-\item \textbf{Step~7: Exception backtracking.} With \texttt{is\_backward}=\texttt{True}, the PM-Agent still activates backtracking and pops the stack in reverse order. Lacking the TE-Agent report, diagnosis defaults to the monotonic workflow order: the PY-Agent is queried first for code refinement, and the ME-Agent is queried next if the corrected code still fails. Recovery is therefore possible but typically requires more rounds than in Example~1.
+\item \textbf{Step~6: Failure Detection.} The framework executes the latest solver code and applies the correctness gate. As in Example~1, the gate detects that the returned solution is inconsistent with the benchmark target, but the only signal available to downstream backtracking is the framework-level verification failure, without an attribution to the code level or the model level.
+\item \textbf{Step~7: Exception backtracking.} With \texttt{is\_backward}=\texttt{True}, the PM-Agent activates backtracking and pops the stack in reverse order. Lacking the TE-Agent report, diagnosis defaults to the monotonic workflow order: the PY-Agent is queried first for code refinement, and the ME-Agent is queried next if the corrected code still fails.
 \end{itemize}
 \end{enumerate}
 
-Together, the two examples illustrate that exception backtracking is governed by the execution and verification outcome rather than by TE-Agent selection, while the TE-Agent, when available, supplies a diagnostic interpretation of the execution result that may assist fault localization during backtracking.
+Together, the two examples illustrate that exception backtracking is governed by the Failure Detection outcome, while the TE-Agent, when available, supplies a diagnostic interpretation of the execution result that may assist fault localization during backtracking.
 
 \subsubsection{Modifications}
+For clarity, we now restate the TE-Agent and backtracking procedure in list form through two examples built on the same three-port ECR setting described in Section~3.4 of the revised manuscript.
+
 \begin{enumerate}
 \item \textbf{Section 3.1, Agent Definition (L277) --- MODIFY}
 \begin{quote}
 \textbf{Before:} ``The TE-Agent \ldots{} carries out the execution of the code within a sandbox environment \ldots{} and subsequently provide a report on the execution.''\\[4pt]
-\textbf{After:} ``\textcolor{red}{When selected by the PM-Agent, the framework executes the PY-Agent's solver code with the actual input data and supplies the raw execution outcome (solver status, objective value, runtime logs) to the TE-Agent. The TE-Agent then interprets this outcome, classifies errors into code-level, model-level, or data-level categories, and generates a diagnostic report.}'' 
+\textbf{After:} ``\textcolor{red}{During the Failure Detection stage, if the TE-Agent was selected during the forward pass, the framework executes the PY-Agent's solver code with the actual input data and supplies the raw execution outcome (solver status, objective value, runtime logs) to the TE-Agent. The TE-Agent then interprets this outcome, classifies errors into code-level, model-level, or data-level categories, and generates a diagnostic report.}'' 
 \end{quote}
 
 \item \textbf{Section 3.2, Step 6--7 (L325--335) --- MODIFY}
 \begin{quote}
 \textbf{Before:} ``If the TE-Agent is activated, it executes the code generated by the PY-Agent \ldots{} Only when both automated checks and expert sign-off are satisfied does the workflow advance to Step~7. Otherwise, proceed to Step~7 for exception backtracking. When an execution error is detected and \texttt{is\_backward} = \texttt{True}, trigger the backtracking mechanism.''\\[4pt]
-\textbf{After:} ``\textcolor{red}{After the $K$-step iterative modeling process, the verification stage begins. The framework first determines the verification outcome: if the TE-Agent was selected during the forward pass and the framework-level execution succeeded, the resulting objective value is reused directly; otherwise, the framework executes the latest PY-Agent solver code itself to obtain the verification outcome. The correctness gate is then applied. If the execution and verification stage succeeds, the workflow proceeds directly to Step~8. Otherwise, if \texttt{is\_backward} = \texttt{True}, the PM-Agent triggers Step~7 for exception backtracking; if \texttt{is\_backward} = \texttt{False}, the workflow skips backtracking and proceeds directly to Step~8.}''
+\textbf{After:} ``\textcolor{red}{After the $K$-step iterative modeling process, the Failure Detection stage begins. The framework executes the latest PY-Agent solver code to obtain the execution outcome. If the TE-Agent was selected during the forward pass, it interprets the execution outcome, classifies errors into code-level, model-level, or data-level categories, and generates a structured diagnostic report. The correctness gate is then applied. If the Failure Detection stage succeeds, the workflow proceeds directly to Step~8. Otherwise, if \texttt{is\_backward} = \texttt{True}, the PM-Agent triggers Step~7 for exception backtracking; if \texttt{is\_backward} = \texttt{False}, the workflow skips backtracking and proceeds directly to Step~8.}''
 \end{quote}
 
 \item \textbf{Section 3.3, Item 3 (L351) --- MODIFY}
@@ -126,64 +125,21 @@ Together, the two examples illustrate that exception backtracking is governed by
 \textbf{After:} ``\textcolor{red}{Upon the occurrence of an execution or verification failure, the SOP-MAS framework generates the corresponding failure information for backtracking. When the TE-Agent was selected, its diagnostic interpretation is additionally available in the shared message pool.}'' 
 \end{quote}
 
-\item \textbf{Section 4.2, Group 4 description and discussion (L460, L484) --- MODIFY}
-\begin{quote}
-\textbf{Before:} ``However, the exception backtracking mechanism remains active, enabling each agent to perform self-checks on its output to detect probable errors. \ldots{} Group 4 indicates that the exclusion of the TE-Agent still results in a relatively high accuracy, as the testing agent is capable of providing detailed error information, and errors can be rectified via the exception-backtracking mechanism.''\\[4pt]
-\textbf{After:} ``\textcolor{red}{The TE-Agent is omitted to examine the interaction between testing and exception backtracking, while exception backtracking remains enabled. \ldots{} Group~4 achieves 84.32\%, compared to 86.59\% for the control group --- a gap of 2.27 percentage points. Because code execution is always performed by the framework in Step~6 regardless of whether the TE-Agent is selected, removing the TE-Agent does not affect the baseline verification capability. The 2.27\% gap reflects the marginal benefit of the TE-Agent's diagnostic interpretation, which assists the backtracking mechanism in a subset of failure cases where the raw pass/fail signal alone is insufficient for accurate root-cause localization.}''
-\end{quote}
 \end{enumerate}
 
 % ----------------------------------------------------------------------------
-\subsection{Comment 1.2 and 1.7 --- Temperature Settings}
+\subsection{Comment 1.2 --- Temperature Settings}
 
 \subsubsection{Comment}
-This comment overlaps substantially with Comment~1.2 and is therefore addressed jointly there. 
-\begin{enumerate}
-  \item \textbf{Comment 1.2: }``The framework relies on specific large language models (LLMs), like GPT-4, but it does not explore how changing temperature settings ($t_i$) affects its performance.''
 
-  \item \textbf{Comment 1.7: }``The paper should add an experiment that changes the LLM temperature ($t_i$) and \texttt{top\_p} values to show how stable the generated Mixed Integer Programming (MIP) formulations are.''
-\end{enumerate}
+\textbf{Comment 1.2: }``The framework relies on specific large language models (LLMs), like GPT-4, but it does not explore how changing temperature settings ($t_i$) affects its performance.''
 
 \subsubsection{Response}
-We thank the reviewer for this constructive and inspiring suggestion. We wish to clarify that Section~4.2 already presents a comprehensive sensitivity analysis examining the effect of temperature on framework performance. Specifically, a grid search was performed over $t_\text{ME}, t_\text{PY} \in [0.2, 0.4, 0.8, 1.0]$ while varying $K \in [2,5]$, using AR as the evaluation metric. The results, presented in Figure~3, demonstrate that lower temperatures consistently yield higher accuracy for both the ME-Agent and PY-Agent.
+We thank the reviewer for this constructive and inspiring suggestion. We wish to clarify that Section~4.2 already presents a sensitivity analysis examining the effect of temperature on framework performance. Specifically, a grid search was performed over $t_\text{ME}, t_\text{PY} \in [0.2, 0.4, 0.8, 1.0]$ while varying $K \in [2,5]$, using AR as the evaluation metric. The results, presented in Figure~3 of the revised manuscript, demonstrate that lower temperatures consistently yield higher accuracy for both the ME-Agent and PY-Agent.
 
-Regarding the scope of temperature coverage, we focused on $t_\text{ME}$ and $t_\text{PY}$ because these two agents are directly responsible for mathematical model construction and executable code generation, respectively, which are the primary determinants of solution accuracy. The temperatures of the remaining agents have a relatively minor impact for different reasons: the DE-Agent performs structured data extraction whose output format is largely determined by the input schema; the PM-Agent's selection strategy is constrained by the sub-sequence rules, which limits the effect of temperature-induced randomness; the TE-Agent is not a primary determinant of formulation accuracy, although it can indirectly improve final performance by providing finer-grained diagnostic evidence during backtracking; and the BA-Agent operates after optimization and therefore does not materially affect model accuracy, as validated by the ablation study in Section~4.3 (Group~2 and Group~4).
-
-Concerning the $\texttt{top\_p}$ parameter raised jointly in Comment~1.7, it is kept at its default value of $1.0$ throughout the main experiments. To directly address the reviewer's request for empirical evidence rather than relying on the design rationale alone, we conducted a dedicated $\texttt{top\_p}$ sensitivity study on the SOP-MAS framework with the DeepSeek-V3 backbone. Specifically, we performed a $4 \times 2$ factorial sweep over $\texttt{top\_p} \in \{0.5, 0.7, 0.9, 1.0\}$ and $t_\text{ME} = t_\text{PY} \in \{0.2, 0.8\}$, applying the swept values only to the ME-Agent and PY-Agent (other agents remain deterministic). The study covers five representative instances spanning ComplexOR (\texttt{aircraft\_landing}, \texttt{diet\_problem}, \texttt{knapsack\_optimization}) and NLP4LP (instances \texttt{74} and \texttt{187}), each repeated $R{=}5$ times under \texttt{is\_backward}~=~\texttt{False}. Beyond AR, we additionally report two stability metrics: Objective-Agreement Rate (OAR), defined per instance as the fraction of repeat pairs whose objective values agree within a relative tolerance of $10^{-4}$ and then averaged across instances; and Structural-Agreement Rate (SAR), defined as pairwise agreement of a coarse formulation signature $(n_{\text{vars}}, n_{\text{constrs}}, n_{\text{bin}}, n_{\text{int}}, \text{nnz})$. OAR captures objective-level stability independently of correctness, whereas SAR provides a formulation-level structural diagnostic stricter than OAR. The results in Table~\ref{tab:topp_ablation} show that AR remains within a narrow range of $0.560$--$0.600$, OAR ranges from $0.860$--$1.000$, and SAR ranges from $0.720$--$0.860$ across all tested $\texttt{top\_p}$ settings. Neither OAR nor SAR exhibits a monotonic trend with respect to $\texttt{top\_p}$ or temperature, indicating that varying these parameters does not materially affect formulation stability or outcome consistency. This is also consistent with the OpenAI API documentation~\footnote{\url{https://platform.openai.com/docs/api-reference/chat/create}} guidance that practitioners alter $\texttt{top\_p}$ \emph{or} $\texttt{temperature}$ but not both, and with prior work such as Chain-of-Experts (CoE)~[Xiao et al., 2023] where only temperature is tuned.
-
-\begin{table}[htbp]
-  \centering
-  \caption{$\texttt{top\_p}$ sensitivity ablation on the SOP-MAS framework ($K{=}5$, \texttt{is\_backward}~=~\texttt{False}, 5 instances $\times$ $R{=}5$ repeats = 25 runs per configuration). AR is the Accuracy Rate; OAR is the Objective-Agreement Rate (averaged pairwise consistency of objective values across repeats, per instance); SAR is the Structural-Agreement Rate (averaged pairwise consistency of the formulation signature $(n_{\text{vars}}, n_{\text{constrs}}, n_{\text{bin}}, n_{\text{int}}, \text{nnz})$ across repeats, per instance). SAR $\le$ OAR in expectation because structural identity implies outcome identity, but not vice versa.}
-  \label{tab:topp_ablation}
-  \begin{tabular}{cccccccc}
-    \toprule
-    Config & $\texttt{top\_p}$ & $t_\text{ME}{=}t_\text{PY}$ & $n_{\mathrm{runs}}$ & AR & OAR & SAR & sig\_pairs \\
-    \midrule
-    c1 & 0.5 & 0.2 & 25 & 0.600 & 0.920 & 0.800 & 46 \\
-    c2 & 0.7 & 0.2 & 25 & 0.560 & 0.920 & 0.720 & 50 \\
-    c3 & 0.9 & 0.2 & 25 & 0.600 & 0.860 & 0.740 & 43 \\
-    c4 & 1.0 & 0.2 & 25 & 0.600 & 1.000 & 0.820 & 50 \\
-    c5 & 0.5 & 0.8 & 25 & 0.560 & 0.920 & 0.820 & 50 \\
-    c6 & 0.7 & 0.8 & 25 & 0.600 & 0.860 & 0.820 & 43 \\
-    c7 & 0.9 & 0.8 & 25 & 0.600 & 1.000 & 0.860 & 50 \\
-    c8 & 1.0 & 0.8 & 25 & 0.560 & 0.920 & 0.820 & 50 \\
-    \bottomrule
-  \end{tabular}
-\end{table}
-
-Further, we consulted the official OpenAI API documentation (reproduced in Figure~\ref{fig:openai_docs}), which recommends adjusting \texttt{temperature} \emph{or} \texttt{top\_p} but not both. The empirical evidence in Table~\ref{tab:topp_ablation} corroborates this for the present task.
+Regarding the scope of temperature coverage, we focused on $t_\text{ME}$ and $t_\text{PY}$ because these two agents are directly responsible for mathematical model construction and executable code generation, respectively, which are the primary determinants of solution accuracy. The temperatures of the remaining agents have a relatively minor impact for different reasons: the DE-Agent performs structured data extraction whose output format is largely determined by the input schema; the PM-Agent's selection strategy is constrained by the sub-sequence rules, which limits the effect of temperature-induced randomness; the TE-Agent is not a primary determinant of formulation accuracy, although it can indirectly improve final performance by providing finer-grained diagnostic evidence during backtracking; and the BA-Agent operates after optimization and therefore does not materially affect model accuracy, as validated by the ablation study in Section~4.3 (Group~2 and Group~4). While these justifications are analytical, we acknowledge that a full factorial design across all six agents would provide a more complete empirical characterization and is an interesting direction for future work.
 
 
-\begin{figure}[htbp]
-  \centering
-  \includegraphics[width=0.9\textwidth]{openai_docs.png}
-  \caption{Excerpt from the OpenAI API documentation for Chat Completions, showing the official recommendation that practitioners alter \texttt{temperature} \emph{or} \texttt{top\_p} but not both. This documentation guidance is corroborated by the empirical results in Table~\ref{tab:topp_ablation}.}
-  \label{fig:openai_docs}
-\end{figure}
-
-Regarding MIP formulation stability across runs, we acknowledge that variable naming and symbolic representation inevitably differ across runs due to the inherent stochasticity of LLM generation. Therefore, we do not claim symbolic identity of the generated formulations. Instead, Table~\ref{tab:topp_ablation} separates three levels of evidence: AR for correctness, OAR for objective-level repeatability, and SAR for coarse structural-signature repeatability. The results indicate that objective-level outputs and coarse structural signatures remain broadly stable across the tested $\texttt{top\_p}$ values, without a monotone deterioration as $\texttt{top\_p}$ increases. When exception backtracking is enabled (\texttt{is\_backward}~=~\texttt{True}), the verification--backtracking loop can further correct formulation errors based on ground-truth comparison; in contrast, this supplementary sensitivity study intentionally disables backtracking to isolate single-pass generation variability.
-
-We have revised Section~4.2 to (1)~explicitly justify the focus on $t_\text{ME}$ and $t_\text{PY}$, (2)~report the dedicated $\texttt{top\_p}$ sensitivity ablation summarized in Table~\ref{tab:topp_ablation}, which empirically shows that AR, OAR, and SAR are not monotonically sensitive to $\texttt{top\_p}$ in the tested range, and (3)~correct an inconsistency in Step~6 where the verification criterion allowed a Feasible status, which has been tightened to require an Optimal status to align with the AR definition in Section~4.1.
 
 \subsubsection{Modifications}
 \begin{enumerate}
@@ -191,12 +147,6 @@ We have revised Section~4.2 to (1)~explicitly justify the focus on $t_\text{ME}$
 \begin{quote}
 \textbf{Before:} ``Within the SOP-MAS framework, pivotal parameters encompass the maximum collaboration count $K$ of the PM-Agent, alongside the temperatures of the ME-Agent and PY-Agent, denoted as $t_\text{ME}$ and $t_\text{PY}$, respectively. The parameter $K$ exerts influence over the overall depth and breadth of the workflow by modulating the number of agent invocations. Temperature significantly affects the optimization modeling and solution outputs generated by the agents. Specifically, elevated temperatures foster the development of more innovative solutions, while reduced temperatures bolster deterministic reasoning, and in consequence ensuring stability and compliance of the outputs. This trade-off between precision and creativity mandates meticulous calibration of the temperature parameters tailored to specific task scenarios. [paragraph break] Among all agents, the temperatures of the ME-Agent and PY-Agent are prioritized for sensitivity analysis because\dots''\\[4pt]
 \textbf{After:} ``\textcolor{red}{Within the SOP-MAS framework, the maximum collaboration count $K$ of the PM-Agent governs the depth and breadth of the workflow by modulating the number of agent invocations. Among the six agents, the temperatures of the ME-Agent and PY-Agent, denoted as $t_\text{ME}$ and $t_\text{PY}$, are the primary determinants of solution accuracy, because these two agents are directly responsible for mathematical model construction and executable code generation, respectively. The temperatures of the remaining agents (DE-Agent, PM-Agent, TE-Agent, and BA-Agent) have a relatively minor impact on the optimization outcome, as validated by the ablation study in Section~4.3. Temperature significantly affects the optimization modeling and solution outputs generated by the agents: elevated temperatures foster more innovative solutions, while reduced temperatures bolster deterministic reasoning, ensuring stability and compliance of the outputs. This trade-off between precision and creativity mandates meticulous calibration of the temperature parameters tailored to specific task scenarios.}''
-\end{quote}
-
-\item \textbf{Section 3.2, Step 6 (L315) --- MODIFY}
-\begin{quote}
-\textbf{Before:} ``The solution is deemed correct only if (i) the solver status is Optimal or Feasible, and (ii) the objective value matches the ground-truth optimum.''\\[4pt]
-\textbf{After:} ``\textcolor{red}{The solution is deemed correct only if (i) the solver reports an Optimal status, and (ii) the objective value matches the ground-truth optimum.}''
 \end{quote}
 \end{enumerate}
 
@@ -207,7 +157,7 @@ We have revised Section~4.2 to (1)~explicitly justify the focus on $t_\text{ME}$
 ``There is not enough discussion about the delay caused by the multi-agent interaction layers compared to traditional manual modeling timelines.''
 
 \subsubsection{Response}
-We deeply appreciate the reviewer's rigorous attention to detail. We agree that the manuscript should more clearly distinguish the measured automated latency of SOP-MAS from the broader expert-centered modeling cycle. In response, we revised the manuscript to discuss this distinction more explicitly while retaining the workflow-level acceleration claim.
+We thank the reviewer for raising this point. We agree that the manuscript should more clearly distinguish the measured automated latency of SOP-MAS from the broader expert-centered modeling cycle. In response, we revised the manuscript to discuss this distinction more explicitly while retaining the workflow-level acceleration claim.
 
 Specifically, we now clarify that the reported 48.75\,s is the end-to-end automated latency of SOP-MAS, which already includes multi-agent interaction, API communication, and local execution. Therefore, the delay introduced by the interaction layers is not omitted from the reported runtime, but is already part of the measured latency. At the same time, we clarify the scope of the comparison: the reported 48.75\,s refers to the automated generation of an executable initial model, rather than the full human modeling cycle. For complex real-world ECR problems, manual formulation typically involves repeated requirement clarification, data checking, model revision, code debugging, and stakeholder validation, and therefore often spans hours or even weeks in practice. In this sense, SOP-MAS compresses the routine formulation stage to sub-minute automated generation and shifts the remaining work to expert review, validation, and refinement, yielding an hour-scale human-in-the-loop workflow rather than a prolonged expert-centered process.
 
@@ -233,20 +183,16 @@ Specifically, we now clarify that the reported 48.75\,s is the end-to-end automa
 ``The claim that the system reduces barriers for non-experts lacks user-study data to support the effectiveness of the `Business Analyst Agent.' ''
 
 \subsubsection{Response}
-We thank the reviewer for this insightful observation. We agree that the BA-Agent should be supported by evidence beyond Accuracy Rate (AR), because it does not alter the mathematical correctness of the generated model but instead translates solver outputs into business-accessible interpretations for non-expert stakeholders.
+We thank the reviewer for this constructive and inspiring suggestion. We agree that the BA-Agent should be supported by evidence beyond Accuracy Rate (AR), because it does not alter the mathematical correctness of the generated model but instead translates solver outputs into business-accessible interpretations for non-expert stakeholders.
 
-Although a formal user study remains beyond the scope of the present revision, we have strengthened the manuscript with two concrete pieces of evidence from actual BA-Agent outputs. First, in the illustrative three-port ECR example (Section~3.4), the BA-Agent correctly interprets the optimal objective value of CNY~650 and explains why the selected flows $(x_{AB}{=}100, x_{BC}{=}150)$ satisfy demand while the direct A--C route and reverse movements remain zero. This serves as a transparent sanity check for interpretation accuracy. For direct inspection, we reproduce below a translated excerpt from the actual BA-Agent output generated for this example:
+Given that this paper focuses primarily on the correctness and effectiveness of the modeling process itself, we have not conducted a formal user study in the current revision. We fully agree that interpretation quality is important and have therefore included two concrete pieces of evidence from actual BA-Agent outputs to support our claims. First, in the illustrative three-port ECR example (Section~3.4), the BA-Agent correctly interprets the optimal objective value of CNY~650 and explains why the selected flows $(x_{AB}{=}100, x_{BC}{=}150)$ satisfy demand while the direct A--C route and reverse movements remain zero. This serves as a transparent sanity check for interpretation accuracy. For direct inspection, we reproduce below a translated excerpt from the actual BA-Agent output generated for this example:
 
 \begin{quote}
 \textbf{Representative BA-Agent output (translated from the actual run).}
 \begin{promptbox}
 \begin{lstlisting}[style=prompttemplate]
 {
-  "executive_summary": "The optimizer found the minimum-cost plan
-  for the inter-port empty-container repositioning task, with a
-  total transportation cost of CNY 650. The key insight is that
-  routing through the low-cost A->B and B->C arcs minimizes cost
-  while fully satisfying Port C's demand.",
+  "executive_summary": "The optimizer found the minimum-cost plan for the inter-port empty-container repositioning task, with a total transportation cost of CNY 650. The key insight is that routing through the low-cost A->B and B->C arcs minimizes cost while fully satisfying Port C's demand.",
   "cost_breakdown": {
     "total_cost": "650.0",
     "cost_items": [
@@ -254,11 +200,8 @@ Although a formal user study remains beyond the scope of the present revision, w
       {"category": "B->C repositioning cost", "amount": "450.0"}
     ]
   },
-  "key_finding": "Port B acts as the core hub of the repositioning
-  network.",
-  "actionable_recommendation": "Immediately arrange the shipment of
-  100 empty containers from Port A to Port B and 150 empty
-  containers from Port B to Port C."
+  "key_finding": "Port B acts as the core hub of the repositioning network.",
+  "actionable_recommendation": "Immediately arrange the shipment of 100 empty containers from Port A to Port B and 150 empty containers from Port B to Port C."
 }
 \end{lstlisting}
 \end{promptbox}
@@ -266,9 +209,9 @@ Although a formal user study remains beyond the scope of the present revision, w
 
 Second, in the large-scale empirical case (Section~5.3), the BA-Agent summarizes the CNY~1,355,388 solution into an exact cost decomposition, repositioning CNY~925,238 (68.26\%), leasing CNY~406,000 (29.95\%), and holding CNY~24,150 (1.78\%),and further provides actionable operational recommendations. These additions demonstrate that the BA-Agent does more than paraphrase variable values: it converts mathematically valid solutions into structured managerial insight.
 
-To clarify this point more precisely, we also revised the ablation discussion (Section~4.3) in a more conservative manner. Rather than embedding a formal qualitative framework in the manuscript, we now state that AR has limited ability to capture the BA-Agent's downstream interpretive role because the BA-Agent operates after solution generation, and we point readers to the concrete demonstrations in Sections~3.4 and~5.3. 
+Accordingly, we have revised the ablation discussion (Section~4.3) to avoid overclaiming: we now simply note that AR has limited ability to capture the BA-Agent's interpretive role, and refer readers to the concrete examples in Sections~3.4 and~5.3. Rather than embedding a formal qualitative framework in the manuscript, we now state that AR has limited ability to capture the BA-Agent's downstream interpretive role because the BA-Agent operates after solution generation, and we point readers to the concrete demonstrations in Sections~3.4 and~5.3. 
 
-Although we cannot conduct this study within the current revision, we have given careful thought to its design. The core idea is to invite domain experts (e.g., port operations managers and supply-chain modeling experts) to independently score each BA-Agent report on three dimensions (interpretation accuracy, completeness, and actionability) using structured scoring instruments, and then compute inter-rater agreement to obtain a reliable, quantitative measure of interpretive quality. We plan to carry out this evaluation as a natural extension of the present work.
+While a full user study is beyond the scope of the current revision, we have carefully considered its design as important future work. The core idea would be to invite domain experts (e.g., port operations managers and supply-chain modeling experts) to independently score each BA-Agent report on three dimensions (interpretation accuracy, completeness, and actionability) using structured scoring instruments, and then compute inter-rater agreement to obtain a reliable, quantitative measure of interpretive quality. We plan to carry out this evaluation as a natural extension of the present work.
 
 \subsubsection{Modifications}
 \begin{enumerate}
@@ -291,7 +234,7 @@ Although we cannot conduct this study within the current revision, we have given
 
 \item \textbf{Section~Conclusions (line~597) --- MODIFY}
 \begin{quote}
-\textbf{After:} ``\textcolor{red}{Finally, conducting a multi-rater user study with logistics practitioners to evaluate the BA-Agent's output framework comprising interpretation accuracy, completeness, and actionability sub-dimensions) would provide rigorous empirical evidence of its qualitative contribution.}''
+\textbf{After:} ``\textcolor{red}{Finally, conducting a multi-rater user study with logistics practitioners to evaluate the BA-Agent's output on three dimensions (interpretation accuracy, completeness, and actionability) would provide rigorous empirical evidence of its qualitative contribution.}''
 \end{quote}
 \end{enumerate}
 
@@ -302,15 +245,97 @@ Although we cannot conduct this study within the current revision, we have given
 ``In Section 2.4 (Challenges). It is suggested to refer from the paper: `A novel permissioned blockchain approach for scalable and privacy-preserving IoT authentication'. This citation addresses privacy and trust issues in decentralized environments, which is important for discussing the security of data shared between port agents in the ECR network.''
 
 \subsubsection{Response}
-We appreciate the reviewer’s valuable suggestion. The cited paper is highly relevant to the challenges discussed in Section 2.4, particularly because the decentralized nature of EC networks requires sensitive operational data, such a container inventories and transport schedules, to be shared across organizationa boundaries. We have therefore added this reference an revised the discussion to highlight the importance of privacy-preservin and trust mechanisms for effective multi-stakeholde collaboration.
+We appreciate the reviewer’s valuable suggestion. The cited paper is highly relevant to the challenges discussed in Section 2.4, particularly because the decentralized nature of EC networks requires sensitive operational data, such as container inventories and transport schedules, to be shared across organizational boundaries. We have therefore added this reference and revised the discussion to highlight the importance of privacy-preserving and trust mechanisms for effective multi-stakeholder collaboration.
 \subsubsection{Modifications}
 \begin{enumerate}
 \item \textbf{Section 2.4 (L253) --- ADD}
 \begin{quote}
-\textbf{After:} ``\textcolor{red}{. This decentralized nature of ECR networks, where sensitive operational data (e.g., container inventories and transport schedules) must be shared across organizational boundaries, underscores the importance of privacy-preserving and trust mechanisms for effective multi-stakeholder collaboration} \textcolor{red}{[\texttt{27}]}''\end{quote}
+\textbf{After:} ``\ldots{} \textcolor{red}{This decentralized nature of ECR networks, where sensitive operational data (e.g., container inventories and transport schedules) must be shared across organizational boundaries, underscores the importance of privacy-preserving and trust mechanisms for effective multi-stakeholder collaboration [27].}''\end{quote}
 \end{enumerate}
 
 
+% ----------------------------------------------------------------------------
+
+
+\subsection{Comment 1.7 --- MIP Formulation Stability}
+\textbf{Comment 1.7: }``The paper should add an experiment that changes the LLM temperature ($t_i$) and \texttt{top\_p} values to show how stable the generated Mixed Integer Programming (MIP) formulations are.''
+
+\subsubsection{Response --- $\texttt{top\_p}$ Sensitivity}
+
+The $\texttt{top\_p}$ parameter is kept at its default value throughout the main experiments. To directly address the reviewer's request for empirical evidence, we conducted a dedicated $\texttt{top\_p}$ sensitivity study on the SOP-MAS framework with the DeepSeek-V3 backbone. Specifically, we performed a $4 \times 2$ factorial sweep over $\texttt{top\_p} \in \{0.5, 0.7, 0.9, 1.0\}$ and $t_\text{ME} = t_\text{PY} \in \{0.2, 0.8\}$, applying the swept values only to the ME-Agent and PY-Agent (other agents remain deterministic). The study covers ten representative instances spanning ComplexOR (\texttt{aircraft\_landing}, \texttt{blend\_problem}, \texttt{diet\_problem}, \texttt{flowshop\_scheduling}, \texttt{knapsack\_optimization}, \texttt{revenue\_maximization}) and NLP4LP (instances \texttt{74}, \texttt{105}, \texttt{150}, and \texttt{187}), each repeated $R{=}10$ times under \texttt{is\_backward}~=~\texttt{False}. Beyond AR, we additionally report the Objective-Agreement Rate (OAR), defined per instance as the fraction of repeat pairs whose objective values agree within a relative tolerance of $10^{-4}$ and then averaged across instances.
+
+\begin{table}[htbp]
+  \centering
+  \caption{$\texttt{top\_p}$ sensitivity ablation on the SOP-MAS framework (DeepSeek-V3, 10 instances from ComplexOR and NLP4LP, $R{=}5$ repeats each)}
+  \label{tab:topp_ablation}
+  \begin{tabular}{cccccc}
+    \toprule
+    Config & $\texttt{top\_p}$ & $t_\text{ME}{=}t_\text{PY}$ & $n_{\mathrm{runs}}$ & AR & OAR \\
+    \midrule
+    c1 & 0.5 & 0.2 & 50 & 0.580 & 0.820 \\
+    c2 & 0.7 & 0.2 & 50 & 0.560 & 0.820 \\
+    c3 & 0.9 & 0.2 & 50 & 0.600 & 0.830 \\
+    c4 & 1.0 & 0.2 & 50 & 0.600 & 0.860 \\
+    c5 & 0.5 & 0.8 & 50 & 0.580 & 0.830 \\
+    c6 & 0.7 & 0.8 & 50 & 0.600 & 0.830 \\
+    c7 & 0.9 & 0.8 & 50 & 0.600 & 0.860 \\
+    c8 & 1.0 & 0.8 & 50 & 0.580 & 0.820 \\
+    \bottomrule
+  \end{tabular}
+\end{table}
+
+The above findings rest on three complementary lines of evidence, each sufficient on its own to justify not introducing $\texttt{top\_p}$ as an additional tuning dimension in the main experiments.
+
+\begin{enumerate}
+    \item \textbf{Empirical evidence.} As shown in Table~\ref{tab:topp_ablation}, AR remains within $0.560$--$0.600$ and OAR within $0.820$--$0.860$ across all eight tested configurations, with no monotonic trend in either metric. This flat response surface indicates that, within the tested range, $\texttt{top\_p}$ does not materially affect solution correctness or objective-level repeatability.
+
+    \item \textbf{Dataset design mismatch.} The ComplexOR and NLP4LP benchmark instances are designed for \emph{correctness} evaluation and involve relatively few variables and constraints. Their formulation space is inherently narrow---most structurally valid formulations naturally coincide regardless of sampling parameters. As a result, repeated runs on these instances cannot adequately discriminate generation stability from problem simplicity. A more complex instance with a wider formulation space is required to draw reliable conclusions about structural stability (addressed in the next subsection).
+
+    \item \textbf{Established practice.} We consulted the OpenAI API documentation~\footnote{\url{https://platform.openai.com/docs/api-reference/chat/create}}, which recommends that practitioners alter $\texttt{top\_p}$ \emph{or} $\texttt{temperature}$ but not both. Prior work such as Chain-of-Experts (CoE)~[Xiao et al., 2023] follows the same convention of tuning only temperature. Our experimental design is consistent with both.
+\end{enumerate}
+
+\begin{figure}[htbp]
+  \centering
+  \includegraphics[width=0.9\textwidth]{openai_docs.png}
+  \caption{Excerpt from the OpenAI API documentation for Chat Completions, showing the official recommendation that practitioners alter \texttt{temperature} \emph{or} \texttt{top\_p} but not both.}
+  \label{fig:openai_docs}
+\end{figure}
+
+
+\subsubsection{Response --- MIP Formulation Stability}
+
+We now turn to the deeper question of whether the generated MIP formulations are structurally stable across repeated runs. In the $\texttt{top\_p}$ Sensitivity above, we initially computed a Structural-Agreement Rate (SAR) based on the formulation structure $(n_{\text{vars}}, n_{\text{constrs}}, n_{\text{bin}}, n_{\text{int}}, \text{nnz})$, obtaining values of $0.689$--$0.800$. However, we recognize a critical methodological limitation: the ComplexOR and NLP4LP benchmark instances used in that study are designed for \emph{correctness} evaluation and involve relatively few variables and constraints. Consequently, their formulation space is inherently narrow, most structurally valid formulations naturally coincide, yielding high SAR values that primarily reflect problem simplicity rather than genuine generation stability. A rigorous stability assessment requires a substantially more complex instance whose formulation space is large enough to expose meaningful structural variability.
+
+To this end, we conducted a dedicated formulation stability experiment on the empirical ECR instance (13 nodes, including 3 seaports and 10 dry ports, over 5 planning periods). The fully specified MIP formulation involves approximately 975 variables and over 700 constraints, and admits multiple structurally distinct yet mathematically equivalent representations: for example, storage capacity bounds can be encoded as explicit inequalities or folded into variable upper bounds. This makes the instance far more suitable for discriminating between stable and unstable generation.
+
+The experiment uses LLM with thinking mode enabled. Since thinking mode does not support temperature or $\texttt{top\_p}$ adjustments, both parameters are left at their default values, thereby isolating the inherent structural variability of the LLM generation process from sampling-parameter effects. The framework is run $R{=}25$ times on the same instance under identical conditions. The results are summarized in Table~4 of the revised manuscript (Section~5.1) and reveal three key patterns:
+
+\begin{enumerate}
+    \item \textbf{Low SAR yet high AR.} Across 25 runs, 8 distinct feasible formulation structures are observed, yielding an SAR of only 13.7\%. Despite this structural diversity, all 18 feasible runs converge to the exact same ground-truth optimum (CNY~1,355,388). The most frequent structure $(370, 130, 370, 718)$ accounts for 7 of 25 runs, while the remaining runs adopt alternative but mathematically equivalent encodings.
+
+    \item \textbf{Compact formulations dominate.} Among the 8 feasible structures, 6 use compact formulations with $n_{\text{vars}} \leq 458$, accounting for 15 of 18 feasible runs. Only 2 structures adopt the fully expanded formulation ($n_{\text{vars}} = 975$), yet both achieve the correct optimum by constraining non-adjacent arc flows to zero.
+
+    \item \textbf{Encoding variability, not modeling error, drives structural diversity.} The primary source of structural divergence is constraint-level encoding: for example, storage capacity can appear as an explicit inequality ($I_{i,t} \leq U_i$, contributing to $n_{\text{constrs}}$) or be folded into a variable upper bound ($I_{i,t} \in [0, U_i]$, where it disappears from $n_{\text{constrs}}$). Both encodings are mathematically equivalent and yield the same optimum. The 28\% failure rate (7 of 25 runs) is attributable to code-execution issues (e.g., Gurobi license unavailability) rather than formulation errors.
+\end{enumerate}
+
+These results provide a nuanced answer to the reviewer's question: the generated formulations are \emph{structurally diverse} (low SAR) but \emph{operationally stable} (high AR, and perfect objective agreement among all feasible runs). The structural diversity arises from the LLM's flexibility in encoding the same logical constraints in different algebraic forms, not from errors or omissions.
+
+\subsubsection{Modifications}
+\begin{enumerate}
+\item \textbf{Section~5 (Empirical Analysis) --- ADD a new subsection ``Formulation Stability Analysis''}
+\begin{quote}
+\textcolor{red}{
+Added a dedicated subsection presenting the formulation stability experiment on the empirical ECR instance ($R{=}25$ repeats), including Table~4 that enumerates the observed formulation structures grouped by unique structural profile, and a discussion of the three key empirical patterns listed above.
+}
+\end{quote}
+
+\item \textbf{Appendix~D --- ADD ``Case Analysis of Formulation Variability''}
+\begin{quote}
+\textcolor{red}{
+Added a case-study appendix examining a representative run (F10) from the formulation stability experiment, where an expanded formulation (975 variables, creating variables for all node pairs) nevertheless achieves the correct optimum by constraining non-adjacent arc flows to zero via big-$M$ constraints, illustrating that LLM-generated formulations can be structurally different yet mathematically equivalent.
+}
+\end{quote}
+\end{enumerate}
 % ----------------------------------------------------------------------------
 \subsection{Comment 1.8 --- Terminology Consistency}
 
@@ -318,7 +343,7 @@ We appreciate the reviewer’s valuable suggestion. The cited paper is highly re
 ``The terminology must be consistent; the terms `SOP-MAS' and `LLM-agent system' should be used in the same way throughout.''
 
 \subsubsection{Response}
-A comprehensive terminology audit was performed. ``LLM-agent system'' did not appear in the original text. We have unified the framework reference as \textbf{SOP-MAS} throughout the paper: (1)~the acronym is formally introduced in the Abstract upon first mention; (2)~all subsequent framework references use ``SOP-MAS'' or ``the SOP-MAS framework'' instead of informal paraphrases; (3)~``SOP-MAS system'' redundancy is removed. The generic terms ``multi-agent system'' and ``MAS'' are reserved for the general concept in the literature review.
+We appreciate the reviewer for flagging this consistency issue. A comprehensive terminology audit was performed. ``LLM-agent system'' did not appear in the original text. We have unified the framework reference as \textbf{SOP-MAS} throughout the paper: (i)~the acronym is formally introduced in the Abstract upon first mention; (ii)~all subsequent framework references use ``SOP-MAS'' or ``the SOP-MAS framework'' instead of informal paraphrases; (iii)~``SOP-MAS system'' redundancy is removed. The generic terms ``multi-agent system'' and ``MAS'' are reserved for the general concept in the literature review.
 
 \subsubsection{Modifications}
 \begin{enumerate}
@@ -340,6 +365,7 @@ A comprehensive terminology audit was performed. ``LLM-agent system'' did not ap
 \textbf{After:} ``\textcolor{red}{Within the SOP-MAS framework,}''
 \end{quote}
 \end{enumerate}
+
 
 \newpage
 % ============================================================================
@@ -386,7 +412,7 @@ We sincerely appreciate this insightful remark. The reviewer's distinction betwe
 ``Explicitly confirm if all baselines (OptiMUS, CoE, etc.) used the same DeepSeek-v3 backbone. Paradigm effectiveness cannot be validated if the underlying language models differ across comparisons.''
 
 \subsubsection{Response}
-We thank the reviewer for raising this important point. We fully agree that a paradigm-level comparison is meaningful only when the underlying LLM is controlled. In our experiments, all methods, including SOP-MAS, SPM, CoT, CoE, and OptiMUS, were run with the same DeepSeek-v3-0324 backbone and under identical hardware conditions. For CoE and OptiMUS, we used the authors' public code repositories (\url{https://github.com/xzymustbexzy/Chain-of-Experts} and \url{https://github.com/teshnizi/OptiMUS}, respectively) and adapted their LLM interface to DeepSeek-v3-0324; for SPM and CoT, we directly implemented the published prompting procedures on the same backbone. The benchmark instances and evaluation settings were also held fixed across methods, including five independent runs per instance with $K=5$. Therefore, the reported performance differences reflect the effectiveness of the collaboration paradigm rather than differences in the underlying model. We have clarified this explicitly in Section 4.1.
+We thank the reviewer for raising this important point. We fully agree that a paradigm-level comparison is meaningful only when the underlying LLM is controlled. In our experiments, all methods, including SOP-MAS, SPM, CoT, CoE, and OptiMUS, were run with the same DeepSeek-v3-0324 backbone and under identical hardware conditions. For CoE and OptiMUS, we used the authors' public code repositories (\url{https://github.com/xzymustbexzy/Chain-of-Experts} and \url{https://github.com/teshnizi/OptiMUS}, respectively) and adapted their LLM interface to DeepSeek-v3-0324; for SPM and CoT, we directly implemented the prompting procedures on the same backbone. The benchmark instances and evaluation settings were also held fixed across methods, including five independent runs per instance with $K=5$. Therefore, the reported performance differences reflect the effectiveness of the collaboration paradigm rather than differences in the underlying model. We have clarified this explicitly in Section 4.1.
 
 \subsubsection{Modifications}
 \begin{enumerate}
@@ -409,17 +435,13 @@ We thank the reviewer for raising this important point. We fully agree that a pa
 ``Re-evaluate Equation 1's probabilistic notation. If agent selection is governed by deterministic prompts rather than actual probability distributions, simplify the math to avoid unnecessary `math-washing.' ''
 
 \subsubsection{Response}
-We thank the reviewer for this careful observation. After re-checking the implementation, we agree that the original probabilistic notation $\Pr\{A_k=e\mid S_k=s\}$ overstated the role of randomness in PM-Agent selection. \textcolor{red}{In the implementation, the PM-Agent operates under two structural constraints: (i) the candidate set $\mathcal{A}_k$ is restricted by the sub-sequence rule, which forbids re-selecting already-used agents and maintains relative ordering; and (ii) decoding is performed with temperature 0.0, so for a fixed contextual state $s_k$ the LLM produces a single, repeatable output. The selection within $\mathcal{A}_k$ is not reduced to a hard-coded rule; rather, the PM-Agent reasons over the current message-pool state to decide the next role, which in particular accommodates agent reuse, early termination, and backtracking decisions (Section~3.3).} \textcolor{red}{Empirically, across all $K=5$ independent runs on every benchmark instance, the realized PM-Agent selection sequence was identical, indicating that the realized policy behaves as a state-dependent decision function rather than a stochastic distribution.} Accordingly, the formalization should be a state-dependent selection function rather than a probability distribution. The relevant PM-Agent prompt template is reproduced below:
+We are deeply grateful to the reviewer for this incisive and constructive critique. After re-checking the implementation, we fully agree that the original probabilistic notation $\Pr\{A_k=e\mid S_k=s\}$ overstated the role of randomness in PM-Agent selection. \textcolor{red}{In the implementation, the PM-Agent operates under two structural constraints: (i) the candidate set $\mathcal{A}_k$ is restricted by the sub-sequence rule, which forbids re-selecting already-used agents and maintains relative ordering; and (ii) LLM decoding is performed with temperature 0.0, so for a fixed contextual state $s_k$ the LLM produces a single, repeatable output. The selection within $\mathcal{A}_k$ is not reduced to a hard-coded rule; rather, the PM-Agent reasons over the current message-pool state to decide the next role, which in particular accommodates agent reuse, early termination, and backtracking decisions (Section~3.3).} \textcolor{red}{Empirically, across all five independent runs (each with $K{=}5$) on every benchmark instance, the observed PM-Agent selection sequence was identical, suggesting that the realized policy behaves as a deterministic, state-dependent decision function rather than a stochastic distribution.} Accordingly, the formalization should be a state-dependent selection function rather than a probability distribution. The relevant PM-Agent prompt template is reproduced below:
 
 \begin{promptbox}
-\begin{lstlisting}[style=prompttemplate, caption={Complete ECR mathematical formulation generated by SOP-MAS}, label={lst:ecr-mathematical-model}]
-Now, you are presented with an operational optimization-related problem: {problem_description}. In this
-multi-agent system, there are many agents, each of whom is responsible for solving part of the problem.
-Your task is to CHOOSE THE NEXT AGENT TO CONSULT to solve the optimization problem. The names of the
-agents and their capabilities are listed below: {agent_list}. Experts that have already been selected
-include: {selected_agent_list}. Please select an agent to consult from the remaining agent names
-{allowed_agent_list}. Please note that the maximum number of asked agents is {max_collaborate_nums}, and
-you can ask {remaining_collaborate_nums} more times. You should output the name of agent directly.
+\begin{lstlisting}[style=prompttemplate]
+Now, you are presented with an operational optimization-related problem: {problem_description}. In this multi-agent system, there are many agents, each of whom is responsible for solving part of the problem.
+
+Your task is to CHOOSE THE NEXT AGENT TO CONSULT to solve the optimization problem. The names of the agents and their capabilities are listed below: {agent_list}. Experts that have already been selected include: {selected_agent_list}. Please select an agent to consult from the remaining agent names {allowed_agent_list}. Please note that the maximum number of asked agents is {max_collaborate_nums}, and you can ask {remaining_collaborate_nums} more times. You should output the name of agent directly.
 
 # Decision Logic
 Select agents based on these priorities:
@@ -455,7 +477,7 @@ where $s_k$ denotes the current state comprising the problem description, messag
 ``Provide efficiency metrics correlated to problem size. Show how runtime and accuracy scale as the number of ports and time periods increase to prove industrial-grade scalability.''
 
 \subsubsection{Response}
-We thank the reviewer for this insightful comment, which highlights an important point that we failed to make sufficiently clear in the original manuscript. After careful analysis of the SOP-MAS workflow, we clarify that the framework's modeling runtime does not scale with problem size. The key insight lies in a deliberate architectural design: \textbf{problem description and concrete data are strictly separated}.
+We sincerely thank the reviewer for this invaluable critique, which highlights an important point that we failed to make sufficiently clear in the original manuscript. After careful analysis of the SOP-MAS workflow, we clarify that the framework's modeling runtime does not scale with problem size. The key insight lies in a deliberate architectural design: \textcolor{red}{problem description and concrete data are strictly separated}.
 
 In SOP-MAS, the problem description $P$ (e.g., \texttt{description.txt}) is expressed in abstract symbolic form, parameters, variables, and constraints defined using index notation, while the concrete numerical data (e.g., port coordinates, demand matrices) resides in separate data files (e.g., \texttt{sample.json}). For small-scale problems, embedding concrete data directly into the problem description is perfectly feasible and does not pose any difficulty. However, as the problem scale grows (e.g., more ports, longer time horizons, larger demand matrices), the text length increases rapidly. Embedding all numerical data into the prompt would eventually overwhelm the LLM's context window and degrade its comprehension capacity. Therefore, we adopt a strict separation between the abstract problem description and the concrete data files. To illustrate this point, consider the following comparison:
 
@@ -466,15 +488,13 @@ In SOP-MAS, the problem description $P$ (e.g., \texttt{description.txt}) is expr
 \begin{lstlisting}[style=prompttemplate]
 # ECR Problem: 3 ports (A, B, C), T=1
 
-The supply vector is S = [100, 50, 0] (TEU), where
-  port A supplies 100 TEU, port B supplies 50 TEU, port C supplies 0 TEU.
-The demand vector is D = [0, 0, 150] (TEU), where
-  port A demands 0 TEU, port B demands 0 TEU, port C demands 150 TEU.
+The supply vector is S = [100, 50, 0] (TEU), where port A supplies 100 TEU, port B supplies 50 TEU, port C supplies 0 TEU.
+The demand vector is D = [0, 0, 150] (TEU), where port A demands 0 TEU, port B demands 0 TEU, port C demands 150 TEU.
 Unit transportation costs (CNY/TEU):
   c(A->B) = 2, c(A->C) = 10, c(B->C) = 3
   c(B->A) = 2, c(C->A) = 10, c(C->B) = 3
 Storage cost h_i = 0, initial inventory I_i0 = 0.
-  ... (for larger scale: 3 seaports + 5 dry ports + 7 time periods
+  ... (for larger scale: 3 seaports + 10 dry ports + 5 time periods
    => text grows to O(|N|^2 * |T|) entries)
 \end{lstlisting}
 \end{promptbox}
@@ -485,11 +505,7 @@ Storage cost h_i = 0, initial inventory I_i0 = 0.
 \begin{lstlisting}[style=prompttemplate]
 # ECR Problem: Multi-period Network Flow Optimization
 
-Network: Directed graph G=(N,E), where N = H (seaports) union L (dry ports).
-Edges E represent repositioning routes: seaport-seaport,
-seaport-dry port, and dry port-dry port.
-Lambda_ij describes the hinterland relationship between seaport i
-and dry port j.
+Network: Directed graph G=(N,E), where N = H (seaports) union L (dry ports). Edges E represent repositioning routes: seaport-seaport, seaport-dry port, and dry port-dry port. Lambda_ij describes the hinterland relationship between seaport i and dry port j.
 
 Parameters:
 - S_i^t: supply of empty containers at node i in period t
@@ -501,19 +517,18 @@ Parameters:
 \end{lstlisting}
 \end{promptbox}
 
-\noindent As shown, Case B's description length is independent of the number of ports or time periods, whereas Case A's text length grows proportionally to $O(|N|^2 \times |T|)$ as problem scale increases. For the empirical case study (in the manuscript section 5) with 3 seaports, 5 dry ports, and 7 time periods, Case A would require enumerating hundreds of specific values, whereas Case B's abstract description remains unchanged.
+\noindent As shown, Case B's description length is independent of the number of ports or time periods, whereas Case A's text length grows proportionally to $O(|N|^2 \times |T|)$ as problem scale increases. For the empirical case study (in the manuscript section 5) with 3 seaports, 10 dry ports, and 5 time periods, Case A would require enumerating hundreds of specific values, whereas Case B's abstract description remains unchanged.
 
 This design has the following implications for each step of the SOP process:
 
 \begin{itemize}
-\item \textbf{Steps 1--5 (Iterative Modeling):} Since $P$ (problem descrition) remains fixed in length regardless of how many ports or time periods are involved, the DE-Agent's parameter extraction, the ME-Agent's model formulation, and the PY-Agent's code generation all produce identical outputs in terms of model structure and code template. The LLM API call time for these steps is therefore constant.
+\item \textbf{Steps 1--5 (Iterative Modeling):} Since $P$ (problem description) remains fixed in length regardless of how many ports or time periods are involved, the DE-Agent's parameter extraction, the ME-Agent's model formulation, and the PY-Agent's code generation all produce identical outputs in terms of model structure and code template. The LLM API call time for these steps is therefore constant.
 
-\item \textbf{Step 6 (Execution):} After the forward pass, the framework enters a unified execution stage around the generated \texttt{optimize(data)} function, where concrete data is loaded from external files (\texttt{sample.json}). If the TE-Agent was selected earlier in the forward pass, its successful execution result can be reused directly; otherwise, or if reuse is not possible, the framework executes the latest solver code itself. Only at this stage does the actual problem scale manifest, affecting the optimization solver's (such as OR-Tools, Gurobi, CPLEX) runtime. Increasing the number of ports or time periods increases the number of decision variables and constraints fed to the solver, but the solver code template itself remains unchanged.
+\item \textbf{Step 6 (Failure Detection):} After the forward pass, the framework enters a unified execution stage around the generated \texttt{optimize(data)} function, where concrete data is loaded from external files (\texttt{sample.json}). Only at this stage does the actual problem scale manifest, affecting the optimization solver's (such as OR-Tools, Gurobi, CPLEX) runtime. Increasing the number of ports or time periods increases the number of decision variables and constraints fed to the solver, but the solver code template itself remains unchanged.
 
 \item \textbf{Scalability implication:} The modeling overhead of SOP-MAS (Steps 1--5) is bounded by the sub-minute LLM API call time and is independent of problem scale. The computational bottleneck shifts entirely to the solver execution phase, whose scalability depends on the choice of solver (e.g., OR-Tools, Gurobi, CPLEX) and has been extensively validated by the OR community. This separation of concerns allows SOP-MAS to serve as a scale-agnostic modeling layer on top of existing solver infrastructure.
 \end{itemize}
 
-We have added a corresponding discussion to Section 4.4.
 
 \subsubsection{Modifications}
 
@@ -612,7 +627,7 @@ We are grateful to the reviewer for this attentive observation. Upon re-examinin
 \end{enumerate}
 
 \subsubsection{Response}
-We deeply appreciate the reviewer's rigorous attention to detail. Pointing out the confusion between $i$ and $k$ is invaluable. Such meticulous feedback is indispensable for ensuring the mathematical clarity of the paper. We have carefully revised the entire text to eliminate this ambiguity. The variable $i$ was indeed overloaded: in $\mathcal{A}=\{a_i\}_{i=0}^n$ it identifies agent types, while in Steps 2--4 it served as the step index. We have:
+We thank the reviewer for identifying the variable-name conflict between $i$ and $k$. This observation is critical for ensuring the mathematical clarity of the paper. We have carefully revised the entire text to eliminate this ambiguity. The variable $i$ was indeed overloaded: in $\mathcal{A}=\{a_i\}_{i=0}^n$ it identifies agent types, while in Steps 2--4 it served as the step index. We have:
 \begin{enumerate}
 \item disambiguated by introducing $k$ ($k=1,2,\ldots,K$) for step indexing, 
 \item and replacing the numeric agent subscript $i$ with descriptive labels (e.g., $a_{\text{DE}}, a_{\text{ME}}, a_{\text{PY}}, a_{\text{TE}}, a_{\text{BA}}$) so that agent identifiers are self-documenting and visually distinct from the step index. 
@@ -690,7 +705,7 @@ k{=}1&:\; \mathcal{A}_1{=}\{a_{\text{TE}}, a_{\text{BA}}\}
 ``The notation of variables in equation (1) is not clearly defined. What are the definitions of $e$, $S_i$, $s$, and $A_i$?''
 
 \subsubsection{Response}
-We deeply appreciate the reviewer's rigorous attention to notation. Pointing out the undefined symbols $e$, $S_i$, $s$, and $A_i$ in Equation~(1) is invaluable; such meticulous feedback is indispensable for ensuring the mathematical clarity and notational consistency of the paper. We agree that the original notation around Equation~(1) was unclear. After re-checking the implementation, we further determined that the probabilistic formulation itself was stronger than warranted by the actual PM-Agent selection mechanism. In the revised manuscript, we therefore simplified Equation~(1) to a deterministic state-dependent selection function, so the previously ambiguous symbols $e$, $S_i$, and $A_i$ no longer appear. We then added explicit definitions for the remaining symbols in the revised formulation. For ease of reference, we summarize them below:
+We thank the reviewer for noting that $e$, $S_i$, $s$, and $A_i$ were undefined in Equation~(1). Resolving these ambiguities is essential for the notational consistency of the paper. We agree that the original notation around Equation~(1) was unclear. After re-checking the implementation, we further determined that the probabilistic formulation itself was stronger than warranted by the actual PM-Agent selection mechanism. In the revised manuscript, we therefore simplified Equation~(1) to a deterministic state-dependent selection function, so the previously ambiguous symbols $e$, $S_i$, and $A_i$ no longer appear. We then added explicit definitions for the remaining symbols in the revised formulation. For ease of reference, we summarize them below:
 
 \begin{center}
 \begin{tabular}{cp{10cm}}
@@ -758,7 +773,7 @@ We thank the reviewer for this careful observation. In the original Figure~1, th
 
 \begin{quote}
 \textbf{Before:} `` If the current iteration count $k$ exceeds the maximum permissible selections $K$, emit the message pool $C$ and the execution result.''\\[4pt]
-\textbf{After:} ``Figure~1, Previously, we used $i$; now we uniformly use $k$.'' 
+\textbf{After:} ``All step-indexed subscripts in Figure~1 have been updated from $i$ to $k$ to match the revised notation in Section~3.2.''
 \end{quote}
 
 \end{enumerate}
@@ -859,7 +874,7 @@ We verified the calculation: $(52.26-48.08)/48.08 = 8.69\%$, confirming the rela
 ``In line 534, the phrase `...was deactivated (is\_backward = False)' should have `is\_backward = False' emphasized in bold, as it is in line 369.''
 
 \subsubsection{Response}
-We deeply appreciate the reviewer's rigorous attention to detail. We unified the formatting of \texttt{is\_backward} throughout the manuscript to use consistent monospace type.
+We agree that formatting should be consistent. We unified the rendering of \texttt{is\_backward} throughout the manuscript to use monospace type in all occurrences.
 
 \subsubsection{Modifications}
 \begin{enumerate}
@@ -996,7 +1011,7 @@ To address the reviewer's readability concern without interrupting the flow of t
 \begin{enumerate}
 \item \textbf{Section 5.2, Problem Description --- MODIFY (Strengthen signposting to Appendix C)}
 \begin{quote}
-\textbf{Added:} ``\textit{\textcolor{red}{To keep the main text focused on the problem setting and empirical analysis, the complete mathematical formulation used in the ECR case is provided in Appendix~C, while the key decision logic, variables, and operational assumptions are summarized above.}}''
+\textbf{Added:} ``\textcolor{red}{To keep the main text focused on the problem setting and empirical analysis, the complete mathematical formulation used in the ECR case is provided in Appendix~C, while the key decision logic, variables, and operational assumptions are summarized above.}''
 \end{quote}
 
 \item \textbf{Section 5.3, Results Analysis --- MODIFY}
