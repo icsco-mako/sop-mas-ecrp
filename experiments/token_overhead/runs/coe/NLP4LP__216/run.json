@@ -1,0 +1,15 @@
+{
+  "algorithm": "coe",
+  "obj_value": 300.0,
+  "total_tokens": 18572,
+  "llm_calls": 11,
+  "status": true,
+  "duration_s": 56.833,
+  "error_msg": null,
+  "dataset": "NLP4LP",
+  "prob_name": "216",
+  "ground_truth": 300.0,
+  "obj_correct": true,
+  "model": "deepseek-v4-flash",
+  "mako_commit": "fa2cbc80df0b0a6778575c0b499dc94240b9e44f"
+}

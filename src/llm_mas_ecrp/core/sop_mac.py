@@ -262,6 +262,9 @@ def _run_python_developer_code(
                 error_result["formulation_signature"] = signature
             return error_result
 
+        result = {k: v for k, v in result.items()
+                  if isinstance(v, (int, float, str, bool, type(None), dict, list, tuple))}
+
         if signature is not None:
             result["formulation_signature"] = signature
 
@@ -373,6 +376,8 @@ def sop_mac(
     max_collaborate_nums: int = 2,
     is_backtrack: bool = True,
     AGENTs_CONFIG: list = [],
+    client: str = "DeepSeek",
+    model: str = "deepseek-chat",
 ):
     stack = []
     agent_list = [
@@ -381,8 +386,8 @@ def sop_mac(
         if __create_agent(agent_config) is not None
     ]
     pm = ProjectManager(
-        client="DeepSeek",
-        model="deepseek-chat",
+        client=client,
+        model=model,
         agent_list=agent_list,
         max_collaborate_nums=max_collaborate_nums,
     )
@@ -421,17 +426,8 @@ def sop_mac(
     result: Dict = __run_str_code(problem, message_pool)
     logger.info(f"代码执行结果: {result}\n")
     
-    if problem["dataset"] == "NLP4ECR":
-        if result.get("obj_value") is not None:
-            is_success = True
-            error_msg = "None"
-            logger.info(f"NLP4ECR: obj_value={result['obj_value']}, auto-accepted")
-        else:
-            is_success = False
-            error_msg = result.get("error_msg", "obj_value is None")
-    else:
-        [sample_result] = problem["sample"][0]["output"]
-        is_success, error_msg = __verify_result(result, sample_result)
+    [sample_result] = problem["sample"][0]["output"]
+    is_success, error_msg = __verify_result(result, sample_result)
 
     if is_success:
         log_separator(logger, "SUCCESS", "=", 80)
@@ -462,7 +458,7 @@ def sop_mac(
                 }
             except (json.JSONDecodeError, KeyError):
                 pass
-        error_info: str = json.dumps(error_info, ensure_ascii=False)
+        error_info: str = json.dumps(error_info, ensure_ascii=False, default=str)
         try:
             is_error_found, bw_res = __exception_traceback(
                 problem, pm, error_info, stack, message_pool
@@ -493,11 +489,7 @@ def sop_mac(
                     agent_times[agent_name] = exec_time
 
             result: Dict = __run_str_code(problem, message_pool)
-            if problem["dataset"] == "NLP4ECR":
-                is_success = result.get("obj_value") is not None
-                new_error_msg = "None" if is_success else result.get("error_msg", "obj_value is None")
-            else:
-                is_success, new_error_msg = __verify_result(result, sample_result)
+            is_success, new_error_msg = __verify_result(result, sample_result)
             if is_success:
                 log_separator(logger, "SUCCESS AFTER BACKTRACKING", "=", 80)
                 logger.info(

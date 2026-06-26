@@ -1,0 +1,15 @@
+{
+  "algorithm": "optimus",
+  "obj_value": 2480.0,
+  "total_tokens": 9170,
+  "llm_calls": 7,
+  "status": true,
+  "duration_s": 43.315,
+  "error_msg": null,
+  "dataset": "NLP4LP",
+  "prob_name": "143",
+  "ground_truth": 2480.0,
+  "obj_correct": true,
+  "model": "deepseek-v4-flash",
+  "mako_commit": "fa2cbc80df0b0a6778575c0b499dc94240b9e44f"
+}

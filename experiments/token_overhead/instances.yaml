@@ -1,0 +1,33 @@
+# Token-overhead instance sample (pool=NLP4LP n=269, valid=242, size=25, seed=42).
+# Ground-truth-missing rows rejected and topped up on the same RNG stream.
+# Regenerate:  uv run python experiments/token_overhead/select_instances.py
+dataset: NLP4LP
+pool_size: 269
+pool_size_valid: 242
+seed: 42
+instances:
+  - 1
+  - 6
+  - 12
+  - 15
+  - 16
+  - 44
+  - 47
+  - 52
+  - 71
+  - 107
+  - 111
+  - 114
+  - 119
+  - 129
+  - 131
+  - 139
+  - 140
+  - 143
+  - 154
+  - 166
+  - 172
+  - 179
+  - 216
+  - 232
+  - 247

@@ -1,0 +1,15 @@
+{
+  "algorithm": "coe",
+  "obj_value": null,
+  "total_tokens": 24382,
+  "llm_calls": 11,
+  "status": false,
+  "duration_s": 119.926,
+  "error_msg": "'StatusConstClass' object is not subscriptable",
+  "dataset": "NLP4LP",
+  "prob_name": "44",
+  "ground_truth": 1800.0,
+  "obj_correct": false,
+  "model": "deepseek-v4-flash",
+  "mako_commit": "fa2cbc80df0b0a6778575c0b499dc94240b9e44f"
+}

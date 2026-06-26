@@ -1,0 +1,15 @@
+{
+  "algorithm": "spm",
+  "obj_value": 310.0,
+  "total_tokens": 2119,
+  "llm_calls": 1,
+  "status": true,
+  "duration_s": 11.251,
+  "error_msg": null,
+  "dataset": "NLP4LP",
+  "prob_name": "16",
+  "ground_truth": 310.0,
+  "obj_correct": true,
+  "model": "deepseek-v4-flash",
+  "mako_commit": "fa2cbc80df0b0a6778575c0b499dc94240b9e44f"
+}

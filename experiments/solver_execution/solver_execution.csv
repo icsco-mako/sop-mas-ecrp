@@ -1,0 +1,11 @@
+structure,type,n_vars,n_constrs,nnz,obj,correct,wall_ms_mean,wall_ms_std,runtime_ms_mean,iters_mean,nodes,status
+(975,984,nnz=2652),expanded,975,984,2652,1355388.0,True,10.2,5.8,2.0,85,1.0,2
+(370,0,nnz=0),compact,370,0,0,None,False,0.8,0.0,,,None,None
+(458,221,nnz=884),compact,458,221,884,1355388.0,True,5.2,0.3,1.0,102,1.0,2
+(370,130,nnz=718),compact,370,130,718,1355388.0,True,2.3,0.0,0.9,107,1.0,2
+(361,65,nnz=644),compact,361,65,644,1355388.0,True,2.1,0.1,0.8,107,1.0,2
+(370,65,nnz=653),compact,370,65,653,1355388.0,True,2.4,0.1,0.9,107,1.0,2
+(361,130,nnz=709),compact,361,130,709,1355388.0,True,4.8,0.1,0.8,107,1.0,2
+(975,130,nnz=1798),expanded,975,130,1798,1355388.0,True,5.8,0.1,0.9,107,1.0,2
+(370,74,nnz=662),compact,370,74,662,1355388.0,True,2.2,0.1,,,None,None
+(361,0,nnz=0),compact,361,0,0,None,False,0.8,0.1,,,None,None

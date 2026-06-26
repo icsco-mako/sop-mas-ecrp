@@ -1,0 +1,6 @@
+label,n_runs,mean_calls,mean_prompt_tokens,mean_completion_tokens,mean_total_tokens,ar_25,ar_269_ref
+SPM,25,1.0,0,0,1826,0.8000,0.4808
+CoT,25,3.0,0,0,4850,0.7600,0.5226
+CoE,25,11.0,0,0,23080,0.7600,0.6237
+OptiMUS,25,7.1,0,0,9770,0.8400,0.7735
+SOP-MAS,25,11.0,20968,9354,30322,0.8000,0.8659

@@ -1,0 +1,15 @@
+\begin{table}[htbp]
+\centering
+\caption{Prompting token overhead across paradigms on a 25-instance NLP4LP subset (DeepSeek-V4-Flash backbone, $K{=}5$, seed${=}42$). AR(25) is measured on the same runs; AR(269) is cited from Table~\ref{tab:benchmark} (DeepSeek-V3-0324 era).}\label{tab:token_overhead}
+\begin{tabular}{lrrrr}
+\toprule
+Method & \#Calls (mean) & Total tokens (mean) & AR (25) & AR (269, ref) \\
+\midrule
+SPM & 1.0 & 1826 & 80.00\% & 48.08\% \\
+CoT & 3.0 & 4850 & 76.00\% & 52.26\% \\
+CoE & 11.0 & 23080 & 76.00\% & 62.37\% \\
+OptiMUS & 7.1 & 9770 & 84.00\% & 77.35\% \\
+SOP-MAS & 11.0 & 30322 & 80.00\% & 86.59\% \\
+\bottomrule
+\end{tabular}
+\end{table}

@@ -1,0 +1,15 @@
+{
+  "algorithm": "cot",
+  "obj_value": 236.5,
+  "total_tokens": 4271,
+  "llm_calls": 3,
+  "status": true,
+  "duration_s": 19.278,
+  "error_msg": null,
+  "dataset": "NLP4LP",
+  "prob_name": "6",
+  "ground_truth": 224.0,
+  "obj_correct": false,
+  "model": "deepseek-v4-flash",
+  "mako_commit": "fa2cbc80df0b0a6778575c0b499dc94240b9e44f"
+}

@@ -1,0 +1,15 @@
+{
+  "algorithm": "cot",
+  "obj_value": null,
+  "total_tokens": 5105,
+  "llm_calls": 3,
+  "status": false,
+  "duration_s": 28.757,
+  "error_msg": "Use 'import gurobipy as gp' (not '... as grb'). The sandbox only pre-injects 'gp' into the global namespace.",
+  "dataset": "NLP4LP",
+  "prob_name": "140",
+  "ground_truth": 6300.0,
+  "obj_correct": false,
+  "model": "deepseek-v4-flash",
+  "mako_commit": "fa2cbc80df0b0a6778575c0b499dc94240b9e44f"
+}

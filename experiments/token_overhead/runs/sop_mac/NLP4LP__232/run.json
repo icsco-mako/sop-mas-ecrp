@@ -1,0 +1,18 @@
+{
+  "obj_value": 0.0,
+  "prompt_tokens": 20037,
+  "completion_tokens": 8393,
+  "total_tokens": 28430,
+  "llm_calls": 10,
+  "status": true,
+  "duration_s": 89.562,
+  "usage_estimated": false,
+  "error_msg": null,
+  "algorithm": "sop_mac",
+  "dataset": "NLP4LP",
+  "prob_name": "232",
+  "ground_truth": 0.0,
+  "obj_correct": true,
+  "model": "deepseek-v4-flash",
+  "mako_commit": "fa2cbc80df0b0a6778575c0b499dc94240b9e44f"
+}

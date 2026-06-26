@@ -1,0 +1,681 @@
+\documentclass[11pt,a4paper]{article}
+
+\usepackage{amsmath}
+\usepackage{booktabs}
+\usepackage{graphicx}
+\usepackage{longtable}
+\usepackage{tabularx}
+\usepackage{listings}
+\usepackage{xcolor}
+% The manuscript marks revisions with \changed{...}; mirror it here as red text.
+\newcommand{\changed}[1]{\textcolor{red}{#1}}
+\usepackage[most]{tcolorbox}
+\lstset{
+  basicstyle=\small\ttfamily,
+  backgroundcolor=\color{gray!10},
+  frame=single,
+  rulecolor=\color{gray!40},
+  breaklines=true,
+  columns=fullflexible,
+}
+\lstdefinestyle{prompttemplate}{
+  backgroundcolor=\color{gray!6},
+  frame=none,
+  basicstyle=\scriptsize\ttfamily,
+  numbers=none,
+  breaklines=true,
+  breakatwhitespace=true,
+  columns=flexible,
+  keepspaces=true,
+  showstringspaces=false,
+  captionpos=b
+}
+\newtcolorbox{promptbox}{%
+  enhanced,
+  colback=gray!6,
+  colframe=black!35,
+  boxrule=0.35pt,
+  arc=6pt,
+  left=6pt, right=6pt,
+  top=4pt, bottom=4pt,
+}
+\usepackage[colorlinks=true,linkcolor=blue,urlcolor=blue,citecolor=blue]{hyperref}
+\usepackage{geometry}
+\geometry{margin=1in}
+
+\title{Response to Reviewer Comments (Round 2)}
+\author{}
+\date{}
+
+\begin{document}
+\maketitle
+\setcounter{tocdepth}{2}
+\tableofcontents
+\newpage
+
+% ============================================================================
+\section{Overview of Revisions}
+% ============================================================================
+
+% TODO: 总结本轮主要修改
+
+% ============================================================================
+\section{Response to Reviewer \#2}
+% ============================================================================
+
+We sincerely thank Reviewer~\#2 for the positive evaluation and the recommendation for acceptance. We are particularly grateful for the reviewer's insightful and constructive comments in the previous round. Addressing these comments has significantly strengthened our manuscript and deepened our understanding of the underlying issues. We truly appreciate the time and expertise invested, which have guided us to make substantial improvements.
+
+% ============================================================================
+\section{Response to Reviewer \#3}
+% ============================================================================
+
+% ----------------------------------------------------------------------------
+\subsection{Comment 3.1 --- Agent Abbreviations Omitted}
+
+\subsubsection{Comment}
+``In lines 272-279, the redefinition and notation of the agents have resulted in the omission of their abbreviations (e.g., PM-agent, previously denoted as Project Manager Agent (currently denoted as $a_{PM}$)), which are referenced in subsequent content.''
+
+\subsubsection{Response}
+We thank the reviewer for this observation. In the revised manuscript, we have unified the agent naming convention throughout the paper. The abbreviated forms (e.g., PM-Agent, DE-Agent) have been replaced by the full descriptive names accompanied by their symbolic notation (e.g., ``the Project Manager Agent ($a_{\text{PM}}$)''). In purely mathematical contexts such as set definitions and temperature parameters, the symbolic notation alone is retained. This eliminates the redundancy between the three naming layers and ensures consistent notation across all sections.
+
+\subsubsection{Modifications}
+\begin{enumerate}
+\item \textbf{Section 3.1 (Agent Definition) --- MODIFY}
+\begin{quote}
+\textbf{Before:} ``\textbf{PM-Agent:} Responsible for executing state transitions\ldots'', ``\textbf{DE-Agent:} Its role is data engineering\ldots'', etc.\\[4pt]
+\textbf{After:} ``\textcolor{red}{\textbf{Project Manager Agent ($a_{\text{PM}}$):} Responsible for executing state transitions\ldots}'', ``\textcolor{red}{\textbf{Data Engineer Agent ($a_{\text{DE}}$):} Its role is data engineering\ldots}'', etc. Each agent entry now uses the full descriptive name followed by its symbolic notation.
+\end{quote}
+\item \textbf{Sections 3.2--5.3 and Section 6 --- MODIFY}
+\begin{quote}
+All occurrences of abbreviated agent names (PM-Agent, DE-Agent, ME-Agent, PY-Agent, TE-Agent, BA-Agent) throughout the manuscript have been replaced with their full descriptive names accompanied by symbolic notation (e.g., ``the Project Manager Agent ($a_{\text{PM}}$)''). In purely mathematical contexts (e.g., set definitions, temperature parameters), the symbolic notation alone is retained.
+\end{quote}
+\end{enumerate}
+
+% ----------------------------------------------------------------------------
+\subsection{Comment 3.2 --- Variable $x_{ij}$ Lacks Explicit Definition}
+
+\subsubsection{Comment}
+``In line 486, while the definition of the variable $x_{ij}$ may be inferred by readers with a background in operations research, it is advisable to provide an explicit definition to prevent ambiguity.''
+
+\subsubsection{Response}
+We thank the reviewer for this observation. In the revised manuscript, we have added an explicit definition of $x_{ij}$ immediately after its first contextual mention in the illustrative example, clarifying that it denotes the number of empty containers repositioned from port $i$ to port $j$.
+
+\subsubsection{Modifications}
+\begin{enumerate}
+\item \textbf{Section 3.4 (Illustrative Example) --- MODIFY}
+\begin{quote}
+\textbf{Before:} ``\ldots the unit transportation costs $c_{ij}$ range from 2 to 10 \textyen/TEU.''\\[4pt]
+\textbf{After:} ``\ldots the unit transportation costs $c_{ij}$ range from 2 to 10 \textyen/TEU, and $x_{ij}$ \textcolor{red}{denotes the number of empty containers repositioned from port $i$ to port $j$}.''
+\end{quote}
+\end{enumerate}
+
+% ----------------------------------------------------------------------------
+\subsection{Comment 3.3 --- Duplicated ``Appendix'' Term}
+
+\subsubsection{Comment}
+``In line 789, the term `Appendix' is repeated within the sentence.''
+
+\subsubsection{Response}
+We thank the reviewer for identifying this error. The duplication arose because the \texttt{\textbackslash ref} command in the \texttt{elsarticle} class already prepends ``Appendix'' to appendix section numbers. Writing \texttt{Appendix\~{}\textbackslash ref\{app2\}} therefore rendered as ``Appendix Appendix B.'' In the revised manuscript, the redundant prefix has been removed.
+
+\subsubsection{Modifications}
+\begin{enumerate}
+\item \textbf{Section 5.1 (Case Setup) --- MODIFY}
+\begin{quote}
+\textbf{Before:} ``\ldots are detailed in Appendix~B.''\\[4pt]
+\textbf{After:} ``\ldots are detailed in~Appendix~B.'' (removed redundant ``Appendix'' prefix)
+\end{quote}
+\item \textbf{Section 5.2 (Problem Description) --- MODIFY}
+\begin{quote}
+\textbf{Before:} ``The complete mathematical formulation is provided in Appendix~C.''\\[4pt]
+\textbf{After:} ``The complete mathematical formulation is provided in~Appendix~C.'' (removed redundant ``Appendix'' prefix)
+\end{quote}
+\end{enumerate}
+
+% ----------------------------------------------------------------------------
+\subsection{Comment 3.4 --- SAR Variables Undefined}
+
+\subsubsection{Comment}
+``In lines 826-828, the definition of the Structural-Agreement Rate (SAR) is presented with the formulation structure $(n_{vars}, n_{constrs}, n_{bin}, n_{int}, nnz)$; however, these variables lack definition.''
+
+\subsubsection{Response}
+We thank the reviewer for this observation. In the revised manuscript, we have added explicit definitions for all five components of the formulation structure tuple immediately after the SAR definition.
+
+\subsubsection{Modifications}
+\begin{enumerate}
+\item \textbf{Section 5.4 (Formulation Stability Analysis) --- MODIFY}
+\begin{quote}
+\textbf{Before:} ``\ldots the Structural-Agreement Rate (SAR)---defined as pairwise agreement of the formulation structure $(n_{\text{vars}}, n_{\text{constrs}}, n_{\text{bin}}, n_{\text{int}}, \text{nnz})$---has limited discriminative power.''\\[4pt]
+\textbf{After:} ``\ldots the Structural-Agreement Rate (SAR)---defined as pairwise agreement of the formulation structure $(n_{\text{vars}}, n_{\text{constrs}}, n_{\text{bin}}, n_{\text{int}}, \text{nnz})$---has limited discriminative power. \textcolor{red}{Here, $n_{\text{vars}}$ denotes the total number of decision variables, $n_{\text{constrs}}$ the number of constraints, $n_{\text{bin}}$ the number of binary variables, $n_{\text{int}}$ the number of integer variables, and nnz the number of non-zero coefficients in the constraint matrix.}''
+\end{quote}
+\end{enumerate}
+
+% ----------------------------------------------------------------------------
+\subsection{Comment 3.5 --- SAR Definition and Illustrative Example}
+
+\subsubsection{Comment}
+``SAR is described as the `pairwise agreement of the formulation structure,' which does not adequately convey the concept of `Rate.' An example illustrating the calculation of SAR would be beneficial.''
+
+\subsubsection{Response}
+We thank the reviewer for this suggestion. In the revised manuscript, we have added a formal definition of SAR as an equation, specifying that it is computed as the ratio of matching formulation-structure pairs to all possible pairs among feasible runs. This makes the ``Rate'' interpretation explicit: SAR equals 1 when all feasible runs produce identical structures, and 0 when every run yields a distinct structure. The accompanying variable definitions ($F_i$, $R'$, indicator function) further clarify the computation.
+
+\subsubsection{Modifications}
+\begin{enumerate}
+\item \textbf{Section 5.4 (Formulation Stability Analysis) --- ADD}
+\begin{quote}
+\textbf{After:} The variable definitions ($n_{\text{vars}}$, $n_{\text{constrs}}$, $n_{\text{bin}}$, $n_{\text{int}}$, nnz), the following formal definition has been added:
+
+``\textcolor{red}{Let $F_i=(n_{\text{vars}}^i, n_{\text{constrs}}^i, n_{\text{bin}}^i, n_{\text{int}}^i, \text{nnz}^i)$ denote the formulation structure observed in the $i$-th run that produced a valid formulation. The SAR is then computed as $\text{SAR}=\frac{\sum_{1\le i<j\le R'}\mathbf{1}(F_i=F_j)}{\binom{R'}{2}}$, where $R'$ is the number of runs that yielded a formulation structure and $\mathbf{1}(\cdot)$ is the indicator function.}''
+\end{quote}
+\end{enumerate}
+
+% ----------------------------------------------------------------------------
+\subsection{Comment 3.6 --- Structure Notation Missing $n_{bin}$}
+
+\subsubsection{Comment}
+``Additionally, when structures are mentioned (e.g., line 843 (379,130,370,718)), the omission of $n_{bin}$ leads to potential confusion.''
+
+\subsubsection{Response}
+We thank the reviewer for this observation. In the ECR formulation, all integer variables are binary ($n_{\text{bin}}=n_{\text{int}}$), so the original table omitted $n_{\text{bin}}$ to avoid redundancy. In the revised manuscript, we have added an explicit note after the table stating this relationship, ensuring that readers are not confused by the apparent omission.
+
+\subsubsection{Modifications}
+\begin{enumerate}
+\item \textbf{Section 5.4 (Formulation Stability Analysis) --- ADD}
+\begin{quote}
+\textbf{After Table~4:} The following note has been added: ``\textcolor{red}{Note that $n_{\text{bin}}=n_{\text{int}}$ for all formulations in Table~4, as every integer variable in the ECR model is binary; the column is therefore omitted to avoid redundancy.}''
+\end{quote}
+\end{enumerate}
+
+
+% ============================================================================
+\section{Response to Reviewer \#4}
+% ============================================================================
+
+% TODO: 致谢
+
+% ----------------------------------------------------------------------------
+\subsection{Comment 4.1 --- Algebraic Modeling Languages Characterization}
+
+\subsubsection{Comment}
+``The characterization of algebraic modeling languages as inadequate overlooks their structural role as target compilers for the code generated by the system.''
+
+\subsubsection{Response}
+We thank the reviewer for this insightful observation. The original wording did not adequately acknowledge the structural role of AMLs as intermediate representations and compilation targets. In the revised manuscript, we have softened the characterization in the Introduction and added an explicit statement in Section~2.1 recognizing that AMLs serve as solver-agnostic intermediate representations that can function as compilation targets for automatically generated code.
+
+\subsubsection{Modifications}
+\begin{enumerate}
+\item \textbf{Section 1 (Introduction) --- MODIFY}
+\begin{quote}
+\textbf{Before:} ``\ldots they remain inadequate in realizing end-to-end optimization from unstructured business descriptions to MIP formulation.''\\[4pt]
+\textbf{After:} ``\ldots \textcolor{red}{their reliance on expert-authored algebraic expressions means they cannot bridge the gap between unstructured business descriptions and MIP formulation without human intervention.}''
+\end{quote}
+\item \textbf{Section 2.1 (Traditional MIP Solution) --- ADD}
+\begin{quote}
+\textbf{After:} ``\ldots decoupling models from data and enhancing modeling efficiency.''\\[4pt]
+\textbf{Added:} ``\textcolor{red}{These languages serve as structured intermediate representations that formalize optimization models in a solver-agnostic manner, and modern systems such as SOP-MAS can leverage them as compilation targets for automatically generated code.}''
+\end{quote}
+\end{enumerate}
+
+% ----------------------------------------------------------------------------
+\subsection{Comment 4.2 --- Single-Agent Bottlenecks Not Detailed Before Introducing MAS}
+
+\subsubsection{Comment}
+``The text introduces the concept of multi-agent collaboration before detailing the precise failures or bottlenecks of single-agent setups in operations research.''
+
+\subsubsection{Response}
+We thank the reviewer for this observation. In the revised manuscript, we have added concrete examples of single-agent failure modes in OR tasks (e.g., omitted variables or constraints, logically incorrect formulations, compilable but infeasible code) before introducing the MAS paradigm. This establishes a clearer motivation for multi-agent collaboration.
+
+\subsubsection{Modifications}
+\begin{enumerate}
+\item \textbf{Section 1 (Introduction) --- ADD}
+\begin{quote}
+\textbf{After:} ``\ldots which considerably restricts their practical application in critical decision-making systems.''\\[4pt]
+\textbf{Added:} ``\textcolor{red}{Empirical studies have documented characteristic failure modes of single-agent LLMs in optimization tasks: omitting decision variables or constraints that are implicit in the problem description, generating syntactically valid but logically incorrect mathematical formulations, and producing solver code that compiles yet yields infeasible or suboptimal solutions. These errors are particularly difficult to detect in the absence of an independent verification mechanism, as the same agent that generates the model is also responsible for validating it.}''
+\end{quote}
+\end{enumerate}
+
+% ----------------------------------------------------------------------------
+\subsection{Comment 4.3 --- Abrupt Narrative Shift to ECR}
+
+\subsubsection{Comment}
+``The narrative shifts abruptly from generalized large language model limitations to the highly specific application domain of empty container repositioning.''
+
+\subsubsection{Response}
+We thank the reviewer for this observation. In the revised manuscript, we have restructured the Introduction to lead with the ECR problem as the motivating application, establishing its characteristics and challenges before discussing LLM-based solutions. ECR is now introduced in the opening sentence, and the subsequent discussion of MIP limitations, LLM potential, and multi-agent collaboration is framed as responses to the specific demands of this problem rather than a generic narrative that abruptly shifts domain.
+
+\subsubsection{Modifications}
+\begin{enumerate}
+\item \textbf{Section 1 (Introduction, Paragraph~1) --- MODIFY}
+\begin{quote}
+\textbf{Before:} ``Mixed-Integer Programming (MIP) constitutes a fundamental instrument within the domain of Container Supply Chain Management (SCM)\ldots''\\[4pt]
+\textbf{After:} ``\textcolor{red}{Empty Container Repositioning (ECR), the logistical challenge of repositioning surplus empty containers from locations with excess supply to locations with unmet demand, is a central problem in container supply chain management. Optimizing ECR requires multi-period, multi-node, and multi-modal transportation decisions under dynamic supply--demand imbalances, a task commonly formulated as a Mixed-Integer Program (MIP). In practice, however, translating such complex business scenarios into a correct MIP formulation is heavily dependent on domain experts\ldots}''
+\end{quote}
+\item \textbf{Section 1 (Introduction, Paragraph~4) --- MODIFY}
+\begin{quote}
+\textbf{Before:} ``Empty Container Repositioning (ECR) is one of the most representative and challenging problems in container SCM\ldots''\\[4pt]
+\textbf{After:} ``\textcolor{red}{We employ the ECR problem introduced above as an empirical testbed, as its multi-stakeholder, multi-modal complexity and the dual demand for mathematical rigor and business interpretability make it a compelling representative of the class of problems that the proposed framework is designed to address.}''
+\end{quote}
+\end{enumerate}
+
+% ----------------------------------------------------------------------------
+\subsection{Comment 4.4 --- Overlapping Contributions}
+
+\subsubsection{Comment}
+``The listed contributions overlap significantly, with the third and fourth items essentially restating the same empirical validation from different viewpoints.''
+
+\subsubsection{Response}
+We thank the reviewer for this observation. We agree that the original third and fourth contributions described the same empirical work from different angles. In the revised manuscript, we have merged them into a single contribution that presents the framework implementation and its empirical validation on ECR as an integrated claim, and renumbered the contributions from fourfold to threefold.
+
+\subsubsection{Modifications}
+\begin{enumerate}
+\item \textbf{Section 1 (Introduction) --- MODIFY}
+\begin{quote}
+\textbf{Before:} ``\ldots are fourfold: 1)\ldots 3) The implementation of an end-to-end automated modeling and solving framework\ldots 4) The exploratory application of LLM and MAS in container supply chain optimization\ldots''\\[4pt]
+\textbf{After:} ``\ldots \textcolor{red}{are threefold: 1)\ldots 3) The implementation and empirical validation of an end-to-end framework that translates natural language business descriptions into optimized solutions, demonstrated through the sea-land coordinated ECR problem faced by shipping companies in the Liaoning coastal port cluster, which achieved a 12.18\% reduction in total operational costs and thereby verifies both the method's effectiveness and its potential for the digital and intelligent transformation of the port and shipping industry.}''
+\end{quote}
+\end{enumerate}
+
+% ----------------------------------------------------------------------------
+\subsection{Comment 4.5 --- Agent Operational Boundaries and Message Protocols}
+
+\subsubsection{Comment}
+``The roles of the six distinct agents are mapped out without explaining the exact operational boundaries or message protocols that govern their handoffs.''
+
+\subsubsection{Response}
+We thank the reviewer for this observation. In the revised manuscript, we have added a paragraph in Section~3.1 that explicitly defines the operational boundaries (delineated by each agent's prompt template $\mathcal{T}_a$), the message protocol (structured JSON or code outputs communicated through the shared message pool $C$), and the handoff mechanism (governed by the sub-sequence rule $\mathcal{A}^{\uparrow}$).
+
+\subsubsection{Modifications}
+\begin{enumerate}
+\item \textbf{Section 3.1 (Agent Definition) --- ADD}
+\begin{quote}
+\textbf{After:} The agent tuple definition ($a=(f_a, L_a, \mathcal{T}_a, t_a, \mathcal{H}_a)$).\\[4pt]
+\textbf{Added:} ``\textcolor{red}{The operational boundary of each agent is delineated by its prompt template $\mathcal{T}_a$, which specifies the agent's permitted inputs, expected output format, and task scope. Agents interact exclusively through the shared message pool $C$, which serves as a blackboard-style communication medium: each agent reads the current state of $C$, produces a structured output (in JSON or domain-specific code format), and appends it to $C$. This design enforces a clear separation of concerns: no agent directly invokes or modifies another agent's internal state. The handoff between agents is governed by the sub-sequence rule defined in the workflow orchestration (Section~3.2), which constrains the order in which agents can be activated.}''
+\end{quote}
+\end{enumerate}
+
+% ----------------------------------------------------------------------------
+\subsection{Comment 4.6 --- Integrate Guo et al.\ (2024)}
+
+\subsubsection{Comment}
+``Integrate Guo et al. (2024; doi: 10.1002/rob.22361) in Section 2.1 (Traditional MIP Solution).''
+
+\subsubsection{Response}
+We thank the reviewer for this suggestion. We have carefully reviewed this work and, while we appreciate its contribution to optimization in field robotics, we find that its focus on escape entrapment strategies for robotic path planning is not directly aligned with the scope of our paper, which centers on LLM-driven multi-agent collaboration for MIP formulation in container logistics. We have therefore not incorporated this reference to maintain the relevance and focus of our literature review.
+
+\subsubsection{Modifications}
+\begin{enumerate}
+\item No modifications made.
+\end{enumerate}
+
+% ----------------------------------------------------------------------------
+\subsection{Comment 4.7 --- Cite Zhao et al.\ (2024)}
+
+\subsubsection{Comment}
+``Cite Zhao et al. (2024; doi: 10.1109/TIV.2023.3288810) in Section 2.3 (Distributed Collaboration and Optimization in MAS).''
+
+\subsubsection{Response}
+We thank the reviewer for this suggestion. We have reviewed this work and find that its focus on causal intervention for target-driven visual navigation in autonomous vehicles is not directly related to the multi-agent collaboration and optimization modeling addressed in our paper. Incorporating it would dilute the focus of our literature review.
+
+\subsubsection{Modifications}
+\begin{enumerate}
+\item No modifications made.
+\end{enumerate}
+
+% ----------------------------------------------------------------------------
+\subsection{Comment 4.8 --- Reference Huang et al.\ (2025)}
+
+\subsubsection{Comment}
+``Reference Huang et al. (2025; doi: 10.1145/3701551.3703546) in Section 2.2 (Emerging Paradigms from LLMs in Scientific Computing and OR).''
+
+\subsubsection{Response}
+We thank the reviewer for this suggestion. We have reviewed this work and find that its focus on LLM-based recommendation system simulation is not directly aligned with the OR modeling and optimization scope of our paper. We have therefore not incorporated this reference.
+
+\subsubsection{Modifications}
+\begin{enumerate}
+\item No modifications made.
+\end{enumerate}
+
+% ----------------------------------------------------------------------------
+\subsection{Comment 4.9 --- Include Zhang et al.\ (2025, IJPR)}
+
+\subsubsection{Comment}
+``Include Zhang et al. (2025; doi: 10.1080/00207543.2025.2502106) when discussing future research directions.''
+
+\subsubsection{Response}
+We thank the reviewer for this suggestion. We have reviewed this work and find that its focus on multi-objective scheduling for surface mount technology is not directly related to the container logistics and LLM-driven optimization addressed in our paper.
+
+\subsubsection{Modifications}
+\begin{enumerate}
+\item No modifications made.
+\end{enumerate}
+
+% ----------------------------------------------------------------------------
+\subsection{Comment 4.10 --- Incorporate Zhang et al.\ (2025, COR)}
+
+\subsubsection{Comment}
+``Incorporate Zhang et al. (2025; doi: 10.1016/j.cor.2025.107244) in Section 2.1 (Traditional MIP Solution).''
+
+\subsubsection{Response}
+We thank the reviewer for this suggestion. We have reviewed this work and find that its focus on hybrid data-driven flowshop scheduling is not directly aligned with the LLM-based modeling automation and container logistics scope of our paper.
+
+\subsubsection{Modifications}
+\begin{enumerate}
+\item No modifications made.
+\end{enumerate}
+
+% ----------------------------------------------------------------------------
+\subsection{Comment 4.11 --- Integrate Chen et al.\ (2026)}
+
+\subsubsection{Comment}
+``Integrate Chen et al. (2026; doi: 10.1016/j.ress.2025.111520) in Section 3.2 or Section 3.3.''
+
+\subsubsection{Response}
+We thank the reviewer for this suggestion. We have reviewed this work and find that its focus on causal inference-based root cause analysis in reliability engineering is not directly related to the multi-agent workflow orchestration and LLM hallucination mitigation addressed in our paper.
+
+\subsubsection{Modifications}
+\begin{enumerate}
+\item No modifications made.
+\end{enumerate}
+
+% ----------------------------------------------------------------------------
+\subsection{Comment 4.12 --- Cite Xing et al.\ (2025)}
+
+\subsubsection{Comment}
+``Cite Xing et al. (2025; doi: 10.1038/s40494-025-01994-3) to justify future multimodal extensions.''
+
+\subsubsection{Response}
+We thank the reviewer for this suggestion. We have reviewed this work and find that its focus on multimodal AI in heritage science is not directly aligned with the container supply chain optimization scope of our paper. We have therefore not incorporated this reference.
+
+\subsubsection{Modifications}
+\begin{enumerate}
+\item No modifications made.
+\end{enumerate}
+
+% ----------------------------------------------------------------------------
+\subsection{Comment 4.13 --- State-Dependent Decision Function Parameters}
+
+\subsubsection{Comment}
+``The mathematical formalization uses a state-dependent decision function but omits the exact parameters that define the current contextual state dictionary.''
+
+\subsubsection{Response}
+We appreciate the reviewer's attention to detail. We respectfully note that the state dictionary is explicitly defined in the formalization. Specifically, the state $s_k$ is defined as the tuple $(P, C, K-k, \mathcal{A}_k)$ (Section 3.2, Step 2), where $P$ denotes the problem description, $C$ denotes the message pool history, $K-k$ denotes the remaining selection quota, and $\mathcal{A}_k$ denotes the current selectable agent set. These four components fully characterize the contextual state available to the $a_{\text{PM}}$ selection function $\pi_{\mathrm{PM}}$.
+
+\subsubsection{Modifications}
+\begin{enumerate}
+\item No modification required. The state parameters are already defined in Section 3.2.
+\end{enumerate}
+
+% ----------------------------------------------------------------------------
+\subsection{Comment 4.14 --- Sub-Sequence Rule Structural Necessity}
+
+\subsubsection{Comment}
+``The sub-sequence rule relies on an ordered tuple sequence, yet the text fails to justify the structural necessity of this rigid directional hierarchy.''
+
+\subsubsection{Response}
+We thank the reviewer for this observation. The directional hierarchy is not an arbitrary design choice but reflects the intrinsic dependency chain of the optimization modeling process: data extraction ($a_{\text{DE}}$) must precede model formulation ($a_{\text{ME}}$), which must precede code generation ($a_{\text{PY}}$), since each stage's output constitutes a prerequisite for the next. We have added a justification sentence in Section 3.2 to clarify this structural rationale.
+
+\subsubsection{Modifications}
+\begin{enumerate}
+\item \textbf{Section 3.2 (Step 4) --- ADD justification for directional hierarchy}
+\begin{quote}
+\textbf{Before:} ``Finally, push $a_k$ onto the stack $H$.''\\[4pt]
+\textbf{After:} ``Finally, push $a_k$ onto the stack $H$. \changed{This directional hierarchy is structurally necessary because each agent's output constitutes a prerequisite for downstream agents: $a_{\text{DE}}$ produces the structured parameters that $a_{\text{ME}}$ requires to formulate the mathematical model, and $a_{\text{ME}}$'s model specification in turn serves as the input for $a_{\text{PY}}$'s code generation. Allowing out-of-order selection would break this dependency chain and produce incomplete or inconsistent outputs.}''
+\end{quote}
+\end{enumerate}
+
+% ----------------------------------------------------------------------------
+\subsection{Comment 4.15 --- LIFO Backtracking and Combined Failures}
+
+\subsubsection{Comment}
+``The exception backtracking mechanism assumes a last-in-first-out stack model without explaining how the framework handles cases where errors originate from a combined failure of multiple previous agents.''
+
+\subsubsection{Response}
+We thank the reviewer for raising this important point. The LIFO backtracking mechanism handles combined failures through sequential agent querying. When the stack is popped in reverse order, each agent independently evaluates whether its own output contributed to the failure. In a combined failure scenario, multiple agents may sequentially claim responsibility ($\delta_k=1$): the first agent (nearest to the failure point) corrects its output and the framework resumes forward modeling; if the error persists, the next backtracking round reaches the next responsible agent. This iterative process continues until all contributing errors are resolved or the collaboration budget $K$ is exhausted. The mechanism is illustrated in the illustrative example (Section~3.5), where $a_{\text{PY}}$ returns $\delta_3=0$ (not responsible) and $a_{\text{ME}}$ returns $\delta_2=1$ (responsible), demonstrating the sequential propagation logic.
+
+\subsubsection{Modifications}
+\begin{enumerate}
+\item No modification required. The combined failure handling is inherent in the sequential LIFO querying mechanism described in Section 3.2.
+\end{enumerate}
+
+% ----------------------------------------------------------------------------
+\subsection{Comment 4.16 --- Prompt Template Schema Drift Prevention}
+
+\subsubsection{Comment}
+``The prompt template for the modeling expert agent restricts the generation scope to markdown formatting but lacks programmatic constraints to prevent structural schema drift.''
+
+\subsubsection{Response}
+We thank the reviewer for this observation. We acknowledge that the prompt template specifies a markdown output structure (with headings such as \texttt{\# parameter}, \texttt{\# variable}, \texttt{\# objective}, \texttt{\# constraint}) but does not impose programmatic schema validation at the template level. However, schema drift is mitigated at the framework level through two mechanisms: (1) the downstream Python Developer Agent parses the markdown-formatted model specification to extract parameters, variables, objective, and constraints; parsing failures produce error signals that trigger the exception backtracking mechanism (Section~3.5); (2) the Testing Engineer Agent's verification stage (Section 3.4) detects structural or semantic inconsistencies in the generated code, providing a second layer of validation. Thus, while the prompt template itself relies on instruction-level constraints, the multi-agent pipeline enforces structural correctness through end-to-end verification and backtracking.
+
+\subsubsection{Modifications}
+\begin{enumerate}
+\item No modification required. The schema drift risk is mitigated by the framework-level parsing and verification mechanisms described in Sections 3.2 and 3.4.
+\end{enumerate}
+
+% ----------------------------------------------------------------------------
+\subsection{Comment 4.17 --- Reference Long et al.\ (2026)}
+
+\subsubsection{Comment}
+``Reference Long et al. (2026; doi: 10.1016/j.eswa.2025.129759) in Section 6 (Conclusions).''
+
+\subsubsection{Response}
+We thank the reviewer for this suggestion. We have reviewed this work and find that it is not directly aligned with the LLM-driven multi-agent optimization framework and container logistics scope of our paper. We have therefore not incorporated this reference.
+
+\subsubsection{Modifications}
+\begin{enumerate}
+\item No modifications made.
+\end{enumerate}
+
+% ----------------------------------------------------------------------------
+\subsection{Comment 4.18 --- Include Yuan et al.\ (2024)}
+
+\subsubsection{Comment}
+``Include Yuan et al. (2024; doi: 10.1631/FITEE.2300548) in Section 2.2.''
+
+\subsubsection{Response}
+We thank the reviewer for this suggestion. We have reviewed this work and find that it is not directly aligned with the OR modeling and LLM-based optimization scope of our paper. We have therefore not incorporated this reference.
+
+\subsubsection{Modifications}
+\begin{enumerate}
+\item No modifications made.
+\end{enumerate}
+
+% ----------------------------------------------------------------------------
+\subsection{Comment 4.19 --- Cite Liu et al.\ (2025)}
+
+\subsubsection{Comment}
+``Cite Liu et al. (2025; doi: 10.1016/j.knosys.2025.114613) in Section 3.3.''
+
+\subsubsection{Response}
+We thank the reviewer for this suggestion. We have reviewed this work and find that it is not directly related to the multi-agent workflow orchestration and hallucination mitigation mechanisms addressed in our paper. We have therefore not incorporated this reference.
+
+\subsubsection{Modifications}
+\begin{enumerate}
+\item No modifications made.
+\end{enumerate}
+
+% ----------------------------------------------------------------------------
+\subsection{Comment 4.20 --- Integrate Li et al.\ (2026)}
+
+\subsubsection{Comment}
+``Integrate Li et al. (2026; doi: 10.1049/cit2.70108) in Section 2.3.''
+
+\subsubsection{Response}
+We thank the reviewer for this suggestion. We have reviewed this work and find that it is not directly aligned with the LLM-driven multi-agent collaboration and container logistics scope of our paper. We have therefore not incorporated this reference.
+
+\subsubsection{Modifications}
+\begin{enumerate}
+\item No modifications made.
+\end{enumerate}
+
+% ----------------------------------------------------------------------------
+\subsection{Comment 4.21 --- Reference Hu et al.\ (2026)}
+
+\subsubsection{Comment}
+``Reference Hu et al. (2026; doi: 10.1108/BPMJ-10-2025-1657) in Section 1 (Introduction).''
+
+\subsubsection{Response}
+We thank the reviewer for this suggestion. We have reviewed this work and find that it is not directly aligned with the LLM-driven optimization and container logistics scope of our paper. We have therefore not incorporated this reference.
+
+\subsubsection{Modifications}
+\begin{enumerate}
+\item No modifications made.
+\end{enumerate}
+
+% ----------------------------------------------------------------------------
+\subsection{Comment 4.22 --- Include Qin et al.\ (2026)}
+
+\subsubsection{Comment}
+``Include Qin et al. (2026; doi: 10.1145/3757915) in Section 3.2.''
+
+\subsubsection{Response}
+We thank the reviewer for this suggestion. We have reviewed this work and find that it is not directly related to the SOP-based workflow orchestration and multi-agent collaboration addressed in our paper. We have therefore not incorporated this reference.
+
+\subsubsection{Modifications}
+\begin{enumerate}
+\item No modifications made.
+\end{enumerate}
+
+% ----------------------------------------------------------------------------
+\subsection{Comment 4.23 --- Cite Huang et al.\ (2026, TSC)}
+
+\subsubsection{Comment}
+``Cite Huang et al. (2026; doi: 10.1109/TSC.2025.3648444) in Section 3.1.''
+
+\subsubsection{Response}
+We thank the reviewer for this suggestion. We have reviewed this work and find that it is not directly aligned with the agent definition and multi-agent optimization framework addressed in our paper. We have therefore not incorporated this reference.
+
+\subsubsection{Modifications}
+\begin{enumerate}
+\item No modifications made.
+\end{enumerate}
+
+% ----------------------------------------------------------------------------
+\subsection{Comment 4.24 --- Incorporate Yue et al.\ (2026)}
+
+\subsubsection{Comment}
+``Incorporate Yue et al. (2026; doi: 10.1109/TAES.2026.3652115) in Section 2.4.''
+
+\subsubsection{Response}
+We thank the reviewer for this suggestion. We have reviewed this work and find that it is not directly aligned with the container supply chain optimization and LLM-driven modeling scope of our paper. We have therefore not incorporated this reference.
+
+\subsubsection{Modifications}
+\begin{enumerate}
+\item No modifications made.
+\end{enumerate}
+
+% ----------------------------------------------------------------------------
+\subsection{Comment 4.25 --- Formal Computational Complexity Study}
+
+\subsubsection{Comment}
+``The efficiency analysis asserts that runtime is scale-independent based on text length without providing a formal computational complexity study of the local orchestration layers.''
+
+\subsubsection{Response}
+We appreciate this insightful observation. We have added a formal computational complexity analysis characterizing the orchestration overhead of SOP-MAS in Section 3.2 (Orchestration of Workflow Based on SOP-MAS), as the complexity property is an inherent attribute of the framework design. The analysis demonstrates that the total orchestration complexity is $O(K \cdot |\mathcal{A}|)$, where $K$ is the collaboration budget and $|\mathcal{A}|$ is the agent set size. Since $K$ is a small constant (typically 5) and $|\mathcal{A}|=6$, the orchestration overhead is bounded by a constant and remains negligible relative to LLM inference latency.
+
+\subsubsection{Modifications}
+\begin{enumerate}
+\item \textbf{Section 3.3 --- ADD new subsection ``Computational Complexity Analysis''}
+\begin{quote}
+A new subsection (Section 3.3) is added after Section 3.2, containing the following content: ``\changed{To characterize the computational overhead of the orchestration layer itself, we analyze the complexity of the SOP-MAS workflow. Let $K$ denote the collaboration budget. Message-pool append operations are $O(1)$ each, yielding $O(K)$ total overhead. Agent selection by $a_{\text{PM}}$ at each step requires evaluating at most $|\mathcal{A}|$ candidates, contributing $O(K \cdot |\mathcal{A}|)$ across the forward pass. Stack operations for exception backtracking are $O(K)$ in the worst case. The total orchestration complexity is therefore $O(K \cdot |\mathcal{A}|)$, which, for fixed agent set size, reduces to $O(K)$. Since $K$ is a small constant (typically 5) and $|\mathcal{A}|=6$, the orchestration overhead is bounded by a constant and remains negligible relative to LLM inference latency, which dominates the end-to-end runtime. This architectural property ensures that the framework scales gracefully: the actual problem scale, manifested in the number of decision variables and constraints, only affects the solver execution phase, whose scalability has been extensively validated by the OR community.}''
+\end{quote}
+\end{enumerate}
+
+% ----------------------------------------------------------------------------
+\subsection{Comment 4.26 --- Prompting Token Overhead Across Paradigms}
+
+\subsubsection{Comment}
+``The baseline comparison controls the language model backbone but fails to account for variations in prompting token overhead across different paradigms.''
+
+\subsubsection{Response}
+We thank the reviewer for this important observation. We agree that controlling the language-model backbone is necessary but not sufficient for a fair comparison: the prompting token overhead incurred by each paradigm is an equally important dimension that warrants explicit reporting.
+
+To address this, we conducted a supplementary token-overhead analysis, reported in the revised Section~4.4 (new Table~3 and Figure~5). Because the DeepSeek-V3 endpoint employed for Table~1 has since been retired by the provider, token consumption was re-measured on its successor, \textbf{DeepSeek-V4-Flash}, with all five paradigms running on this identical backbone ($K{=}5$; 25 NLP4LP instances randomly sampled with seed~42). We report the mean number of LLM calls and the mean total tokens consumed per instance.
+
+The results show that prompting overhead scales monotonically with the complexity of collaboration: SPM (1 call, ${\approx}1.8$k tokens), CoT (3 calls, ${\approx}4.9$k), OptiMUS (${\approx}7$ calls, ${\approx}9.8$k), CoE (${\approx}11$ calls, ${\approx}23$k), and SOP-MAS (${\approx}11$ calls, ${\approx}30$k). SOP-MAS incurs the highest prompting overhead, which is the expected cost of its multi-agent collaboration with exception backtracking.
+
+This confirms that SOP-MAS is explicitly designed as an accuracy--cost trade-off: the additional inference budget secures the substantially higher accuracy reported in Table~1 (AR 86.59\% versus 48.08--77.35\% for the baselines)---a trade-off we consider favorable for high-stakes deployment where solution correctness outweighs API cost. We disclose that token consumption was measured on DeepSeek-V4-Flash, as the V3-0324 endpoint is no longer served; all five paradigms share this backbone, and the accuracy figures are cited from Table~1.
+
+\subsubsection{Modifications}
+\begin{enumerate}
+\item \textbf{Section 4.4 (Computational Efficiency Analysis) --- ADD token-overhead analysis}
+\begin{quote}
+A new paragraph, Table~3 (mean \#LLM calls and total tokens per paradigm), and Figure~5 (two panels) are appended to Section~4.4. The added discussion reads: ``\textcolor{red}{The prompting overhead scales monotonically with collaboration complexity, from single-shot SPM (${\approx}1.8$k tokens) through CoT, OptiMUS, and CoE, up to SOP-MAS (${\approx}30$k tokens), which carries the cost of multi-agent collaboration with exception backtracking. This confirms that SOP-MAS embodies an explicit accuracy--cost trade-off: the additional inference budget secures the substantially higher accuracy reported in Table~1 (86.59\% versus 48.08--77.35\%), a trade-off favorable for high-stakes deployment where solution correctness outweighs API cost.}''
+\end{quote}
+\end{enumerate}
+
+% ----------------------------------------------------------------------------
+\subsection{Comment 4.27 --- Structural Diversity and Solver Execution}
+
+\subsubsection{Comment}
+``The structural diversity observed in the stability experiment is dismissed as equivalent encoding, neglecting the potential impact on solver execution variations.''
+
+\subsubsection{Response}
+We thank the reviewer for this important clarification request, and we agree that mathematical equivalence of formulations does not imply identical solver execution. Structurally distinct encodings differ in size, sparsity, and conditioning, and can therefore differ in solve time, presolve behavior, and numerical characteristics. Our use of ``equivalent encodings'' in Section~4.6 was intended to denote equivalence in \emph{optimal objective value}, not equivalence in solver behavior; we welcome the opportunity to characterize the solver-execution dimension explicitly.
+
+We re-executed the solver on each of the distinct formulation structures produced in the stability experiment (Section~4.6), re-using the generated model code (no additional LLM calls). The table below reports, for each feasible structure, the formulation size, the mean wall-clock solve time (5 repeats), the simplex iteration count, and the resulting objective.
+
+\begin{center}
+\small
+\begin{tabular}{lcccc}
+\toprule
+$(n_{\text{vars}}, n_{\text{constrs}}, \text{nnz})$ & Type & Wall (ms) & Simplex iters & Objective \\
+\midrule
+$(361, 65, 644)$   & compact  & 2.1  & 107 & 1{,}355{,}388 \\
+$(361, 130, 709)$  & compact  & 4.8  & 107 & 1{,}355{,}388 \\
+$(370, 65, 653)$   & compact  & 2.4  & 107 & 1{,}355{,}388 \\
+$(370, 74, 662)$   & compact  & 2.2  & --- & 1{,}355{,}388 \\
+$(370, 130, 718)$  & compact  & 2.3  & 107 & 1{,}355{,}388 \\
+$(458, 221, 884)$  & compact  & 5.2  & 102 & 1{,}355{,}388 \\
+$(975, 130, 1798)$ & expanded & 5.8  & 107 & 1{,}355{,}388 \\
+$(975, 984, 2652)$ & expanded & 10.2 & 85  & 1{,}355{,}388 \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+Across the eight feasible structures ($n_{\text{vars}}$ from 361 to 975; nnz from 644 to 2{,}652), every encoding converges to the identical optimum (CNY~1{,}355{,}388) at the root node. Solver execution does vary with structure, as the reviewer anticipates: simplex iterations range from 85 to 107, and wall-clock solve time from ${\approx}2$\,ms for the compact encodings ($n_{\text{vars}}\!\approx\!361$--$458$) to ${\approx}6$--$10$\,ms for the expanded encodings ($n_{\text{vars}}\!\approx\!975$), a roughly $2$--$5\times$ difference. (Two further generated structures recorded no constraints and did not yield a feasible solve; they are excluded here and correspond to the code-execution failure mode already discussed in Section~4.6.)
+
+Crucially, this variation is bounded and inconsequential for the framework: every feasible structure attains the correct optimum, and the entire solve-time range ($<\!11$\,ms) is negligible relative to the LLM-driven modeling latency (${\approx}48$\,s per instance, Section~4.4). We therefore clarify that ``equivalent encoding'' refers to objective equivalence; the resulting solver-execution variation is real but bounded, and does not affect the framework's correctness or its end-to-end runtime. We have added a clarifying sentence in Section~4.6 noting that ``equivalent'' refers to objective value, with the execution dimension characterized in this response.
+
+\subsubsection{Modifications}
+\begin{enumerate}
+\item \textbf{Section~4.6 --- ADD clarifying sentence.} A sentence is added noting that ``equivalent encodings'' refers to optimal objective value rather than solver behavior, and that the resulting solver-execution differences are bounded and negligible at this scale. The quantitative characterization (table above) is provided in this response.
+\end{enumerate}
+
+% ----------------------------------------------------------------------------
+\subsection{Comment 4.28 --- Cost Reduction Decomposition}
+
+\subsubsection{Comment}
+``The reported reduction in total operational cost combines disparate logistics activities, making it difficult to isolate the exact efficiency gains of lateral land routes.''
+
+\subsubsection{Response}
+% TODO
+
+\subsubsection{Modifications}
+\begin{enumerate}
+\item \textbf{Section X.X --- MODIFY/ADD}
+\begin{quote}
+\textbf{Before:} ``TODO''\\[4pt]
+\textbf{After:} ``\textcolor{red}{TODO}''
+\end{quote}
+\end{enumerate}
+
+% ----------------------------------------------------------------------------
+\subsection{Comment 4.29 --- Human Expert as Core Architectural Layer}
+
+\subsubsection{Comment}
+``The conclusion relies on human expert integration as a caveat rather than synthesizing it as a core architectural layer of the proposed system.''
+
+\subsubsection{Response}
+We thank the reviewer for this valuable suggestion. We have revised the conclusion to reposition human-in-the-loop integration as a deliberate architectural design rather than a limitation. The revised text explicitly identifies three core functions that domain experts provide within the SOP-MAS architecture: (i) validation of model assumptions, (ii) business-rule checking, and (iii) strategic acceptance of optimized solutions. This reframing reflects our design philosophy that high-stakes optimization requires both mathematical rigor and domain-specific judgment.
+
+\subsubsection{Modifications}
+\begin{enumerate}
+\item \textbf{Section 6 (Conclusions) --- MODIFY human expert framing}
+\begin{quote}
+\textbf{Before:} ``At present, LLM-based AI agents are incapable of fully supplanting human experts; domain-specific agents primarily serve as auxiliary AI copilots. Consequently, the proposed method has been experimentally validated solely within the context of MIP and cannot entirely substitute human expertise.''\\[4pt]
+\textbf{After:} ``\changed{SOP-MAS is deliberately designed as an expert-in-the-loop decision support system, where human expertise constitutes a core architectural layer. Domain experts provide three essential functions: (i) validation of model assumptions against operational constraints, (ii) business-rule checking for contractual and regulatory compliance, and (iii) strategic acceptance of optimized solutions before deployment.}''
+\end{quote}
+\end{enumerate}
+
+
+\end{document}

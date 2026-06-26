@@ -1,0 +1,55 @@
+# Token Overhead Experiment — Reviewer Comment 4.26
+# ---------------------------------------------------------------------------
+# Measures per-paradigm prompting token overhead (#Calls, prompt/completion/
+# total tokens) on a controlled backbone, responding to the reviewer's concern
+# that "the baseline comparison controls the language model backbone but fails
+# to account for variations in prompting token overhead across paradigms".
+#
+# Backbone note: the DeepSeek-V3 family (incl. the paper's V3-0324) has been
+# sunset by the provider — api.deepseek.com now serves only V4. All five
+# paradigms therefore run on the SAME successor backbone (DeepSeek-V4-Flash),
+# preserving the controlled comparison. See README.md for the disclosure text.
+
+mako_root: ../mako                                  # relative to llm_mas_ecrp root
+mako_commit: fa2cbc80df0b0a6778575c0b499dc94240b9e44f
+
+llm:
+  provider: DeepSeek
+  model: deepseek-v4-flash                          # successor to sunset V3-0324
+  base_url_env: DEEPSEEK_BASE_URL                   # both repos share one .env -> api.deepseek.com
+  temperature: 0.0
+  top_p: 1.0
+
+sample:
+  pool: NLP4LP                                      # 269-row LP/MIP benchmark (bulk of Table 1's 269)
+  pool_size: 269
+  size: 25
+  seed: 42                                          # reproducible; instances.yaml is checked in
+
+methods: [sop_mac, spm, cot, coe, optimus]
+
+pipeline:
+  max_collaborate_nums: 5                           # K=5, matches Table 1
+  is_backtrack: true                                # matches Table 1 (SOP-MAS)
+  coe_max_collaborate_nums: 5
+  optimus_max_selections: 5                         # align selection budget with K=5
+
+repeats: 1                                          # tokens stable at T=0; 1 run/instance/method
+
+# Table 1 reference AR (269 instances, DeepSeek-V3-0324 era) — CITED, not re-measured.
+# Shown only as a reference column; this experiment re-measures tokens on V4-Flash.
+ar_full_benchmark:
+  spm: 0.4808
+  cot: 0.5226
+  coe: 0.6237
+  optimus: 0.7735
+  sop_mac: 0.8659
+
+output:
+  runs_dir: experiments/token_overhead/runs
+  summary_csv: experiments/token_overhead/summary.csv
+  summary_md: experiments/token_overhead/summary.md
+  summary_tex: experiments/token_overhead/summary.tex
+  figure: experiments/token_overhead/fig_token_tradeoff.pdf
+
+concurrency: 1                                      # SOP-MAS runs sequential for correct per-run token attribution

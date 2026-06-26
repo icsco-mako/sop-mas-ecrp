@@ -12,6 +12,6 @@
 - `baseline/`：基线方法（已设置只读保护）
 - `model_p2p_compare/`：模型比较与数据（已设置只读保护）
 - `tests/`：单元测试占位
-- `pyproject.toml`：Poetry 配置
+- `pyproject.toml`：uv 项目配置（hatchling 构建）
 
-运行方式：`poetry run python main.py`（根据实际入口调整）
+运行方式：`uv run python src/llm_mas_ecrp/main.py`（根据实际入口调整）
