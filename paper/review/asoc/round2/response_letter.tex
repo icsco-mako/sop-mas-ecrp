@@ -294,104 +294,49 @@ We thank the reviewer for this observation. In the revised manuscript, we have a
 \end{enumerate}
 
 % ----------------------------------------------------------------------------
-\subsection{Comment 4.6 --- Integrate Guo et al.\ (2024)}
+\subsection{Comments 4.6--4.12, 4.17--4.24 --- Suggested References}
 
-\subsubsection{Comment}
-``Integrate Guo et al. (2024; doi: 10.1002/rob.22361) in Section 2.1 (Traditional MIP Solution).''
+\subsubsection{Comments}
+The reviewer suggested fifteen additional references (Comments 4.6--4.12 and 4.17--4.24) for integration at various points of the manuscript.
 
 \subsubsection{Response}
-We thank the reviewer for this suggestion. We have carefully reviewed this work and, while we appreciate its contribution to optimization in field robotics, we find that its focus on escape entrapment strategies for robotic path planning is not directly aligned with the scope of our paper, which centers on LLM-driven multi-agent collaboration for MIP formulation in container logistics. We have therefore not incorporated this reference to maintain the relevance and focus of our literature review.
+We thank the reviewer for these suggestions. We reviewed each work against the scope of our paper---LLM-driven multi-agent collaboration for the automated modeling and solution of OR (MIP) problems, instantiated on empty container repositioning (ECR). Four works that directly advance LLM/AI-driven optimization or contextualize the supply-chain setting of our study have been incorporated into the revised Literature Review (Section~2); the remaining eleven address topics outside this scope and are not incorporated. The per-reference disposition and rationale are given in Table~\ref{tab:ref_disposition}.
+
+The four incorporated references strengthen the review as follows. Zhang et al.\ (2025, \emph{Computers \& OR}) exemplifies the shift from purely expert-built models toward knowledge- and data-driven hybrid optimization, and is added in Section~2.1. Yuan et al.\ (2024, \emph{FITEE}) and Li et al.\ (2026, \emph{CAAI Trans.\ Intell.\ Technol.}) broaden the coverage of LLM/Transformer-based decision-making and optimization, and are added in Section~2.2. Hu et al.\ (2026, \emph{BPMJ}) contextualizes the supply-chain-digitalization background of ECR, and is added in Section~2.4. Where a reviewer-suggested section did not coincide with the revised structure, we placed the citation at its most natural location.
+
+\begin{table}[htbp]
+\centering
+\small
+\caption{Disposition of the fifteen suggested references (Comments 4.6--4.12, 4.17--4.24).}\label{tab:ref_disposition}
+\begin{tabular}{llp{8cm}}
+\toprule
+\# & Reference (topic) & Disposition \\
+\midrule
+4.6  & Guo et al.\ (2024) & Decline: planetary-rover escape-path planning, outside OR modeling \\
+4.7  & Zhao et al.\ (2024) & Decline: target-driven visual navigation for vehicles \\
+4.8  & Huang et al.\ (2025) & Decline: LLM for cold-start recommendation, not optimization \\
+4.9  & Zhang et al.\ (2025, IJPR) & Decline: SMT scheduling metaheuristics, no LLM/MAS angle \\
+\textbf{4.10} & \textbf{Zhang et al.\ (2025, COR)} & \textbf{Incorporated, Sec.~2.1: knowledge-/data-driven hybrid optimization} \\
+4.11 & Chen et al.\ (2026) & Decline: causal multi-modal root-cause analysis \\
+4.12 & Xing et al.\ (2025) & Decline: multimodal AI for cultural-heritage sculpture analysis \\
+4.17 & Long et al.\ (2026) & Decline: AutoML scheduling for space-surveillance \\
+\textbf{4.18} & \textbf{Yuan et al.\ (2024)} & \textbf{Incorporated, Sec.~2.2: Transformer+RL decision-making survey} \\
+4.19 & Liu et al.\ (2025) & Decline: deep-RL sample-efficient method, not LLM-MAS \\
+\textbf{4.20} & \textbf{Li et al.\ (2026)} & \textbf{Incorporated, Sec.~2.2: LLM fine-tuning for combinatorial optimization} \\
+\textbf{4.21} & \textbf{Hu et al.\ (2026)} & \textbf{Incorporated, Sec.~2.4: supply-chain digitalization context} \\
+4.22 & Qin et al.\ (2026) & Decline: software fault localization (semantic code search) \\
+4.23 & Huang et al.\ (2026) & Decline: LLM for mobile-app usage data generation \\
+4.24 & Yue et al.\ (2026) & Decline: ADS-B aviation data authentication, unrelated \\
+\bottomrule
+\end{tabular}
+\end{table}
 
 \subsubsection{Modifications}
 \begin{enumerate}
-\item No modifications made.
+\item \textbf{Section~2.1} --- added a sentence citing Zhang et al.\ (2025) on knowledge-/data-driven hybrid optimization (Comment 4.10).
+\item \textbf{Section~2.2} --- added a sentence citing Yuan et al.\ (2024) and Li et al.\ (2026) on Transformer/LLM-based optimization (Comments 4.18, 4.20).
+\item \textbf{Section~2.4} --- added a sentence citing Hu et al.\ (2026) on supply-chain digitalization (Comment 4.21).
 \end{enumerate}
-
-% ----------------------------------------------------------------------------
-\subsection{Comment 4.7 --- Cite Zhao et al.\ (2024)}
-
-\subsubsection{Comment}
-``Cite Zhao et al. (2024; doi: 10.1109/TIV.2023.3288810) in Section 2.3 (Distributed Collaboration and Optimization in MAS).''
-
-\subsubsection{Response}
-We thank the reviewer for this suggestion. We have reviewed this work and find that its focus on causal intervention for target-driven visual navigation in autonomous vehicles is not directly related to the multi-agent collaboration and optimization modeling addressed in our paper. Incorporating it would dilute the focus of our literature review.
-
-\subsubsection{Modifications}
-\begin{enumerate}
-\item No modifications made.
-\end{enumerate}
-
-% ----------------------------------------------------------------------------
-\subsection{Comment 4.8 --- Reference Huang et al.\ (2025)}
-
-\subsubsection{Comment}
-``Reference Huang et al. (2025; doi: 10.1145/3701551.3703546) in Section 2.2 (Emerging Paradigms from LLMs in Scientific Computing and OR).''
-
-\subsubsection{Response}
-We thank the reviewer for this suggestion. We have reviewed this work and find that its focus on LLM-based recommendation system simulation is not directly aligned with the OR modeling and optimization scope of our paper. We have therefore not incorporated this reference.
-
-\subsubsection{Modifications}
-\begin{enumerate}
-\item No modifications made.
-\end{enumerate}
-
-% ----------------------------------------------------------------------------
-\subsection{Comment 4.9 --- Include Zhang et al.\ (2025, IJPR)}
-
-\subsubsection{Comment}
-``Include Zhang et al. (2025; doi: 10.1080/00207543.2025.2502106) when discussing future research directions.''
-
-\subsubsection{Response}
-We thank the reviewer for this suggestion. We have reviewed this work and find that its focus on multi-objective scheduling for surface mount technology is not directly related to the container logistics and LLM-driven optimization addressed in our paper.
-
-\subsubsection{Modifications}
-\begin{enumerate}
-\item No modifications made.
-\end{enumerate}
-
-% ----------------------------------------------------------------------------
-\subsection{Comment 4.10 --- Incorporate Zhang et al.\ (2025, COR)}
-
-\subsubsection{Comment}
-``Incorporate Zhang et al. (2025; doi: 10.1016/j.cor.2025.107244) in Section 2.1 (Traditional MIP Solution).''
-
-\subsubsection{Response}
-We thank the reviewer for this suggestion. We have reviewed this work and find that its focus on hybrid data-driven flowshop scheduling is not directly aligned with the LLM-based modeling automation and container logistics scope of our paper.
-
-\subsubsection{Modifications}
-\begin{enumerate}
-\item No modifications made.
-\end{enumerate}
-
-% ----------------------------------------------------------------------------
-\subsection{Comment 4.11 --- Integrate Chen et al.\ (2026)}
-
-\subsubsection{Comment}
-``Integrate Chen et al. (2026; doi: 10.1016/j.ress.2025.111520) in Section 3.2 or Section 3.3.''
-
-\subsubsection{Response}
-We thank the reviewer for this suggestion. We have reviewed this work and find that its focus on causal inference-based root cause analysis in reliability engineering is not directly related to the multi-agent workflow orchestration and LLM hallucination mitigation addressed in our paper.
-
-\subsubsection{Modifications}
-\begin{enumerate}
-\item No modifications made.
-\end{enumerate}
-
-% ----------------------------------------------------------------------------
-\subsection{Comment 4.12 --- Cite Xing et al.\ (2025)}
-
-\subsubsection{Comment}
-``Cite Xing et al. (2025; doi: 10.1038/s40494-025-01994-3) to justify future multimodal extensions.''
-
-\subsubsection{Response}
-We thank the reviewer for this suggestion. We have reviewed this work and find that its focus on multimodal AI in heritage science is not directly aligned with the container supply chain optimization scope of our paper. We have therefore not incorporated this reference.
-
-\subsubsection{Modifications}
-\begin{enumerate}
-\item No modifications made.
-\end{enumerate}
-
-% ----------------------------------------------------------------------------
 \subsection{Comment 4.13 --- State-Dependent Decision Function Parameters}
 
 \subsubsection{Comment}
@@ -449,118 +394,6 @@ We thank the reviewer for this observation. We acknowledge that the prompt templ
 \subsubsection{Modifications}
 \begin{enumerate}
 \item No modification required. The schema drift risk is mitigated by the framework-level parsing and verification mechanisms described in Sections 3.2 and 3.4.
-\end{enumerate}
-
-% ----------------------------------------------------------------------------
-\subsection{Comment 4.17 --- Reference Long et al.\ (2026)}
-
-\subsubsection{Comment}
-``Reference Long et al. (2026; doi: 10.1016/j.eswa.2025.129759) in Section 6 (Conclusions).''
-
-\subsubsection{Response}
-We thank the reviewer for this suggestion. We have reviewed this work and find that it is not directly aligned with the LLM-driven multi-agent optimization framework and container logistics scope of our paper. We have therefore not incorporated this reference.
-
-\subsubsection{Modifications}
-\begin{enumerate}
-\item No modifications made.
-\end{enumerate}
-
-% ----------------------------------------------------------------------------
-\subsection{Comment 4.18 --- Include Yuan et al.\ (2024)}
-
-\subsubsection{Comment}
-``Include Yuan et al. (2024; doi: 10.1631/FITEE.2300548) in Section 2.2.''
-
-\subsubsection{Response}
-We thank the reviewer for this suggestion. We have reviewed this work and find that it is not directly aligned with the OR modeling and LLM-based optimization scope of our paper. We have therefore not incorporated this reference.
-
-\subsubsection{Modifications}
-\begin{enumerate}
-\item No modifications made.
-\end{enumerate}
-
-% ----------------------------------------------------------------------------
-\subsection{Comment 4.19 --- Cite Liu et al.\ (2025)}
-
-\subsubsection{Comment}
-``Cite Liu et al. (2025; doi: 10.1016/j.knosys.2025.114613) in Section 3.3.''
-
-\subsubsection{Response}
-We thank the reviewer for this suggestion. We have reviewed this work and find that it is not directly related to the multi-agent workflow orchestration and hallucination mitigation mechanisms addressed in our paper. We have therefore not incorporated this reference.
-
-\subsubsection{Modifications}
-\begin{enumerate}
-\item No modifications made.
-\end{enumerate}
-
-% ----------------------------------------------------------------------------
-\subsection{Comment 4.20 --- Integrate Li et al.\ (2026)}
-
-\subsubsection{Comment}
-``Integrate Li et al. (2026; doi: 10.1049/cit2.70108) in Section 2.3.''
-
-\subsubsection{Response}
-We thank the reviewer for this suggestion. We have reviewed this work and find that it is not directly aligned with the LLM-driven multi-agent collaboration and container logistics scope of our paper. We have therefore not incorporated this reference.
-
-\subsubsection{Modifications}
-\begin{enumerate}
-\item No modifications made.
-\end{enumerate}
-
-% ----------------------------------------------------------------------------
-\subsection{Comment 4.21 --- Reference Hu et al.\ (2026)}
-
-\subsubsection{Comment}
-``Reference Hu et al. (2026; doi: 10.1108/BPMJ-10-2025-1657) in Section 1 (Introduction).''
-
-\subsubsection{Response}
-We thank the reviewer for this suggestion. We have reviewed this work and find that it is not directly aligned with the LLM-driven optimization and container logistics scope of our paper. We have therefore not incorporated this reference.
-
-\subsubsection{Modifications}
-\begin{enumerate}
-\item No modifications made.
-\end{enumerate}
-
-% ----------------------------------------------------------------------------
-\subsection{Comment 4.22 --- Include Qin et al.\ (2026)}
-
-\subsubsection{Comment}
-``Include Qin et al. (2026; doi: 10.1145/3757915) in Section 3.2.''
-
-\subsubsection{Response}
-We thank the reviewer for this suggestion. We have reviewed this work and find that it is not directly related to the SOP-based workflow orchestration and multi-agent collaboration addressed in our paper. We have therefore not incorporated this reference.
-
-\subsubsection{Modifications}
-\begin{enumerate}
-\item No modifications made.
-\end{enumerate}
-
-% ----------------------------------------------------------------------------
-\subsection{Comment 4.23 --- Cite Huang et al.\ (2026, TSC)}
-
-\subsubsection{Comment}
-``Cite Huang et al. (2026; doi: 10.1109/TSC.2025.3648444) in Section 3.1.''
-
-\subsubsection{Response}
-We thank the reviewer for this suggestion. We have reviewed this work and find that it is not directly aligned with the agent definition and multi-agent optimization framework addressed in our paper. We have therefore not incorporated this reference.
-
-\subsubsection{Modifications}
-\begin{enumerate}
-\item No modifications made.
-\end{enumerate}
-
-% ----------------------------------------------------------------------------
-\subsection{Comment 4.24 --- Incorporate Yue et al.\ (2026)}
-
-\subsubsection{Comment}
-``Incorporate Yue et al. (2026; doi: 10.1109/TAES.2026.3652115) in Section 2.4.''
-
-\subsubsection{Response}
-We thank the reviewer for this suggestion. We have reviewed this work and find that it is not directly aligned with the container supply chain optimization and LLM-driven modeling scope of our paper. We have therefore not incorporated this reference.
-
-\subsubsection{Modifications}
-\begin{enumerate}
-\item No modifications made.
 \end{enumerate}
 
 % ----------------------------------------------------------------------------
