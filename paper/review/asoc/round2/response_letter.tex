@@ -54,12 +54,6 @@
 \newpage
 
 % ============================================================================
-\section{Overview of Revisions}
-% ============================================================================
-
-% TODO: 总结本轮主要修改
-
-% ============================================================================
 \section{Response to Reviewer \#2}
 % ============================================================================
 
@@ -191,7 +185,7 @@ We thank the reviewer for this observation. In the ECR formulation, all integer 
 \section{Response to Reviewer \#4}
 % ============================================================================
 
-% TODO: 致谢
+We sincerely thank Reviewer~\#4 for the thorough and constructive evaluation of our manuscript. The 29 detailed comments prompted substantial improvements, including new experimental analyses (token overhead across paradigms, solver-execution characterization), the computational complexity analysis, clarifying refinements to the SAR formula and the subsequence rule, a consolidated literature review incorporating four additional references, and multiple clarifications throughout. We are grateful for the time and expertise that made this round of revision significantly strengthen the paper.
 
 % ----------------------------------------------------------------------------
 \subsection{Comment 4.1 --- Algebraic Modeling Languages Characterization}
@@ -481,14 +475,18 @@ Crucially, this variation is bounded and inconsequential for the framework: ever
 ``The reported reduction in total operational cost combines disparate logistics activities, making it difficult to isolate the exact efficiency gains of lateral land routes.''
 
 \subsubsection{Response}
-% TODO
+We thank the reviewer for this observation. The comparison between Scenario~1 (hinterland lateral repositioning enabled) and Scenario~2 (inter-dry-port exchange disabled) is a controlled pairwise contrast: the two scenarios differ in exactly one design variable---the availability of lateral land routes---while sharing the same network structure, cost parameters, and demand data. Therefore, the full CNY~165,052 (12.18\%) reduction in total cost is attributable entirely to enabling hinterland lateral repositioning.
+
+Decomposing the marginal effect (Table~4): enabling lateral land routes introduces a new cost of CNY~110,718 (hinterland lateral repositioning) but avoids CNY~269,958 in sea--land repositioning and CNY~10,500 in leasing, yielding a net saving of CNY~165,052 after accounting for a CNY~6,720 increase in holding cost (the latter reflects longer dwell times caused by the expanded set of inland storage nodes). The decomposition confirms that the primary efficiency gain of lateral land routes is their substitution effect on costlier sea--dry corridors.
+
+We have added a clarifying sentence in Section~5.3 explicitly framing the 12.18\% reduction as the marginal effect of the lateral land route under the controlled scenario pair.
 
 \subsubsection{Modifications}
 \begin{enumerate}
-\item \textbf{Section X.X --- MODIFY/ADD}
+\item \textbf{Section~5.3 (Results Analysis) --- ADD clarifying sentence.}
 \begin{quote}
-\textbf{Before:} ``TODO''\\[4pt]
-\textbf{After:} ``\textcolor{red}{TODO}''
+\textbf{After:} ``\ldots enabling hinterland lateral repositioning yields a 12.18\% reduction in total operational costs.''\\[4pt]
+\textbf{Added:} ``\textcolor{red}{Because the two scenarios differ solely in whether hinterland lateral repositioning is enabled, this entire reduction is the marginal effect attributable to the lateral land route: the CNY~110,718 spent on hinterland lateral repositioning avoids CNY~269,958 in sea--land repositioning and CNY~10,500 in leasing, yielding a net saving of CNY~165,052 after accounting for a CNY~6,720 increase in holding cost.}''
 \end{quote}
 \end{enumerate}
 
