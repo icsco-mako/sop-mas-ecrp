@@ -64,18 +64,15 @@ def run_one(code: str, data, captured: dict) -> dict:
     t0 = time.perf_counter()
     res = env["optimize"](data)
     wall = time.perf_counter() - t0
-    m = captured.get("model")
+    snap = captured.get("snap", {})
     out = {"wall": wall, "obj": None, "runtime": None, "iters": None,
            "nodes": None, "status": None}
     if isinstance(res, dict):
         out["obj"] = res.get("obj_value")
-    if m is not None:
-        for attr, key in [("Runtime", "runtime"), ("IterCount", "iters"),
-                          ("NodeCount", "nodes"), ("Status", "status")]:
-            try:
-                out[key] = m.getAttr(attr)
-            except (gurobipy.GurobiError, AttributeError):
-                pass
+    for attr, key in [("Runtime", "runtime"), ("IterCount", "iters"),
+                      ("NodeCount", "nodes"), ("Status", "status")]:
+        if attr in snap:
+            out[key] = snap[attr]
     return out
 
 
@@ -98,7 +95,17 @@ def main() -> None:
         except (gurobipy.GurobiError, AttributeError):
             pass
         r = _orig(self)
+        # Snapshot solver metrics immediately, while the model is still alive.
+        # Some generated optimize() routines dispose/reset the model before
+        # returning, which would make a post-hoc getAttr() raise GurobiError.
+        snap = {}
+        for attr in ("Runtime", "IterCount", "NodeCount", "Status"):
+            try:
+                snap[attr] = self.getAttr(attr)
+            except (gurobipy.GurobiError, AttributeError):
+                pass
         captured["model"] = self
+        captured["snap"] = snap
         return r
 
     gurobipy.Model.optimize = _patched
