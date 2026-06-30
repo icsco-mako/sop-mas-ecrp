@@ -259,7 +259,11 @@ The contributions of this paper are threefold: 1) The introduction of workflow o
 
 
 \section{Literature Review}
-This research focuses on a category of problems that are essential and extensively applied within the field of OR: the automated modeling and resolution of MIP problems. This section provides a review of pertinent advancements that are central to this core theme, establishing the foundation for the subsequently proposed paradigm, which employs container SCM as a representative application scenario.
+This research focuses on a category of problems that are essential and extensively applied within the field of OR: the automated modeling and resolution of MIP problems. This section provides a review of pertinent advancements that are central to this core theme, establishing the foundation for the subsequently proposed paradigm, which employs container SCM as a representative application scenario. \changed{We organize this review in two parts. We first survey the empty container repositioning challenges that motivate this work. We then trace the evolution of MIP modeling paradigms used to address such problems, from the expert-driven traditional approach, through the emerging paradigm in which a \emph{single} LLM handles the entire modeling-to-solving pipeline, to the multi-agent collaborative paradigm on which our work builds.}
+
+\subsection{Overview of Empty Container Repositioning Challenges}
+
+The issue of ECR presents a significant challenge within the domain of the container supply chain, and has long been an important research topic in academia. \changed{The broader trend of supply chain digitalization \citep{huImpactSupplyChain2026} further accentuates the need for agile, data-driven repositioning decisions.} Traditionally, ECR research has concentrated on a single mode of repositioning between seaports via maritime routes, emphasizing the optimization of components such as ship routing \citep{xiangLinerFleetDeployment2024,xiangTacticalVesselDeployment2024,xuEmptyContainerRepositioning2024}, shipping network design \citep{kuzmiczContainerDepotLocation2020, shanExactAlgorithmInland2020, zhangTacticalOperationalCooperative2019}, and slot allocation \citep{liangDynamicContainerSlot2024} through MIP. \citet{yuPricingCompetitionMaritime2024} explored the dynamics of pricing competition in maritime transport under blockchain technology and ECR, determining perceived container leasing prices through inverse optimization methodologies. These investigations tend to disregard the particularities associated with land transport – specifically, when shipping companies utilize their own fleets, the marginal cost of sea repositioning approaches zero, starkly contrasting with the costly nature of land transport. Inland container transportation, which encompasses the terrestrial component of the transport chain, significantly drives costs in container shipping, accounting for 50\%-70\% of total container transport volume and potentially up to 40\% of total transport costs, thus constituting a critical bottleneck in the pursuit of operational optimization within the shipping sector. Research on inland ECR has gradually increased in recent years. \citet{faziMultitripContainerDrayage2023} studied a hinterland transport network consisting of a seaport and a dry port, devising an ECR model that accounts for both laden and empty container transport to minimize costs, showing that the utilization of dry ports can reduce laden container transport costs. \citet{caiJointOptimizationEmpty2024} investigated ECR patterns between port nodes and inland depot nodes within their respective zones, providing insights applicable to practical ECR challenges. As inland dry ports evolve, they, alongside seaports, form intermodal systems facilitated by railway collaboration; however, these entities frequently belong to disparate organizations (such as railway companies and shipping companies), which function with independent decision-making processes and competitive interactions. This decentralized nature of ECR networks, where sensitive operational data (e.g., container inventories and transport schedules) must be shared across organizational boundaries, underscores the importance of privacy-preserving and trust mechanisms for effective multi-stakeholder collaboration \citep{addulaNovelPermissionedBlockchain2025}. \citet{luoEmptyContainerRepositioning2019} and \citet{xieEmptyContainerManagement2017} addressed ECR issues from the perspective of sea-rail intermodal transport, by establishing multimodal container repositioning systems with nodes including dry port and seaport. They analyzed benefit distribution between railway companies operating at dry ports and liner shipping companies operating at seaports, under both centralized and decentralized decision-making systems, through numerical exemplifications. The extant body of research predominantly operates within a framework governed by either seaports or dry ports, managing repositioning initiatives via either seaports or dry ports, and addressing sea and land nodes in isolation. In reality, within the hinterland collection and distribution network, dry ports serve as extensions of seaports, and their collaboration can effectively diminish the detention rates of empty containers. \changed{Resolving such challenges in practice requires casting them as solvable Mixed-Integer Programs; the paradigms for modeling and solving these programs are reviewed below.}
 
 \subsection{Traditional MIP Solution}
 The resolution of MIP problems generally adheres to a systematic OR framework that encompasses five stages. Initially, a mathematical model is constructed to abstract the real-world issue. Subsequently, an analysis of the problem's properties is undertaken to identify an appropriate solution strategy. The third stage involves the design and evaluation of algorithm performance. The fourth phase encompasses programming tasks to invoke optimization solvers and the execution of numerical simulations. Finally, the effectiveness of the solution is assessed, followed by its implementation. A core bottleneck within this framework lies in the significant dependence on experts for the laborious and time-intensive responsibilities of model development and parameter tuning.
@@ -284,13 +288,7 @@ In spite of their considerable potential, LLMs operating as solitary agents enco
 
 \subsection{Distributed Collaboration and Optimization in MAS}
 
-In response to the constraints associated with LLMs, researchers have commenced investigations into technical pathways that integrate LLMs with MAS. The latter can effectively handle complex problems by leveraging multiple autonomous, interacting agents working collaboratively. Research focusing on LLM-based multi-agent collaboration has revealed that dynamic interaction, characterized by both cooperation and competition, frequently leads to unanticipated efficacy. \citet{wuAutoGenEnablingNextGen2024} proposed the AutoGen framework to facilitate the implementation of LLM applications through the configuration of multiple agents. Empirical studies have demonstrated the framework's effectiveness across diverse applications, such as mathematical problem-solving and coding, conversational question answering, operational optimization, and online decision-making. \citet{hongMetaGPTMetaProgramming2023a} introduced Standard Operating Procedures (SOP) into MAS to facilitate software development. Within the domain of operations optimization, existing studies have engaged LLMs in addressing problems such as linear programming and MIP. For example, \citet{zhangNeuralTSPSolver2023} attempted to resolve the Traveling Salesperson Problem utilizing LLM based reasoning, demonstrating commendable performance on small-scale instances. \citet{ramamonjisonNL4OptCompetitionFormulating2023} introduced the NL4Opt competition, which aimed at the extraction of meaning and formulation of optimization problems derived from natural language, involving sub-tasks of identifying semantic labeling and generating logical representations. The competition has the potential to enhance the interactive capability between non-expert users and optimization solvers. \citet{ahmaditeshniziOptiMUSScalableOptimization2024b} designed a system intended for formulating and resolving (Mixed Integer) Linear Programming problems based on natural language descriptions. This system is proficient in developing mathematical models and writing debugging solver code. \citet{xiaoChainofExpertsWhenLLMs2023} devised a multi-expert collaboration framework, known as Chain-of-Experts (CoE), aimed at automating the modeling and programming process for complex OR problems, ultimately diminishing dependency on domain-specific experts. Experimental results showed that CoE significantly outperformed state-of-the-art LLM methods in terms of performance on both LPWP and ComplexOR benchmarks.
-
-
-\subsection{Overview of Empty Container Repositioning Challenges}
-
-The issue of ECR presents a significant challenge within the domain of the container supply chain, and has long been an important research topic in academia. \changed{The broader trend of supply chain digitalization \citep{huImpactSupplyChain2026} further accentuates the need for agile, data-driven repositioning decisions.} Traditionally, ECR research has concentrated on a single mode of repositioning between seaports via maritime routes, emphasizing the optimization of components such as ship routing \citep{xiangLinerFleetDeployment2024,xiangTacticalVesselDeployment2024,xuEmptyContainerRepositioning2024}, shipping network design \citep{kuzmiczContainerDepotLocation2020, shanExactAlgorithmInland2020, zhangTacticalOperationalCooperative2019}, and slot allocation \citep{liangDynamicContainerSlot2024} through MIP. \citet{yuPricingCompetitionMaritime2024} explored the dynamics of pricing competition in maritime transport under blockchain technology and ECR, determining perceived container leasing prices through inverse optimization methodologies. These investigations tend to disregard the particularities associated with land transport – specifically, when shipping companies utilize their own fleets, the marginal cost of sea repositioning approaches zero, starkly contrasting with the costly nature of land transport. Inland container transportation, which encompasses the terrestrial component of the transport chain, significantly drives costs in container shipping, accounting for 50\%-70\% of total container transport volume and potentially up to 40\% of total transport costs, thus constituting a critical bottleneck in the pursuit of operational optimization within the shipping sector. Research on inland ECR has gradually increased in recent years. \citet{faziMultitripContainerDrayage2023} studied a hinterland transport network consisting of a seaport and a dry port, devising an ECR model that accounts for both laden and empty container transport to minimize costs, showing that the utilization of dry ports can reduce laden container transport costs. \citet{caiJointOptimizationEmpty2024} investigated ECR patterns between port nodes and inland depot nodes within their respective zones, providing insights applicable to practical ECR challenges. As inland dry ports evolve, they, alongside seaports, form intermodal systems facilitated by railway collaboration; however, these entities frequently belong to disparate organizations (such as railway companies and shipping companies), which function with independent decision-making processes and competitive interactions. This decentralized nature of ECR networks, where sensitive operational data (e.g., container inventories and transport schedules) must be shared across organizational boundaries, underscores the importance of privacy-preserving and trust mechanisms for effective multi-stakeholder collaboration \citep{addulaNovelPermissionedBlockchain2025}. \citet{luoEmptyContainerRepositioning2019} and \citet{xieEmptyContainerManagement2017} addressed ECR issues from the perspective of sea-rail intermodal transport, by establishing multimodal container repositioning systems with nodes including dry port and seaport. They analyzed benefit distribution between railway companies operating at dry ports and liner shipping companies operating at seaports, under both centralized and decentralized decision-making systems, through numerical exemplifications. The extant body of research predominantly operates within a framework governed by either seaports or dry ports, managing repositioning initiatives via either seaports or dry ports, and addressing sea and land nodes in isolation. In reality, within the hinterland collection and distribution network, dry ports serve as extensions of seaports, and their collaboration can effectively diminish the detention rates of empty containers.
-
+In response to the constraints of \emph{single-agent} LLMs documented above, researchers have commenced investigations into technical pathways that integrate LLMs with MAS. The latter can effectively handle complex problems by leveraging multiple autonomous, interacting agents working collaboratively. Research focusing on LLM-based multi-agent collaboration has revealed that dynamic interaction, characterized by both cooperation and competition, frequently leads to unanticipated efficacy. \citet{wuAutoGenEnablingNextGen2024} proposed the AutoGen framework to facilitate the implementation of LLM applications through the configuration of multiple agents. Empirical studies have demonstrated the framework's effectiveness across diverse applications, such as mathematical problem-solving and coding, conversational question answering, operational optimization, and online decision-making. \citet{hongMetaGPTMetaProgramming2023a} introduced Standard Operating Procedures (SOP) into MAS to facilitate software development. Within the domain of operations optimization, existing studies have engaged LLMs in addressing problems such as linear programming and MIP. For example, \citet{zhangNeuralTSPSolver2023} attempted to resolve the Traveling Salesperson Problem utilizing LLM based reasoning, demonstrating commendable performance on small-scale instances. \citet{ramamonjisonNL4OptCompetitionFormulating2023} introduced the NL4Opt competition, which aimed at the extraction of meaning and formulation of optimization problems derived from natural language, involving sub-tasks of identifying semantic labeling and generating logical representations. The competition has the potential to enhance the interactive capability between non-expert users and optimization solvers. \citet{ahmaditeshniziOptiMUSScalableOptimization2024b} designed a system intended for formulating and resolving (Mixed Integer) Linear Programming problems based on natural language descriptions. This system is proficient in developing mathematical models and writing debugging solver code. \citet{xiaoChainofExpertsWhenLLMs2023} devised a multi-expert collaboration framework, known as Chain-of-Experts (CoE), aimed at automating the modeling and programming process for complex OR problems, ultimately diminishing dependency on domain-specific experts. Experimental results showed that CoE significantly outperformed state-of-the-art LLM methods in terms of performance on both LPWP and ComplexOR benchmarks.
 
 In summary, the key to addressing the above issues lies in deeply integrating the strengths of LLMs and MAS to construct a new paradigm driven by LLMs and powered by collaborative MAS. In this paradigm, the LLM acts as a high-level planner, receiving natural language descriptions of business problems, leveraging its capabilities for abstraction and planning to automatically generate structured mathematical models, as well as MAS task allocation and collaboration rules, thereby fundamentally overcoming the cognitive dependency bottleneck inherent in traditional modeling. While recent works such as OptiMUS \citep{ahmaditeshniziOptiMUSScalableOptimization2024b} and CoE \citep{xiaoChainofExpertsWhenLLMs2023} have demonstrated promising results in automating the formulation of linear and MIP from natural language, they primarily focus on syntactic correctness and benchmark performance on standardized datasets (e.g., NLP4LP, ComplexOR). In contrast, our work advances beyond proof-of-concept automation toward industrial-grade deployability in a high-stakes vertical domain, maritime logistics.
 \begin{enumerate}[label=\arabic*)]
@@ -319,7 +317,13 @@ Given an agent set $\mathcal{A}=\{a_{\text{PM}}, a_{\text{DE}}, a_{\text{ME}}, a
 
 Each agent $a \in \mathcal{A}$ can be formally defined as a tuple: $a=(f_a, L_a, \mathcal{T}_a, t_a, \mathcal{H}_a)$, where $f_a$ represents the core functional module of the agent, which processes one or more inputs to produce an output; $L_a$ denotes the large language model selected for the agent (e.g., GPT-4, Claude 3, etc.); $\mathcal{T}_a$ refers to the specific prompt template designed for the agent's role; $t_a$ indicates the temperature parameter utilized during LLM inference; and $\mathcal{H}_a$ represents a set of supplementary hyperparameters, such as \texttt{top\_p} (nucleus sampling threshold) and \texttt{max\_tokens} (maximum output length).
 
-\changed{The operational boundary of each agent is delineated by its prompt template $\mathcal{T}_a$, which specifies the agent's permitted inputs, expected output format, and task scope. Agents interact exclusively through the shared message pool $C$, which serves as a blackboard-style communication medium: each agent reads the current state of $C$, produces a structured output (in JSON or domain-specific code format), and appends it to $C$. This design enforces a clear separation of concerns: no agent directly invokes or modifies another agent's internal state. The handoff between agents is governed by the sub-sequence rule defined in the workflow orchestration (Section~3.2), which constrains the order in which agents can be activated.}
+\changed{The operational boundary of each agent is delineated by its prompt template $\mathcal{T}_a$, which specifies the agent's permitted inputs, expected output format, and task scope, confining each agent to a well-defined sub-task.}
+
+\subsection{Inter-Agent Communication Protocol}
+
+\changed{The six agents do not communicate peer-to-peer but coordinate exclusively through a shared message pool $C$, which serves as a blackboard-style communication medium. The pool $C$ is an ordered log in which each entry records the producing agent together with its structured output. Two primitives govern access: on activation, an agent reads the current state of $C$ as context, and after computing its result it appends a new entry to $C$. No agent directly invokes or modifies another agent's internal state, which enforces a strict separation of concerns and leaves every intermediate artifact available for inspection and verification.}
+
+\changed{The output format of each message is dictated by the producing agent's role. The Data Engineer Agent ($a_{\text{DE}}$) and Modeling Expert Agent ($a_{\text{ME}}$) emit structured JSON specifying the extracted parameters and the mathematical model; the Python Developer Agent ($a_{\text{PY}}$) emits an executable code block; the Testing Engineer Agent ($a_{\text{TE}}$) emits a diagnostic report that classifies errors into code-level, model-level, or data-level categories; and the Business Analyst Agent ($a_{\text{BA}}$) emits a business-interpretable report. This shared, structured representation lets each downstream agent parse its required inputs directly from $C$ without private handshakes. The order in which agents are activated, and hence the order in which messages accumulate in $C$, is constrained by the sub-sequence rule defined in the workflow orchestration (Section~3.3).}
 
 \subsection{Orchestration of Workflow Based on SOP-MAS}
 
@@ -398,7 +402,15 @@ The proposed SOP-MAS framework is designed as an expert-in-the-loop decision sup
 
 \subsection{Computational Complexity Analysis}
 
-\changed{To characterize the computational overhead of the orchestration layer itself, we analyze the complexity of the SOP-MAS workflow. Let $K$ denote the collaboration budget. Message-pool append operations are $O(1)$ each, yielding $O(K)$ total overhead. Agent selection by $a_{\text{PM}}$ at each step requires evaluating at most $|\mathcal{A}|$ candidates, contributing $O(K \cdot |\mathcal{A}|)$ across the forward pass. Stack operations for exception backtracking are $O(K)$ in the worst case. The total orchestration complexity is therefore $O(K \cdot |\mathcal{A}|)$, which, for fixed agent set size, reduces to $O(K)$. Since $K$ is a small constant (typically 5) and $|\mathcal{A}|=6$, the orchestration overhead is bounded by a constant and remains negligible relative to LLM inference latency, which dominates the end-to-end runtime.}
+\changed{We complement the empirical efficiency study (Section~4.4) with a formal analysis of the orchestration layer's computational complexity. The end-to-end wall-clock cost of one SOP-MAS run decomposes into three disjoint components,}
+\begin{equation}
+T_{\text{total}} = T_{\text{orch}} + T_{\text{LLM}} + T_{\text{solver}},
+\end{equation}
+\changed{where $T_{\text{orch}}$ is the orchestration overhead (all non-LLM framework operations), $T_{\text{LLM}}$ is the aggregate LLM inference cost, and $T_{\text{solver}}$ is the cost of executing the generated code with the MIP solver.}
+
+\changed{The orchestration overhead $T_{\text{orch}}$ comprises the non-LLM operations performed by the framework. Appending an agent's output to the message pool is $O(1)$, contributing $O(K)$ over a forward pass. Constructing the selectable set $\mathcal{A}_k$ under the sub-sequence rule scans at most $|\mathcal{A}|$ agents per step, contributing $O(K\cdot|\mathcal{A}|)$. Stack push/pop operations for exception backtracking are $O(1)$ each, bounded by $O(K)$ across a run. Hence $T_{\text{orch}}=O(K\cdot|\mathcal{A}|)$, which, for the fixed agent set $|\mathcal{A}|=6$ and a small collaboration budget (typically $K\le 5$), reduces to a constant that is independent of the problem scale (the number of decision variables and constraints).}
+
+\changed{The remaining two terms are external to the orchestration logic. $T_{\text{LLM}}$ scales with the number of invocations, $O(K)$, and with the context length at each call, as the message pool grows across steps; as characterized empirically in Section~4.4, it is the dominant component of the end-to-end runtime. $T_{\text{solver}}$ depends on the problem scale but is incurred only once per run and resides entirely in the solver, whose scalability the operations research community has extensively studied. The orchestration layer, which is the algorithmic contribution of this work, therefore adds a scale-independent, constant overhead, confirming that the framework's runtime is governed by LLM inference rather than by orchestration, and that the modeling cost stays bounded as the problem size grows.}
 
 \subsection{Mechanisms for Hallucination Mitigation}
 
@@ -487,15 +499,15 @@ In this study, $\varepsilon = 10^{-6}$. Each algorithm was executed five times w
 
 \centering%% For centre alignment of tabular.
 \begin{tabular}{l c c c}
-\hline
+\toprule
 Baseline & CER & RER & AR \\
-\hline
+\midrule
 Standard Prompting Method (SPM) & 7.67\% & 11.81\% & 48.08\% \\
 Chain-of-Thought (CoT) & 7.32\% & 10.83\% & 52.26\% \\
 Chain-of-Experts (CoE) & 4.18\% & 5.77\% & 62.37\% \\
 OptiMUS & 3.14\% & 4.51\% & 77.35\% \\
 SOP-MAS & 1.39\% & 2.91\% & 86.59\% \\
-\hline
+\bottomrule
 \end{tabular}
 \end{table}
 
@@ -548,16 +560,16 @@ The entirety of SOP-MAS functions as the control group for assessing performance
  \begin{threeparttable}
  \caption{Ablation study}\label{tab:ablation}
  \begin{tabular}{l*{3}{>{\centering\arraybackslash}p{2cm}}}
- \hline
+ \toprule
  Group No. & CER & RER & AR \\
- \hline
+ \midrule
  Group1 ($-$) & 6.27\% & 9.80\% & 57.84\% \\
  Group2 ($+$) & 1.74\% & 2.55\% & 82.58\% \\
  Group3 ($+$) & 1.74\% & 3.68\% & 73.17\% \\
  Group4 ($+$) & 1.44\% & 2.09\% & 84.32\% \\
  Group5 ($-$) & 3.48\% & 4.53\% & 69.69\% \\
  Control Group ($+$) & 1.39\% & 2.91\% & 86.59\% \\
- \hline
+ \bottomrule
  \end{tabular}
  \begin{tablenotes}[flushleft]
  \footnotesize
@@ -646,7 +658,7 @@ This section selects ECR as the empirical testbed because it represents a high-s
 %% https://en.wikibooks.org/wiki/LaTeX/Importing_Graphics#Importing_external_graphics
 \end{figure}
 
-A planning horizon of five 7-day periods is adopted. Following \citet{caiJointOptimizationEmpty2024}, the freight rates for empty container transportation by maritime, road, and rail are 0.8, 4.5, and 1.8 CNY/TEU/km, respectively; the leasing cost at seaports is 4,000 CNY/TEU; the holding cost is 10 CNY/TEU/day at seaports and 5 CNY/TEU/day at dry ports; the supply and demand of empty containers at each node per period follow a normal distribution. Inter-node distances and all other parameters are detailed in~\ref{app2}.
+A planning horizon of five 7-day periods is adopted. Following \citet{caiJointOptimizationEmpty2024}, the freight rates for empty container transportation by maritime, road, and rail are 0.8, 4.5, and 1.8 CNY/TEU/km, respectively; the leasing cost at seaports is 4,000 CNY/TEU; the holding cost is 10 CNY/TEU/day at seaports and 5 CNY/TEU/day at dry ports; the supply and demand of empty containers at each node per period follow a normal distribution. Inter-node distances and sea-repositioning transit times are standard road and sea values provided in the public SOP-MAS repository, and the per-node empty-container demand and supply distributions are reported in~\ref{app2}.
 
 
 \subsection{Problem Description}\label{sec:problem_description}
@@ -667,7 +679,7 @@ Based on the ECR problem setting described in Section~\ref{sec:problem_descripti
 
 Under the sea–land coordination scenario (Scenario~1), wherein hinterland lateral repositioning is permitted, the optimal total cost over the five-period planning horizon is CNY~1,190,336, comprising repositioning costs of CNY~763,966, holding costs of CNY~30,870, and leasing costs of CNY~395,500, as summarized in Table~\ref{tab:cost_summary}.
 
-To evaluate the benefits of hinterland lateral repositioning, a comparative analysis was conducted under the scenario without inter-dry-port exchange (Scenario~2), as illustrated in Figure~\ref{fig:cost_comparison}. As shown in Table~\ref{tab:cost_summary}, the total cost increases from CNY~1,190,336 to CNY~1,355,388. This increase is primarily driven by the repositioning costs, which rise from CNY~763,966 to CNY~925,238 (a 17.43\% saving under Scenario~1). Within the repositioning category, the sea--land repositioning cost surges from CNY~594,952 to CNY~864,910 (a 31.21\% saving under Scenario~1), as the network must compensate for the loss of hinterland lateral flows (CNY~110,718 reduced to zero) by routing more containers through the sea--dry corridors. Furthermore, the exacerbated difficulty in empty container flows leads to a greater number of containers failing to arrive at shortage seaports in a timely manner, which in turn increases the leasing demand at the affected seaports from CNY~395,500 to CNY~406,000 (a 2.59\% saving under Scenario~1). Overall, enabling hinterland lateral repositioning yields a 12.18\% reduction in total operational costs. \changed{Because the two scenarios differ solely in whether hinterland lateral repositioning is enabled, this entire reduction is the marginal effect attributable to the lateral land route: the CNY~110{,}718 spent on hinterland lateral flows avoids CNY~269{,}958 in sea--land repositioning and CNY~10{,}500 in leasing, yielding a net saving of CNY~165{,}052 after accounting for a CNY~6{,}720 increase in holding cost.}
+To evaluate the benefits of hinterland lateral repositioning, a comparative analysis was conducted under the scenario without inter-dry-port exchange (Scenario~2), as illustrated in Figure~\ref{fig:cost_comparison}. As shown in Table~\ref{tab:cost_summary}, the total cost increases from CNY~1,190,336 to CNY~1,355,388. This increase is primarily driven by the repositioning costs, which rise from CNY~763,966 to CNY~925,238 (a 17.43\% saving under Scenario~1). Within the repositioning category, the sea--land repositioning cost surges from CNY~594,952 to CNY~864,910 (a 31.21\% saving under Scenario~1), as the network must compensate for the loss of hinterland lateral flows (CNY~110,718 reduced to zero) by routing more containers through the sea--dry corridors. Furthermore, the exacerbated difficulty in empty container flows leads to a greater number of containers failing to arrive at shortage seaports in a timely manner, which in turn increases the leasing demand at the affected seaports from CNY~395,500 to CNY~406,000 (a 2.59\% saving under Scenario~1). Overall, enabling hinterland lateral repositioning yields a 12.18\% reduction in total operational costs. \changed{Because the two scenarios differ solely in whether hinterland lateral repositioning is enabled, this entire reduction is the marginal effect attributable to the lateral land route: the CNY~110{,}718 spent on hinterland lateral flows avoids CNY~269{,}958 in sea--land repositioning, CNY~10{,}500 in leasing, and CNY~2{,}032 in seaport feeder repositioning, yielding a net saving of CNY~165{,}052 after accounting for a CNY~6{,}720 increase in holding cost.}
 
 \begin{table}[htbp]
 \centering
@@ -843,87 +855,16 @@ Build a complete mathematical optimization model through:
 \end{nolinenumbers}
 \section{Empirical Case Data}\label{app2}
 
-\begin{table}[htbp]
-\centering
-\caption{Sea ports repositioning cost and transit time}
-\label{tab:seaport_repositioning}
-\begin{tabular*}{\textwidth}{@{\extracolsep{\fill}}llllll@{}}
-\hline
-Seaport & Seaport & Distance & Unit Price & Reposition Cost & Period \\
-\hline
-Dalian Port & Yingkou Port & 194.1 km & ¥0.8/km & ¥155.28 & 1 \\
-Yingkou Port & Dandong Port & 340.4 km & ¥0.8/km & ¥272.32 & 1 \\
-Dandong Port & Dalian Port & 315 km & ¥0.8/km & ¥252 & 1 \\
-Dalian Port & Dandong Port & 534.5 km & ¥0.8/km & ¥427.6 & 2 \\
-Yingkou Port & Dalian Port & 655.4 km & ¥0.8/km & ¥524.32 & 2 \\
-Dandong Port & Yingkou Port & 509.1 km & ¥0.8/km & ¥407.28 & 2 \\
-\hline
-\end{tabular*}
-\end{table}
-
-\begin{table}[htbp]
-\centering
-\caption{Port-hinterland distance matrix (km)}
-\label{tab:port_hinterland_distance}
-\begin{tabular}{lccc}
-\hline
-City & {Dalian Port} & {Yingkou Port} & {Dandong Port} \\
-\hline
-Shenyang & 379.2 & 180.4 & 243.2 \\
-Anshan & 298.8 & 102.1 & 236.0 \\
-Harbin & 1015.8 & 747.7 & - \\
-Changchun & 676.1 & 478.6 & - \\
-Tonghua & 623.0 & 439.4 & 275.0 \\
-Jilin & 520.0 & 540.0 & - \\
-Tongliao & 460.0 & 380.0 & - \\
-Chifeng & 580.0 & 620.0 & - \\
-Daqing & 870.0 & - & - \\
-Qiqihar & 930.0 & - & - \\
-\hline
-\end{tabular}
-\end{table}
-
-
-\begin{table}[htbp]
-\centering
-\caption{Inter-dry port distances (km)}
-\label{tab:inter_dryport_distance}
-\begin{tabular*}{0.65\textwidth}{@{\extracolsep{\fill}}llc@{}}
-\hline
-Dry port & Dry port & Distance \\
-\hline
-Shenyang & Anshan & 85 \\
-Shenyang & Changchun & 278 \\
-Shenyang & Tonghua & 208 \\
-Shenyang & Jilin & 343 \\
-Shenyang & Tongliao & 224 \\
-Shenyang & Chifeng & 376 \\
-Anshan & Tonghua & 256 \\
-Anshan & Tongliao & 285 \\
-Anshan & Chifeng & 361 \\
-Harbin & Changchun & 232 \\
-Harbin & Jilin & 211 \\
-Harbin & Daqing & 154 \\
-Changchun & Jilin & 100 \\
-Changchun & Tongliao & 247 \\
-Changchun & Daqing & 301 \\
-Changchun & Qiqihar & 400 \\
-Jilin & Daqing & 327 \\
-Jilin & Qiqihar & 440 \\
-Tongliao & Chifeng & 311 \\
-Daqing & Qiqihar & 119 \\
-\hline
-\end{tabular*}
-\end{table}
+\changed{The case-study network comprises three seaports (Dalian, Yingkou, Dandong) and ten inland cities served by dry ports. Inter-node distances and sea-repositioning transit times are standard road and sea values, whose full matrices are provided in the public SOP-MAS repository; the unit repositioning cost (0.8 CNY/TEU/km) and all other scalar parameters are reported in Section~\ref{sec:problem_description}. Table~\ref{tab:ec_demand_supply} reports the per-node empty-container demand and supply, each modeled as a normal distribution characterized by its mean and variance.}
 
 \begin{table}[htbp]
 \centering
 \caption{Empty container demand and supply at each node (TEU)}
 \label{tab:ec_demand_supply}
 \begin{tabular*}{0.65\textwidth}{@{\extracolsep{\fill}}llc@{}}
-\hline
+\toprule
 Port/EC volume (TEU) & EC demand & EC supply \\
-\hline
+\midrule
 Shenyang & $(5000, 100^2)$ & $(4150, 100^2)$ \\
 Anshan & $(1250, 50^2)$ & $(1350, 50^2)$ \\
 Harbin & $(800, 40^2)$ & $(800, 40^2)$ \\
@@ -934,7 +875,7 @@ Tongliao & $(500, 20^2)$ & $(500, 20^2)$ \\
 Chifeng & $(100, 20^2)$ & $(100, 20^2)$ \\
 Daqing & $(300, 20^2)$ & $(300, 20^2)$ \\
 Qiqihar & $(100, 20^2)$ & $(100, 20^2)$ \\
-\hline
+\bottomrule
 \end{tabular*}
 \end{table}
 \clearpage
