@@ -1,0 +1,27 @@
+# Schema-fix ablation: same c4 config (top_p=1.0, T=0.2) as v2,
+# but with _compress_matrix threshold raised from 2 to 20.
+# Purpose: measure how much the full-schema fix reduces formulation instability.
+
+llm:
+  client: DeepSeek
+  model: deepseek-chat
+
+pipeline:
+  algorithm: sop_mac
+  max_collaborate_nums: 5
+  is_backtrack: false
+
+repeats: 15
+
+creative_agents: [ModelEngineer, PythonDeveloper]
+
+configs:
+  - {id: c4_fixed, top_p: 1.0, temperature: 0.2}
+
+instances:
+  - {dataset: NLP4ECR, prob_name: prob_empirical}
+
+output_root: results/schema_fix_ablation
+
+concurrency: 4
+timeout_sec: 1800

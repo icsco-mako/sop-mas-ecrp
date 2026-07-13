@@ -80,19 +80,21 @@ def generate_data_schema(sample_data: list) -> dict:
     return schema_list
 
 
-def _compress_matrix(d: dict, field_name: str = "") -> dict:
+def _compress_matrix(d: dict, field_name: str = "", max_dim: int = 20) -> dict:
     """压缩矩阵 dict。
 
     对于二维矩阵（如 reposition_cost: {H1: {H2: v, ...}, ...}）：
-      只保留前 2 个外层 key × 前 2 个内层 key 的子矩阵，其余用维度说明替代。
+      若外层维度 ≤ max_dim，保留完整矩阵（小规模网络拓扑信息不可截断）；
+      否则只保留前 2 个外层 key × 前 2 个内层 key 的子矩阵 + 维度说明。
     对于一维 dict（如 holding_cost: {H1: v, H2: v, ...}）：
-      保留所有 key，值用 0 替代。
+      保留所有 key，值不变。
     """
-    # 检查是否为二维矩阵
     first_val = next(iter(d.values()), None)
     if isinstance(first_val, dict):
-        # 二维矩阵：只保留 2×2 子矩阵
         outer_keys = list(d.keys())
+        if len(outer_keys) <= max_dim:
+            return {k: (dict(v) if isinstance(v, dict) else v) for k, v in d.items()}
+        # 大矩阵：只保留 2×2 子矩阵
         result = {}
         for ok in outer_keys[:2]:
             inner = d[ok]
@@ -104,7 +106,6 @@ def _compress_matrix(d: dict, field_name: str = "") -> dict:
         result[f"... ({len(outer_keys)} keys total: {', '.join(outer_keys)})"] = {}
         return result
     else:
-        # 一维 dict：保留所有 key，值不变（值本身就是标量）
         return {k: v for k, v in d.items()}
 
 
@@ -177,7 +178,7 @@ def dataset_loader(dataset, prob_name):
                 {
                     "input": sample_schema,   # 精简 schema，供 DE/ME/PY Agent
                     "data": full_data,         # 完整数据，供 TE Agent 执行
-                    "output": "None",
+                    "output": [1355388.0],
                 }
             ]
 

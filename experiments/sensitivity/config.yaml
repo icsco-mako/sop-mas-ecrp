@@ -1,0 +1,43 @@
+# Sensitivity analysis for SOP-MAS: sweep K x t_ME x t_PY grid.
+#
+# Design: factorial sweep over K in {2,3,4,5} and (t_ME, t_PY) in
+# {0.2, 0.4, 0.8, 1.0}^2.  The two "creative" agents (ME-Agent, PY-Agent)
+# receive the swept temperature; all other agents stay deterministic.
+#
+# Each (config, instance) cell is repeated R times so that OAR and SAR
+# can be computed alongside AR.  Backward tracking is disabled to measure
+# raw single-pass behaviour.
+
+models:
+  # OpenRouter free model (primary)
+  primary:
+    - client: OpenRouter
+      model: inclusionai/ling-2.6-flash:free
+  # Fallback when free models are unavailable.
+  fallback:
+    client: DeepSeek
+    model: deepseek-chat
+
+pipeline:
+  algorithm: sop_mac
+  is_backtrack: false
+
+repeats: 5
+
+creative_agents: [ModelEngineer, PythonDeveloper]
+
+# 4 K values x 4 t_ME x 4 t_PY = 64 configs
+K_values: [2, 3, 4, 5]
+temperature_values: [0.2, 0.4, 0.8, 1.0]
+
+instances:
+  - {dataset: ComplexOR, prob_name: aircraft_landing}
+  - {dataset: ComplexOR, prob_name: diet_problem}
+  - {dataset: ComplexOR, prob_name: knapsack_optimization}
+  - {dataset: NLP4LP, prob_name: "74"}
+  - {dataset: NLP4LP, prob_name: "187"}
+
+output_root: results/sensitivity
+
+concurrency: 3
+timeout_sec: 1800

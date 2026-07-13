@@ -1,0 +1,32 @@
+# Formulation Stability Experiment
+# Unified config for all batches. Each batch is a separate repeat run of the
+# same configuration on the empirical ECR instance (prob_empirical).
+#
+# Batches b1 and b2+b3 have different behavioral profiles (see README).
+# Run aggregation with:
+#   poetry run python experiments/topp_ablation/aggregate.py \
+#       --config experiments/formulation_stability/config.yaml
+
+llm:
+  client: DeepSeek
+  model: deepseek-v4-flash
+
+pipeline:
+  algorithm: sop_mac
+  max_collaborate_nums: 5
+  is_backtrack: false
+  thinking: enabled
+
+creative_agents: [ModelEngineer, PythonDeveloper]
+
+configs:
+  - {id: b1_v4flash, top_p: 1.0, temperature: 0.2}
+  - {id: b2_v4flash, top_p: 1.0, temperature: 0.2}
+  - {id: b3_v4flash, top_p: 1.0, temperature: 0.2}
+
+instances:
+  - {dataset: NLP4ECR, prob_name: prob_empirical}
+
+output_root: results/formulation_stability
+concurrency: 1
+timeout_sec: 1800

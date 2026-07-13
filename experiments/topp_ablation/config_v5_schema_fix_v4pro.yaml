@@ -1,0 +1,28 @@
+# Schema-fix + deepseek-v4-pro + thinking mode ablation
+# Tests whether a stronger model + thinking fixes the sign/constraint errors
+# seen with deepseek-chat after schema fix.
+
+llm:
+  client: DeepSeek
+  model: deepseek-v4-pro
+
+pipeline:
+  algorithm: sop_mac
+  max_collaborate_nums: 5
+  is_backtrack: true
+  thinking: enabled
+
+repeats: 15
+
+creative_agents: [ModelEngineer, PythonDeveloper]
+
+configs:
+  - {id: v4pro_think_bt, top_p: 1.0, temperature: 0.2}
+
+instances:
+  - {dataset: NLP4ECR, prob_name: prob_empirical}
+
+output_root: results/v4pro_schema_fix_ablation
+
+concurrency: 4
+timeout_sec: 1800

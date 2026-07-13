@@ -1,0 +1,27 @@
+# ARCHIVED — migrated to formulation_stability/config_b1.yaml
+# Original: config_v3_thinking.yaml (thinking_ablation batch 1)
+# Results moved to: results/formulation_stability/b1_v4flash/
+
+llm:
+  client: DeepSeek
+  model: deepseek-v4-flash
+
+pipeline:
+  algorithm: sop_mac
+  max_collaborate_nums: 5
+  is_backtrack: false
+  thinking: enabled
+
+configs:
+  - {id: b1_v4flash, top_p: 1.0, temperature: 0.2}
+
+creative_agents: [ModelEngineer, PythonDeveloper]
+
+repeats: 15
+
+instances:
+  - {dataset: NLP4ECR, prob_name: prob_empirical}
+
+output_root: results/formulation_stability
+concurrency: 4
+timeout_sec: 1800

@@ -1,0 +1,25 @@
+# Formulation Stability — Batch 2
+# deepseek-v4-flash + thinking mode, 15 repeats.
+
+llm:
+  client: DeepSeek
+  model: deepseek-v4-flash
+
+pipeline:
+  algorithm: sop_mac
+  max_collaborate_nums: 5
+  is_backtrack: false
+  thinking: enabled
+
+configs:
+  - {id: b2_v4flash, top_p: 1.0, temperature: 0.2}
+
+creative_agents: [ModelEngineer, PythonDeveloper]
+repeats: 15
+
+instances:
+  - {dataset: NLP4ECR, prob_name: prob_empirical}
+
+output_root: results/formulation_stability
+concurrency: 4
+timeout_sec: 1800

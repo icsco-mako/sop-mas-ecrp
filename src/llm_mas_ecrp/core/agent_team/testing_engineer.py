@@ -24,6 +24,8 @@ def _summarize_value(value, depth: int = 0, max_depth: int = 2):
             return {"type": "dict", "size": len(value)}
         if isinstance(value, Sequence) and not isinstance(value, (str, bytes, bytearray)):
             return {"type": "list", "size": len(value)}
+        if not isinstance(value, (int, float, str, bool, type(None))):
+            return f"<{type(value).__name__}>"
         return value
 
     if isinstance(value, Mapping):
@@ -55,6 +57,8 @@ def _summarize_value(value, depth: int = 0, max_depth: int = 2):
             "sample": [_summarize_value(v, depth + 1, max_depth) for v in sample],
         }
 
+    if not isinstance(value, (int, float, str, bool, type(None))):
+        return f"<{type(value).__name__}>"
     return value
 
 
@@ -135,11 +139,12 @@ The output format is a JSON structure like this:
         agent_id: int,
         temperature: float = 0.0,
         top_p: float = 1.0,
+        **kwargs,
     ) -> None:
         self.client = get_llm_client(client)
         self.model = model
         self.name = self.NAME
-        super().__init__(self.client, model, agent_id, temperature, top_p)
+        super().__init__(self.client, model, agent_id, temperature, top_p, **kwargs)
 
     # @override
     def forward_step(self, problem: Dict, message_pool: MessagePool):
@@ -160,7 +165,7 @@ The output format is a JSON structure like this:
         # LLM diagnostic analysis
         prompt = self.FORWARD_TASK.format(
             problem_description=problem["description"],
-            execution_outcome=json.dumps(execution_outcome, ensure_ascii=False),
+            execution_outcome=json.dumps(execution_outcome, ensure_ascii=False, default=str),
             solver_log=solver_log_content[:3000],
             message_pool=message_pool.get_content(),
         )

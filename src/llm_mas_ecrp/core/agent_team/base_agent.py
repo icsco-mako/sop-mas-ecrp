@@ -1,6 +1,6 @@
 from typing import List, Dict, Optional
 from openai import OpenAI
-from llm_mas_ecrp.utils.llm_call import llm_call
+from llm_mas_ecrp.utils.llm_call import llm_call, MAX_RETRIES
 
 
 class BaseAgent:
@@ -16,6 +16,10 @@ class BaseAgent:
         agent_id: int,
         temperature: float = 0.0,
         top_p: float = 1.0,
+        max_retries: Optional[int] = None,
+        fallback_client: Optional[OpenAI] = None,
+        fallback_model: Optional[str] = None,
+        thinking: Optional[str] = None,
     ) -> None:
         self.model = model
         self.name = self.NAME
@@ -23,6 +27,10 @@ class BaseAgent:
         self.agent_id = agent_id
         self.temperature = temperature
         self.top_p = top_p
+        self.max_retries = max_retries
+        self.fallback_client = fallback_client
+        self.fallback_model = fallback_model
+        self.thinking = thinking
 
     def llm_call(
         self,
@@ -39,6 +47,10 @@ class BaseAgent:
             seed=seed,
             temperature=self.temperature,
             top_p=self.top_p,
+            max_retries=self.max_retries if self.max_retries is not None else MAX_RETRIES,
+            fallback_client=self.fallback_client,
+            fallback_model=self.fallback_model,
+            thinking=self.thinking,
         )
 
     def forward_step(self, problem: Dict, message_pool) -> str:

@@ -23,6 +23,7 @@ from __future__ import annotations
 import argparse
 import json
 import logging
+import math
 import os
 import sys
 import time
@@ -30,7 +31,7 @@ import traceback
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any, Dict, List
+from typing import Any, Dict, List, Optional
 
 import yaml
 
@@ -83,9 +84,11 @@ def _build_agents_config(
     creative_agents: List[str],
     temperature: float,
     top_p: float,
+    thinking: str | None = None,
 ) -> List[Dict[str, Any]]:
     """Return AGENTs_CONFIG list. Creative agents get the swept (T, top_p);
-    everyone else stays deterministic (defaults T=0.0, top_p=1.0)."""
+    everyone else stays deterministic (defaults T=0.0, top_p=1.0).
+    If *thinking* is set, all agents receive it."""
     creative = set(creative_agents)
     agents_config = []
     for name, agent_id in _AGENT_ORDER:
@@ -93,8 +96,14 @@ def _build_agents_config(
             "class": AGENT_REGISTRY[name],
             "args": [client, model, agent_id],
         }
+        kwargs: Dict[str, Any] = {}
         if name in creative:
-            entry["kwargs"] = {"temperature": temperature, "top_p": top_p}
+            kwargs["temperature"] = temperature
+            kwargs["top_p"] = top_p
+        if thinking:
+            kwargs["thinking"] = thinking
+        if kwargs:
+            entry["kwargs"] = kwargs
         agents_config.append(entry)
     return agents_config
 
@@ -123,6 +132,15 @@ def _expand_run_specs(cfg: Dict[str, Any], output_root: Path) -> List[RunSpec]:
                     )
                 )
     return specs
+
+
+def _values_agree(a: Any, b: Any, rel_tol: float = 1e-4) -> Optional[bool]:
+    if a is None or b is None:
+        return None
+    try:
+        return math.isclose(float(a), float(b), rel_tol=rel_tol, abs_tol=1e-9)
+    except (TypeError, ValueError):
+        return None
 
 
 def _json_safe(value: Any) -> Any:
@@ -184,6 +202,21 @@ def _execute_one(spec: RunSpec, cfg: Dict[str, Any]) -> Dict[str, Any]:
         "repeat": spec.repeat,
     }
 
+    # Load ground truth once.
+    _gt_cache_key = (spec.dataset, spec.prob_name)
+    if not hasattr(_execute_one, "_gt_cache"):
+        _execute_one._gt_cache = {}
+    if _gt_cache_key not in _execute_one._gt_cache:
+        _problem = dataset_loader(spec.dataset, spec.prob_name)
+        _gt_obj = None
+        _sample = _problem.get("sample")
+        if isinstance(_sample, list) and _sample and isinstance(_sample[0], dict):
+            _output = _sample[0].get("output")
+            if isinstance(_output, list) and _output:
+                _gt_obj = _output[0]
+        _execute_one._gt_cache[_gt_cache_key] = _gt_obj
+    ground_truth_obj = _execute_one._gt_cache[_gt_cache_key]
+
     timeout_sec = float(cfg.get("timeout_sec", 1800))
 
     def _run() -> Dict[str, Any]:
@@ -194,6 +227,7 @@ def _execute_one(spec: RunSpec, cfg: Dict[str, Any]) -> Dict[str, Any]:
             creative_agents=cfg["creative_agents"],
             temperature=spec.temperature,
             top_p=spec.top_p,
+            thinking=cfg.get("pipeline", {}).get("thinking"),
         )
         return sop_mac(
             problem=problem,
@@ -208,16 +242,20 @@ def _execute_one(spec: RunSpec, cfg: Dict[str, Any]) -> Dict[str, Any]:
             future = pool.submit(_run)
             result = future.result(timeout=timeout_sec)
 
+        obj_val = result.get("obj_value")
         record.update(
             status=bool(result.get("status", False)),
             error_msg=result.get("error_msg", "None"),
-            obj_value=result.get("obj_value"),
+            obj_value=obj_val,
+            obj_correct=_values_agree(obj_val, ground_truth_obj, rel_tol=1e-4),
             formulation_signature=result.get("formulation_signature"),
             agent_times=result.get("agent_times"),
+            generated_code=result.get("forward_result", {}).get("Python Developer", ""),
         )
     except FuturesTimeout:
         record.update(
             status=False,
+            obj_correct=False,
             error_msg=f"timeout after {timeout_sec:.0f}s",
             obj_value=None,
         )
@@ -228,6 +266,7 @@ def _execute_one(spec: RunSpec, cfg: Dict[str, Any]) -> Dict[str, Any]:
     except Exception as exc:  # noqa: BLE001
         record.update(
             status=False,
+            obj_correct=False,
             error_msg=f"runner_exception: {exc}",
             obj_value=None,
             traceback=traceback.format_exc(),

@@ -38,7 +38,12 @@ instances:
   - {dataset: ComplexOR, prob_name: aircraft_landing}
   - {dataset: ComplexOR, prob_name: diet_problem}
   - {dataset: ComplexOR, prob_name: knapsack_optimization}
+  - {dataset: ComplexOR, prob_name: blend_problem}
+  - {dataset: ComplexOR, prob_name: flowshop_scheduling}
+  - {dataset: ComplexOR, prob_name: revenue_maximization}
   - {dataset: NLP4LP, prob_name: "74"}
+  - {dataset: NLP4LP, prob_name: "105"}
+  - {dataset: NLP4LP, prob_name: "150"}
   - {dataset: NLP4LP, prob_name: "187"}
 
 # Output root (relative to project root).

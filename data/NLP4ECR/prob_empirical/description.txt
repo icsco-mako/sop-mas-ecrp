@@ -12,4 +12,4 @@ Within each period, events occur in the following order: inherit inventory from 
 
 Objective: minimize total operating cost = repositioning cost + holding cost + leasing cost.
 
-Constraints include inventory flow balance, inventory capacity limits, and non-negativity of repositioning decisions.
+Constraints include inventory flow balance, inventory capacity limits, and non-negativity of repositioning decisions. All decision variables (repositioning quantities, inventory levels, and leasing amounts) are measured in TEU (Twenty-foot Equivalent Units) and must be non-negative integers.

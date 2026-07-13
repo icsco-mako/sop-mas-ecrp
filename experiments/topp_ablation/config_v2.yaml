@@ -1,0 +1,45 @@
+# Top-p sensitivity study v2 for SOP-MAS (response to Reviewer 1, Comment 1.7)
+#
+# Replaced trivial ComplexOR/NLP4LP instances with prob_empirical:
+# a 13-node, 5-period ECR integer programming problem (~975 decision vars,
+# ~130 constraints) from the paper's empirical case study (Section 5).
+#
+# Design: factorial sweep over (top_p, temperature) applied to the two
+# "creative" agents only (ModelEngineer, PythonDeveloper). All other agents
+# stay deterministic (temperature=0.0, top_p=1.0) to isolate the effect.
+#
+# Each config is repeated R=15 times on a single instance to obtain
+# stable OAR/SAR estimates (C(15,2)=105 pairwise comparisons per config).
+# Backward tracking is disabled to measure raw single-pass stability.
+
+llm:
+  client: DeepSeek
+  model: deepseek-chat
+
+pipeline:
+  algorithm: sop_mac
+  max_collaborate_nums: 5
+  is_backtrack: false
+
+repeats: 15
+
+creative_agents: [ModelEngineer, PythonDeveloper]
+
+# Factorial design: 4 top_p x 2 temperatures = 8 configs.
+configs:
+  - {id: c1, top_p: 0.5, temperature: 0.2}
+  - {id: c2, top_p: 0.7, temperature: 0.2}
+  - {id: c3, top_p: 0.9, temperature: 0.2}
+  - {id: c4, top_p: 1.0, temperature: 0.2}
+  - {id: c5, top_p: 0.5, temperature: 0.8}
+  - {id: c6, top_p: 0.7, temperature: 0.8}
+  - {id: c7, top_p: 0.9, temperature: 0.8}
+  - {id: c8, top_p: 1.0, temperature: 0.8}
+
+instances:
+  - {dataset: NLP4ECR, prob_name: prob_empirical}
+
+output_root: results/topp_ablation_v2
+
+concurrency: 4
+timeout_sec: 1800

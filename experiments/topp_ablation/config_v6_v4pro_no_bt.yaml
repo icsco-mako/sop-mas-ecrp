@@ -1,0 +1,27 @@
+# v4-pro + thinking, NO backtrack
+# Isolate the effect of model+thinking from backtrack.
+
+llm:
+  client: DeepSeek
+  model: deepseek-v4-pro
+
+pipeline:
+  algorithm: sop_mac
+  max_collaborate_nums: 5
+  is_backtrack: false
+  thinking: enabled
+
+repeats: 5
+
+creative_agents: [ModelEngineer, PythonDeveloper]
+
+configs:
+  - {id: v4pro_think, top_p: 1.0, temperature: 0.2}
+
+instances:
+  - {dataset: NLP4ECR, prob_name: prob_empirical}
+
+output_root: results/v4pro_no_bt_ablation
+
+concurrency: 2
+timeout_sec: 1800

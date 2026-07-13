@@ -3,8 +3,9 @@
 Reads every ``run_*.json`` under ``<output_root>/<config_id>/<dataset>__<prob>/``
 and reports three metrics per config:
 
-* **AR (Accuracy Rate)**: fraction of runs (over all instances and repeats)
-  whose ``status`` is True. Range [0, 1].
+* **AR (Accuracy Rate)**: fraction of runs whose ``obj_value`` matches the
+  ground-truth optimum (via the ``obj_correct`` field). Falls back to
+  ``status==True`` for legacy records without ``obj_correct``. Range [0, 1].
 * **OAR (Objective-Agreement Rate)**: per instance, the fraction of pairs of
   repeats whose obj_value agree within ``rel_tol``; then averaged across
   instances. Runs with status=False contribute their actual numeric obj_value
@@ -79,7 +80,15 @@ def _compute_metrics(
         all_records = [r for recs in instance_map.values() for r in recs]
         n_runs = len(all_records)
         n_success = sum(1 for r in all_records if r.get("status"))
-        ar = n_success / n_runs if n_runs else float("nan")
+
+        # Use obj_correct when available (ground-truth comparison); fall back
+        # to status for legacy records that lack obj_correct.
+        has_obj_correct = any(r.get("obj_correct") is not None for r in all_records)
+        if has_obj_correct:
+            n_correct = sum(1 for r in all_records if r.get("obj_correct"))
+        else:
+            n_correct = n_success
+        ar = n_correct / n_runs if n_runs else float("nan")
 
         oar_per_instance: List[float] = []
         for recs in instance_map.values():
@@ -131,6 +140,7 @@ def _compute_metrics(
                 "n_runs": n_runs,
                 "n_instances": len(instance_map),
                 "AR": ar,
+                "n_correct": n_correct,
                 "OAR": oar,
                 "SAR": sar,
                 "n_signature_pairs": n_signature_pairs,
@@ -193,6 +203,7 @@ def _write_csv(rows: List[Dict[str, Any]], path: Path) -> None:
         "temperature",
         "n_runs",
         "n_instances",
+        "n_correct",
         "AR",
         "OAR",
         "SAR",
@@ -219,7 +230,7 @@ def _write_markdown(rows: List[Dict[str, Any]], path: Path) -> None:
     sep = "|---|---|---|---|---|---|---|---|---|"
     lines = [header, sep]
     for r in rows:
-        ar = "—" if math.isnan(r["AR"]) else f"{r['AR']:.3f}"
+        ar = "—" if math.isnan(r["AR"]) else f"{r['n_correct']}/{r['n_runs']}"
         oar = "—" if math.isnan(r["OAR"]) else f"{r['OAR']:.3f}"
         sar = "—" if math.isnan(r["SAR"]) else f"{r['SAR']:.3f}"
         lines.append(

@@ -1,0 +1,7 @@
+origin_seaport,destination_seaport,distance_km,unit_price_cny_per_km,reposition_cost_cny,transit_periods
+Dalian Port,Yingkou Port,194.1,0.8,155.28,1
+Yingkou Port,Dandong Port,340.4,0.8,272.32,1
+Dandong Port,Dalian Port,315,0.8,252,1
+Dalian Port,Dandong Port,534.5,0.8,427.6,2
+Yingkou Port,Dalian Port,655.4,0.8,524.32,2
+Dandong Port,Yingkou Port,509.1,0.8,407.28,2
